@@ -9,21 +9,17 @@ import {
     faDashboard,
     faUser
 } from "@fortawesome/free-solid-svg-icons";
+import { usePathname } from "next/navigation";
 
 export default function NavigationBar() {
-    const [activeTab, setActiveTab] = useState<string>('Reservar')
-
-    const handleTabChange = (tab:string) => {
-        setActiveTab(tab);
-    }
+    const pathname = usePathname();
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white flex justify-around items-center h-16">
             <div className="grid place-items-center">
                 <Link href="/reserve" passHref>
                     <span
-                        onClick={() => setActiveTab("reserve")}
-                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${activeTab === 'reserve' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
+                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${pathname.split('/')[1] === 'reserve' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
                     >
                         <FontAwesomeIcon icon={faClock}/>
                     </span>
@@ -33,8 +29,7 @@ export default function NavigationBar() {
             <div className="grid place-items-center">
                 <Link href="/reserved-hours" passHref>
                     <span
-                        onClick={() => setActiveTab("reserved-hours")}
-                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${activeTab === 'reserved-hours' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
+                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${pathname.split('/')[1] === 'reserved-hours' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
                     >
                         <FontAwesomeIcon icon={faCalendarDay}/>
                     </span>
@@ -44,8 +39,7 @@ export default function NavigationBar() {
             <div className="grid place-items-center">
                 <Link href="/hour-panel" passHref>
                     <span
-                        onClick={() => setActiveTab("hour-panel")}
-                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${activeTab === 'hour-panel' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
+                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${pathname.split('/')[1] === 'hour-panel' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
                     >
                         <FontAwesomeIcon icon={faDashboard}/>
                     </span>
@@ -55,8 +49,7 @@ export default function NavigationBar() {
             <div className="grid place-items-center">
                 <Link href="/profile" passHref>
                     <span
-                        onClick={() => setActiveTab("profile")}
-                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${activeTab === 'profile' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
+                        className={`flex flex-col w-12 py-2 rounded-full cursor-pointer ${pathname.split('/')[1] === 'profile' ? 'bg-gray-600' : 'hover:bg-gray-600'}`}
                     >
                         <FontAwesomeIcon icon={faUser}/>
                     </span>
