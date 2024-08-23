@@ -13,13 +13,12 @@ export default function ReservePage() {
     }
 
     const options = [ 1, 2, 3, 4 ];
-
     return (
-        <main className="h-screen bg-gray-600 px-4 pb-[9.9rem]">
-            <h1 className="py-4 font-bold text-3xl text-white">
+        <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
+            <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
                 Reservar un consultorio
             </h1>
-            <div className="rounded-lg bg-white h-[95.1%]">
+            <div className="rounded-lg bg-white h-full">
                 <WeekdayBar></WeekdayBar>
                 <div className={`px-4 flex flex-wrap ${editingReserve ? 'justify-evenly' : ''}`}>
                     <div className="py-1 font-bold text-lg">
