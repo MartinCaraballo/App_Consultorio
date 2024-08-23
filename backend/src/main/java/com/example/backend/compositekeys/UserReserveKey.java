@@ -8,7 +8,7 @@ import java.sql.Time;
 
 @Data
 @Embeddable
-public class ReserveKey implements Serializable {
+public class UserReserveKey implements Serializable {
 
     private String email;
 

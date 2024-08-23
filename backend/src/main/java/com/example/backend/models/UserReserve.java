@@ -1,6 +1,6 @@
 package com.example.backend.models;
 
-import com.example.backend.compositekeys.ReserveKey;
+import com.example.backend.compositekeys.UserReserveKey;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.sql.Date;
 public class UserReserve {
 
     @EmbeddedId
-    private ReserveKey reserveKey;
+    private UserReserveKey reserveKey;
 
     @ManyToOne
     @MapsId("email")
