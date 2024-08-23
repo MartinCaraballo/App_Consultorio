@@ -11,7 +11,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private AdminRepository adminRepository;
+    private final AdminRepository adminRepository;
 
     public Optional<Admin> findById(String email) {
         return adminRepository.findById(email);
