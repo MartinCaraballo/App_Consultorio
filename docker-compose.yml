@@ -3,11 +3,11 @@ services:
     image: mysql:8.4.0
     ports:
       - "3306:3306"
-    volumes:
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      - MYSQL_ROOT_PASSWORD=1234
-      - MYSQL_DATABASE=pencaucu_db
+      - MYSQL_ROOT_PASSWORD=app_reservas123@@
+      - MYSQL_USER=app_reservas
+      - MYSQL_PASSWORD=app_reservas123@@
+      - MYSQL_DATABASE=app_reservas
     healthcheck:
       test: ["CMD", "bash", "-c", "mysql --user=$$USER_NAME --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"]
       interval: 5s

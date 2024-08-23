@@ -12,19 +12,14 @@ export default function ReservePage() {
         setSelectedValue(event.currentTarget.value);
     }
 
-    const options = [
-        { value: '1', label: 'Consultorio 1' },
-        { value: '2', label: 'Consultorio 2' },
-        { value: '3', label: 'Consultorio 3' },
-        { value: '4', label: 'Consultorio 4' },
-    ];
+    const options = [ 1, 2, 3, 4 ];
 
     return (
         <main className="h-screen bg-gray-600 px-4 pb-[9.9rem]">
             <h1 className="py-4 font-bold text-3xl text-white">
                 Reservar un consultorio
             </h1>
-            <div className="rounded-lg bg-white h-full pb-96">
+            <div className="rounded-lg bg-white h-[95.1%]">
                 <WeekdayBar></WeekdayBar>
                 <div className={`px-4 flex flex-wrap ${editingReserve ? 'justify-evenly' : ''}`}>
                     <div className="py-1 font-bold text-lg">
@@ -35,8 +30,8 @@ export default function ReservePage() {
                             onChange={handleChangeRoom}
                         >
                             {options.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                                <option key={option}>
+                                    {`Consultorio ${option}`}
                                 </option>
                             ))}
                         </select>
@@ -50,9 +45,9 @@ export default function ReservePage() {
                         </button>
                     )}
                 </div>
-                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 py-2">
-                    <HourCard client="Pablo" start_date={new Date()} end_date={new Date()} />
-                    <HourCard client="Martin" start_date={new Date()} end_date={new Date()} />
+                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2">
+                    <HourCard client="Pablo Landeira" start_date={new Date()} end_date={new Date()} />
+                    <HourCard client="Martin Caraballo" start_date={new Date()} end_date={new Date()} />
                     <HourCard client="" start_date={new Date()} end_date={new Date()} />
                     <HourCard client="ASDASD" start_date={new Date()} end_date={new Date()} />
                 </div>

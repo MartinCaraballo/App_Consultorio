@@ -23,7 +23,7 @@ export default function WeekdayBar() {
     const [selectedDay, setSelectedDay] = useState(daysNameOfWeek[dayToHighlight]);
 
     return (
-        <div className="flex justify-center bg-gray-100 p-2 border-b border-gray-300">
+        <div className="flex justify-center p-2 border-gray-300 rounded-lg">
             <div className="inline-flex overflow-x-auto max-w-full font-bold">
                 {week().map((day, index) => (
                     <div
