@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.services.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -27,8 +29,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = recoverToken(request);
         if (token != null) {
             String login = tokenProvider.validateToken(token);
-            UserDetails loginUser = loginDao.findById(login);
-            Authentication auth = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+            UserDetails user = customUserDetailsService.loadUserByUsername(login);
+            Authentication auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(request, response);

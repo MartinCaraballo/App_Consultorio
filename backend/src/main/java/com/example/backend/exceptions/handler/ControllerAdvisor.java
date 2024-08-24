@@ -3,6 +3,7 @@ package com.example.backend.exceptions.handler;
 import com.example.backend.exceptions.InvalidUserRegistrationException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.ResourceAlreadyExistsException;
+import com.example.backend.exceptions.UnauthorizedUserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -95,6 +96,16 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", "Incorrect username or password");
+        body.put("request description", req.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UnauthorizedUserException.class)
+    public ResponseEntity<Object> handleUnauthorizedUserException(UnauthorizedUserException ex, WebRequest req) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
         body.put("request description", req.getDescription(false));
 
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);

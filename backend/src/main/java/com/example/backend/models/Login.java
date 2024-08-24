@@ -14,31 +14,16 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "Login")
-public class Login implements UserDetails {
+public class Login {
     @Id
     private String email;
     private String password;
     private Boolean authorized;
     private Timestamp lastLogin;
-    private Boolean isAdmin;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "email")
     private User user;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (isAdmin) {
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
-            return Collections.singletonList(authority);
-        }
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-        return Collections.singletonList(authority);
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
 }

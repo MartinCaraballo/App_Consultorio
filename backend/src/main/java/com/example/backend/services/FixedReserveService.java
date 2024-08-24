@@ -6,7 +6,7 @@ import com.example.backend.repositories.FixedReserveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,6 +17,10 @@ public class FixedReserveService {
 
     public Optional<FixedReserve> findById(FixedReserveKey fixedReserveKey) {
         return fixedReserveRepository.findById(fixedReserveKey);
+    }
+
+    public List<FixedReserve> findAllByDayIndex(Integer dayIndex) {
+        return fixedReserveRepository.findAllByDayIndex(dayIndex);
     }
 
     public void saveOrUpdate(FixedReserve fixedReserve) {
