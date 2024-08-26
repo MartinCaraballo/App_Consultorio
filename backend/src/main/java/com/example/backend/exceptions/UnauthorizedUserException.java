@@ -1,7 +1,9 @@
 package com.example.backend.exceptions;
 
+import org.apache.tomcat.websocket.AuthenticationException;
+
 public class UnauthorizedUserException extends RuntimeException {
-    public UnauthorizedUserException(String user) {
-        super(String.format("Unauthorized user: %s", user));
+    public UnauthorizedUserException(String message) {
+        super(message);
     }
 }

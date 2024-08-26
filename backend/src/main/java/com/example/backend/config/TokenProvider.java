@@ -3,7 +3,7 @@ package com.example.backend.config;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.backend.models.Login;
+import com.example.backend.models.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
@@ -17,12 +17,12 @@ public class TokenProvider {
     @Value("$jwt.secret")
     private String JWT_SECRET;
 
-    public String generateAccessToken(Login login) {
+    public String generateAccessToken(CustomUserDetails customUserDetails) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
             return JWT.create()
-                    .withSubject(login.getEmail())
-                    .withClaim("email", login.getEmail())
+                    .withSubject(customUserDetails.getUsername())
+                    .withClaim("email", customUserDetails.getUsername())
                     .withExpiresAt(genAccessExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {

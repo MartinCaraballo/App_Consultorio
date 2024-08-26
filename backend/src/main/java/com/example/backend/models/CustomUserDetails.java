@@ -1,5 +1,6 @@
 package com.example.backend.models;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,18 +8,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @RequiredArgsConstructor
+@Data
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
-    private final Login login;
-    private final Admin admin;
+    private String email;
+    private String password;
+    private boolean isAdmin;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (admin != null) {
+        if (isAdmin) {
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
             return Collections.singletonList(authority);
         }
@@ -28,11 +29,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return login.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 }

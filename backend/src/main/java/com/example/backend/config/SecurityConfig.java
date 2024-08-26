@@ -24,13 +24,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                "/register",
-                                "/login",
-                                "/careers",
-                                "/teams/names",
-                                "/players/**").permitAll()
+                                "auth/register",
+                                "auth/login",
+                                "public/rooms"
+                        ).permitAll()
                         .requestMatchers(
-                                "/admins/**").hasAuthority("ROLE_ADMIN")
+                                "/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest()
                         .authenticated()
                 )

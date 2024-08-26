@@ -28,7 +28,4 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Admin admin;
 
-    @OneToOne(mappedBy = "user")
-    @PrimaryKeyJoinColumn
-    private Login login;
 }

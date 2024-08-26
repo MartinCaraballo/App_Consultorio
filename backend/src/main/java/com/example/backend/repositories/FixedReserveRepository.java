@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface FixedReserveRepository extends JpaRepository<FixedReserve, FixedReserveKey> {
 
-    @Query("SELECT FixedReserve.fixedReserveKey.dayIndex, FixedReserve.fixedReserveKey.email, FixedReserve.fixedReserveKey.startTime FROM FixedReserve WHERE FixedReserve.fixedReserveKey.dayIndex= :dayIndex")
+    @Query("SELECT f FROM FixedReserve f WHERE f.fixedReserveKey.dayIndex= :dayIndex")
     public List<FixedReserve> findAllByDayIndex(Integer dayIndex);
 }

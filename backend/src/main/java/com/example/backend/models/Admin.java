@@ -10,6 +10,8 @@ import java.util.Set;
 @Table(name = "Admins")
 public class Admin {
     @Id
+    private String email;
+
     @OneToOne
     @JoinColumn(name = "email", referencedColumnName = "email")
     private User user;
