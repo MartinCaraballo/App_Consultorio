@@ -1,13 +1,50 @@
+'use client';
+
+import {FormEvent, useState} from "react";
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
+    const router = useRouter();
+    const [error, setError] = useState<string | undefined>(undefined);
+
+    const traduction: Map<string, string> = new Map([
+        ["Bad credentials", "Correo o contraseña incorrectos"],
+        ["User not authorized yet", "Usuario no autorizado aún"],
+        ["Email or password are incorrect.", "Correo o contraseña incorrectos"]
+    ]);
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setError(undefined);
+
+        const formData = new FormData(event.currentTarget);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        const response = await fetch('http://localhost:8080/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+            router.push('/reserve');
+        } else if (response.status === 401) {
+            const responseBody = await response.json();
+            const bodyMessage = responseBody.message;
+            setError(traduction.get(bodyMessage));
+        }
+    }
+
     return (
-        <main className="flex items-center justify-center md:h-screen">
+        <main className="flex items-center justify-center h-screen">
             <div className="flex min-h-3/4 min-w-96 flex-col justify-center px-6 py-12 lg:px-8 rounded-xl border-2 border-gray-200">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                     <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Inicia sesión en tu cuenta</h2>
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" action="#" method="POST">
+                    <form className="space-y-6" onSubmit={handleSubmit} method="POST">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">Correo electrónico</label>
                             <div className="mt-2">
@@ -38,10 +75,14 @@ export default function LoginPage() {
                             </button>
                         </div>
                     </form>
-
+                    {error && (
+                        <div className="mt-4 p-4 bg-red-100 text-red-700 border border-red-300 rounded">
+                            <p>{error}</p>
+                        </div>
+                    )}
                     <p className="mt-10 text-center text-sm text-gray-500">
                         ¿No estás registrado?
-                        <a href="#" className="pl-1 font-semibold leading-6 text-indigo-600 hover:text-indigo-500">Regístrate ahora!</a>
+                        <a href="/register" className="pl-1 font-semibold leading-6 text-indigo-600 hover:text-indigo-500">Regístrate ahora!</a>
                     </p>
                 </div>
             </div>

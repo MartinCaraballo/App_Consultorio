@@ -1,4 +1,50 @@
+'use client';
+
+import {FormEvent, useState} from "react";
+import {useRouter} from "next/navigation";
+
 export default function RegisterPage() {
+    const router = useRouter();
+    const [error, setError] = useState<string | undefined>(undefined);
+    const phoneRegex = /^09\d{7}$/;
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setError(undefined);
+
+        const formData = new FormData(event.currentTarget);
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirm-password');
+        const name = formData.get('name');
+        const lastName = formData.get('lastname');
+        const phoneNumber = formData.get('phone-number');
+
+        if (password != confirmPassword) {
+            setError('Las contraseñas no coinciden');
+            return;
+        }
+
+        if (!phoneRegex.test(phoneNumber as string)) {
+            setError('El número de teléfono no es válido')
+            return;
+        }
+
+        const response = await fetch('http://localhost:8080/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, name, lastName, phoneNumber }),
+        });
+
+        if (response.ok) {
+            router.replace('/login');
+        } else if (response.status === 401) {
+            const responseBody = await response.json();
+            const bodyMessage = responseBody.message;
+            setError(bodyMessage);
+        }
+    }
+
     return (
         <main className="flex items-center justify-center h-screen">
             <div className="flex min-h-3/4 min-w-96 flex-col justify-center px-6 py-12 lg:px-8 rounded-xl border-2 border-gray-200">
@@ -7,7 +53,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" action="#" method="POST">
+                    <form className="space-y-6" onSubmit={handleSubmit} method="POST">
                         <div>
                             <label htmlFor="name"
                                    className="block text-sm font-medium leading-6 text-gray-900">Nombre</label>
@@ -79,6 +125,11 @@ export default function RegisterPage() {
                             </button>
                         </div>
                     </form>
+                    {error && (
+                        <div className="mt-4 p-4 bg-red-100 text-red-700 border border-red-300 rounded">
+                            <p>{error}</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>
