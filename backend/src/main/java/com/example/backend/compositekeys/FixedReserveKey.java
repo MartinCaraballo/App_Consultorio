@@ -14,4 +14,5 @@ public class FixedReserveKey implements Serializable {
     @Column(insertable = false, updatable=false)
     private String email;
     private Time startTime;
+    private Integer roomId;
 }

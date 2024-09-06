@@ -13,6 +13,7 @@ public class Admin {
     private String email;
 
     @OneToOne
+    @MapsId
     @JoinColumn(name = "email", referencedColumnName = "email")
     private User user;
 

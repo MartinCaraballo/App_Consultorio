@@ -13,6 +13,11 @@ public class FixedReserve {
     private FixedReserveKey fixedReserveKey;
 
     @ManyToOne
+    @MapsId("roomId")
+    @JoinColumn(name = "room_id")
+    private Room room;
+
+    @ManyToOne
     @JoinColumn(name = "email", referencedColumnName = "email")
     private Admin admin;
 
