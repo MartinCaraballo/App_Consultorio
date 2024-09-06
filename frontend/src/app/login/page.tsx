@@ -7,12 +7,6 @@ export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState<string | undefined>(undefined);
 
-    const traduction: Map<string, string> = new Map([
-        ["Bad credentials", "Correo o contraseña incorrectos"],
-        ["User not authorized yet", "Usuario no autorizado aún"],
-        ["Email or password are incorrect.", "Correo o contraseña incorrectos"]
-    ]);
-
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setError(undefined);
@@ -31,8 +25,7 @@ export default function LoginPage() {
             router.push('/reserve');
         } else if (response.status === 401) {
             const responseBody = await response.json();
-            const bodyMessage = responseBody.message;
-            setError(traduction.get(bodyMessage));
+            setError(responseBody.message);
         }
     }
 
