@@ -1,6 +1,5 @@
 package com.example.backend.controllers;
 
-import com.example.backend.models.Room;
 import com.example.backend.services.RoomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/room")
+@RequestMapping("/rooms")
 public class RoomController {
 
     private final RoomService roomService;
@@ -20,8 +19,8 @@ public class RoomController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Room>> getAllRooms() {
-        List<Room> roomList = roomService.getAllRooms();
+    public ResponseEntity<List<Integer>> getAllRooms() {
+        List<Integer> roomList = roomService.findAllRoomIds();
 
         if (roomList.isEmpty()) {
             return ResponseEntity.notFound().build();

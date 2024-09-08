@@ -26,7 +26,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "auth/register",
                                 "auth/login",
-                                "public/rooms"
+                                "/rooms",
+                                "/week",
+                                "/reserve"
                         ).permitAll()
                         .requestMatchers(
                                 "/admin/**").hasAuthority("ROLE_ADMIN")

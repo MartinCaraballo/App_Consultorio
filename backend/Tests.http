@@ -1,20 +1,18 @@
-### Send POST request with json body
-POST http://localhost:8080/auth/register
-Content-Type: application/json
-
-{
-  "email": "martin.caraballo@correo.ucu.edu.uy",
-  "password": "123456789",
-  "name": "Martin",
-  "lastName": "Caraballo",
-  "phoneNumber": "099 677 264"
-}
-
 ###
 POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-  "email": "martin.caraballo@correo.ucu.edu.uy",
-  "password": "123456789"
+  "email": "admin@admin.com",
+  "password": "MGcc2003@@"
 }
+
+> {% client.global.set("auth_token", response.headers.valueOf("Authorization").split("Bearer ")[1]); %}
+
+###
+GET http://localhost:8080/week
+#Authorization: Bearer {{auth_token}}
+
+###
+GET http://localhost:8080/reserve?roomId=1
+Authorization: Bearer {{auth_token}}

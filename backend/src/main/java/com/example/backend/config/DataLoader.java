@@ -1,11 +1,9 @@
 package com.example.backend.config;
 
-import com.example.backend.models.Admin;
-import com.example.backend.models.Login;
-import com.example.backend.models.Room;
-import com.example.backend.models.User;
+import com.example.backend.models.*;
 import com.example.backend.repositories.AdminRepository;
 import com.example.backend.repositories.LoginRepository;
+import com.example.backend.repositories.PriceRepository;
 import com.example.backend.repositories.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +38,7 @@ public class DataLoader implements CommandLineRunner {
     private final AdminRepository adminRepository;
     private final RoomRepository roomRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PriceRepository priceRepository;
 
     @Override
     @Transactional
@@ -65,6 +64,20 @@ public class DataLoader implements CommandLineRunner {
             roomRepository.save(room);
         }
 
+        Price price1 = new Price();
+        price1.setHours(10);
+        price1.setPricePerHour(200);
+        priceRepository.save(price1);
+
+        Price price2 = new Price();
+        price2.setHours(20);
+        price2.setPricePerHour(180);
+        priceRepository.save(price2);
+
+        Price price3 = new Price();
+        price3.setHours(144);
+        price3.setPricePerHour(160);
+        priceRepository.save(price3);
     }
 
     private User getDefaultUser() {

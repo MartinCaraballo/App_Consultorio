@@ -19,8 +19,8 @@ public class FixedReserveService {
         return fixedReserveRepository.findById(fixedReserveKey);
     }
 
-    public List<FixedReserve> findAllByDayIndex(Integer dayIndex) {
-        return fixedReserveRepository.findAllByDayIndex(dayIndex);
+    public List<FixedReserve> findAllByDayIndexAndRoomId(Integer dayIndex, Integer roomId) {
+        return fixedReserveRepository.findAllByDayIndexAndRoomId(dayIndex, roomId);
     }
 
     public void saveOrUpdate(FixedReserve fixedReserve) {

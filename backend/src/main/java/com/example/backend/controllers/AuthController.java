@@ -5,7 +5,7 @@ import com.example.backend.exceptions.InvalidUserRegistrationException;
 import com.example.backend.exceptions.UnauthorizedUserException;
 import com.example.backend.models.CustomUserDetails;
 import com.example.backend.models.Login;
-import com.example.backend.models.RegisterReq;
+import com.example.backend.models.requests.RegisterReq;
 import com.example.backend.models.User;
 import com.example.backend.services.LoginService;
 import com.example.backend.services.UserService;
