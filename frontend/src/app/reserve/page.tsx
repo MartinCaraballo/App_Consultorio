@@ -1,39 +1,54 @@
 'use client'
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import HourCard from "@/app/components/hour-card";
+import {ReserveDTO} from "@/app/models/ReserveDTO";
 
 export default function ReservePage() {
     // Stores and updates the room selected.
-    const [selectedValue, setSelectedValue] = useState('');
+    const [selectedRoom, setSelectedRoom] = useState(1);
 
     // Boolean to enter to edit mode and exit from it.
     const [editingReserve, setEditingReserve] = useState(false);
 
     // Handle room selection in combobox.
     const handleChangeRoom = (event: any) => {
-        setSelectedValue(event.currentTarget.value);
+        setSelectedRoom(event.currentTarget.value);
     }
 
-    const options = [ 1, 2, 3, 4 ];
+    // Fetch week days, rooms and reserves data
+    const [rooms, setRooms] = useState([]);
+    const [weekDates, setWeekDates] = useState([]);
+    const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
+    useEffect(() => {
+        async function fetchWeek() {
+            const res = await fetch("http://localhost:8080/week");
+            const data = await res.json();
+            setWeekDates(data);
+        }
+
+        async function fetchRooms() {
+            const res = await fetch("http://localhost:8080/rooms");
+            const data = await res.json();
+            setRooms(data);
+        }
+
+        async function fetchReserves() {
+            const res = await fetch(`http://localhost:8080/reserve?roomId=${selectedRoom}`);
+            const data: ReserveDTO[] = await res.json();
+            setReserveCards(data);
+        }
+
+        fetchWeek();
+        fetchRooms();
+        fetchReserves();
+
+    }, []);
 
     // week day index.
     const today = new Date().getDay() - 1;
     const dayToHighlight = today > 0 ? today : 0;
 
-    const week = () => {
-        let week = [];
-        let current = new Date();
-        // set to monday.
-        current.setDate((current.getDate() - current.getDay() + 1));
-        for (let i = 0; i < 6; i++) {
-            week.push(
-                new Date(current)
-            );
-            current.setDate(current.getDate() + 1);
-        }
-        return week;
-    }
     // Name of the days in the week.
     const daysNameOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     // Selected day to highlight in the bar.
@@ -44,10 +59,10 @@ export default function ReservePage() {
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
                 Reservar un consultorio
             </h1>
-            <div className="rounded-lg bg-white h-full">
+            <div className="rounded-lg bg-white h-full overflow-y-auto">
                 <div className="flex justify-center p-2 border-gray-300 rounded-lg">
                     <div className="inline-flex overflow-x-auto max-w-full font-bold">
-                        {week().map((day, index) => (
+                        {weekDates.map((day, index) => (
                             <div
                                 key={index}
                                 onClick={() => setSelectedDay(daysNameOfWeek[index])}
@@ -55,7 +70,7 @@ export default function ReservePage() {
                                     selectedDay === daysNameOfWeek[index] ? 'bg-gray-600 text-white' : 'text-gray-700'
                                 } rounded-lg transition-colors duration-300`}
                             >
-                                {`${daysNameOfWeek[index]} ${day.getDate()}`}
+                                {`${daysNameOfWeek[index]} ${new Date(day).getDate()}`}
                             </div>
                         ))}
                     </div>
@@ -65,10 +80,10 @@ export default function ReservePage() {
                         <select
                             className="px-1 py-2 bg-gray-700 rounded-lg text-xl text-white"
                             id="combobox"
-                            value={selectedValue}
+                            value={selectedRoom}
                             onChange={handleChangeRoom}
                         >
-                            {options.map(option => (
+                            {rooms.map(option => (
                                 <option key={option}>
                                     {`Consultorio ${option}`}
                                 </option>
@@ -84,11 +99,25 @@ export default function ReservePage() {
                         </button>
                     )}
                 </div>
-                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2">
-                    <HourCard client="Pablo Landeira" start_date={new Date()} end_date={new Date()} />
-                    <HourCard client="Martin Caraballo" start_date={new Date()} end_date={new Date()} />
-                    <HourCard client="" start_date={new Date()} end_date={new Date()} />
-                    <HourCard client="ASDASD" start_date={new Date()} end_date={new Date()} />
+                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 overflow-y-auto max-h-[80vg]">
+                    {reserveCards.map((reserve) => {
+                        const startTime = new Date();
+                        startTime.setHours(reserve.startTime[0]);
+                        startTime.setMinutes(reserve.startTime[1]);
+
+                        const endTime = new Date(startTime);
+                        endTime.setHours(endTime.getHours() + 1);
+                        return (
+                            <HourCard
+                                key={reserve.startTime.toString()}
+                                clientName={reserve.name}
+                                clientLastName={reserve.lastName}
+                                start_date={startTime}
+                                end_date={endTime}
+                                canCancel={reserve.canCancel}
+                            />
+                        );
+                    })}
                 </div>
             </div>
         </main>
