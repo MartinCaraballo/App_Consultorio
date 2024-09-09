@@ -17,7 +17,7 @@ const HourCard = (props: propsType) => {
     return (
         <main className="py-1">
             <div
-                className="border-2 border-gray-600 rounded-lg flex flex-row justify-evenly items-center bg-gray-200 w-72 sm:w-[26rem] lg:w-96">
+                className={`border-2 border-gray-950 rounded-lg flex flex-row justify-evenly items-center text-white ${props.clientName ? 'bg-gray-900' : 'bg-gray-700'} w-72 sm:w-[26rem] lg:w-96`}>
                 <div className="flex flex-col">
                     <h1 className="font-bold text-lg px-2 py-2 2xl:text-3xl">
                         {`${formatTime(props.start_date)} - ${formatTime(props.end_date)}`}
@@ -28,7 +28,7 @@ const HourCard = (props: propsType) => {
                 </div>
                 {!props.clientName && (
                     <button
-                        className={`border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg ${props.canCancel ? 'bg-red-600 border-red-800' : 'bg-black'}`}>
+                        className={`border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg ${props.canCancel ? 'bg-red-600 border-red-800' : 'bg-black border-black'}`}>
                         {props.canCancel ? 'Cancelar' : 'Reservar'}
                     </button>
                 )

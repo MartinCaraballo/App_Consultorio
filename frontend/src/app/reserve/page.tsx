@@ -5,6 +5,14 @@ import HourCard from "@/app/components/hour-card";
 import {ReserveDTO} from "@/app/models/ReserveDTO";
 
 export default function ReservePage() {
+
+    const formatDate = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = date.getMonth().toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // Stores and updates the room selected.
     const [selectedRoom, setSelectedRoom] = useState(1);
 
@@ -13,46 +21,53 @@ export default function ReservePage() {
 
     // Handle room selection in combobox.
     const handleChangeRoom = (event: any) => {
-        setSelectedRoom(event.currentTarget.value);
+        const value = event.currentTarget.value.toString().split(" ")[1]
+        setSelectedRoom(value);
+        fetchReserves(value, selectedDayIndex, selectedDayDate);
     }
 
-    // Fetch week days, rooms and reserves data
-    const [rooms, setRooms] = useState([]);
-    const [weekDates, setWeekDates] = useState([]);
-    const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
-    useEffect(() => {
-        async function fetchWeek() {
-            const res = await fetch("http://localhost:8080/week");
-            const data = await res.json();
-            setWeekDates(data);
-        }
-
-        async function fetchRooms() {
-            const res = await fetch("http://localhost:8080/rooms");
-            const data = await res.json();
-            setRooms(data);
-        }
-
-        async function fetchReserves() {
-            const res = await fetch(`http://localhost:8080/reserve?roomId=${selectedRoom}`);
-            const data: ReserveDTO[] = await res.json();
-            setReserveCards(data);
-        }
-
-        fetchWeek();
-        fetchRooms();
-        fetchReserves();
-
-    }, []);
-
     // week day index.
-    const today = new Date().getDay() - 1;
+    const todayDate = new Date();
+    const today = todayDate.getDay() - 1;
     const dayToHighlight = today > 0 ? today : 0;
 
     // Name of the days in the week.
     const daysNameOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     // Selected day to highlight in the bar.
     const [selectedDay, setSelectedDay] = useState(daysNameOfWeek[dayToHighlight]);
+    const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+    const [selectedDayDate, setSelectedDayDate] = useState(formatDate(new Date()));
+
+    // Fetch week days, rooms and reserves data
+    const [rooms, setRooms] = useState([]);
+    const [weekDates, setWeekDates] = useState([]);
+    const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
+
+    async function fetchWeek() {
+        const res = await fetch('http://localhost:8080/week');
+        const data = await res.json();
+        setWeekDates(data);
+    }
+
+    async function fetchRooms() {
+        const res = await fetch('http://localhost:8080/rooms');
+        const data = await res.json();
+        setRooms(data);
+    }
+
+    async function fetchReserves(roomId: number, dayIndex: number, date: string) {
+        const res = await fetch(
+            `http://localhost:8080/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`
+        );
+        const data: ReserveDTO[] = await res.json();
+        setReserveCards(data);
+    }
+
+    useEffect(() => {
+        fetchWeek();
+        fetchRooms();
+        fetchReserves(selectedRoom, selectedDayIndex, selectedDayDate);
+    }, []);
 
     return (
         <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
@@ -65,9 +80,15 @@ export default function ReservePage() {
                         {weekDates.map((day, index) => (
                             <div
                                 key={index}
-                                onClick={() => setSelectedDay(daysNameOfWeek[index])}
+                                onClick={() => {
+                                    const date = new Date(day);
+                                    setSelectedDay(daysNameOfWeek[index]);
+                                    setSelectedDayIndex(index);
+                                    setSelectedDayDate(formatDate(date));
+                                    fetchReserves(selectedRoom, index, formatDate(date));
+                                }}
                                 className={`flex-shrink-0 w-28 text-center py-2 cursor-pointer ${
-                                    selectedDay === daysNameOfWeek[index] ? 'bg-gray-600 text-white' : 'text-gray-700'
+                                    selectedDay === daysNameOfWeek[index] ? 'bg-gray-700 text-white' : 'text-gray-700'
                                 } rounded-lg transition-colors duration-300`}
                             >
                                 {`${daysNameOfWeek[index]} ${new Date(day).getDate()}`}
@@ -78,9 +99,9 @@ export default function ReservePage() {
                 <div className={`px-4 flex flex-wrap ${editingReserve ? 'justify-evenly' : ''}`}>
                     <div className="py-1 font-bold text-lg">
                         <select
-                            className="px-1 py-2 bg-gray-700 rounded-lg text-xl text-white"
+                            className="block px-3 py-2 bg-gray-700 rounded-lg text-lg text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700"
                             id="combobox"
-                            value={selectedRoom}
+                            value={`Consultorio ${selectedRoom}`}
                             onChange={handleChangeRoom}
                         >
                             {rooms.map(option => (
