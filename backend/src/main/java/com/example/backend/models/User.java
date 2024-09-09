@@ -25,7 +25,4 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<UserReserve> reserves;
 
-    @OneToOne(mappedBy = "user")
-    private Admin admin;
-
 }

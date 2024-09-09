@@ -4,7 +4,7 @@ import com.example.backend.compositekeys.UserReserveKey;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 
 @Data
@@ -26,5 +26,5 @@ public class UserReserve {
     private Room room;
 
     @Column(name = "reserve_date", nullable = false)
-    private Date reserveDate;
+    private LocalDate reserveDate;
 }

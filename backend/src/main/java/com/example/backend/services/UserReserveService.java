@@ -5,9 +5,8 @@ import com.example.backend.repositories.UserReserveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +14,12 @@ public class UserReserveService {
 
     private final UserReserveRepository userReserveRepository;
 
-    public List<UserReserve> findAllByDate(Date date) {
+    public List<UserReserve> findAllByDate(LocalDate date) {
         return userReserveRepository.findAllByDate(date);
+    }
+
+    public void saveOrUpdate(UserReserve userReserve) {
+        userReserveRepository.save(userReserve);
     }
 
 }

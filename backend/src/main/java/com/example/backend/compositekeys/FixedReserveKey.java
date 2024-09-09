@@ -10,7 +10,7 @@ import java.sql.Time;
 @Data
 @Embeddable
 public class FixedReserveKey implements Serializable {
-    private int dayIndex;
+    private Integer dayIndex;
     @Column(insertable = false, updatable=false)
     private String email;
     private Time startTime;

@@ -14,5 +14,17 @@ GET http://localhost:8080/week
 #Authorization: Bearer {{auth_token}}
 
 ###
-GET http://localhost:8080/reserve?roomId=1
-Authorization: Bearer {{auth_token}}
+GET http://localhost:8080/reserve?roomId=1&dayIndex=1&date=2024-09-13
+#Authorization: Bearer {{auth_token}}
+
+###
+POST http://localhost:8080/reserve
+#Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com",
+  "roomId": 1,
+  "startTime": "10:00:00",
+  "reserveDate": "2024-09-13"
+}

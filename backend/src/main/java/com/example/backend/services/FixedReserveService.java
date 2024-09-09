@@ -2,6 +2,7 @@ package com.example.backend.services;
 
 import com.example.backend.compositekeys.FixedReserveKey;
 import com.example.backend.models.FixedReserve;
+import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.repositories.FixedReserveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

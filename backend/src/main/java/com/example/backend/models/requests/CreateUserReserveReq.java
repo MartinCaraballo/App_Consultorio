@@ -1,11 +1,14 @@
 package com.example.backend.models.requests;
 
-import java.sql.Time;
+import lombok.Data;
+
+import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class CreateReserveReq {
+@Data
+public class CreateUserReserveReq {
     private String email;
     private Integer roomId;
-    private Time startTime;
-
+    private LocalTime startTime;
+    private LocalDate reserveDate;
 }

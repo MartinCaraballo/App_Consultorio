@@ -2,6 +2,7 @@ package com.example.backend.repositories;
 
 import com.example.backend.compositekeys.FixedReserveKey;
 import com.example.backend.models.FixedReserve;
+import com.example.backend.models.dtos.ReserveDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
