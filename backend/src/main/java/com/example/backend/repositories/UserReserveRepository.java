@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface UserReserveRepository extends JpaRepository<UserReserve, UserReserveKey> {
 
-    @Query("SELECT u FROM UserReserve u WHERE u.reserveDate=:date")
-    List<UserReserve> findAllByDate(LocalDate date);
+    @Query("SELECT u FROM UserReserve u WHERE u.reserveDate=:date AND u.room.roomId=:roomId")
+    List<UserReserve> findAllByDateAndRoomId(LocalDate date, Integer roomId);
 }

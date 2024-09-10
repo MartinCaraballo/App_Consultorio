@@ -14,8 +14,8 @@ public class UserReserveService {
 
     private final UserReserveRepository userReserveRepository;
 
-    public List<UserReserve> findAllByDate(LocalDate date) {
-        return userReserveRepository.findAllByDate(date);
+    public List<UserReserve> findAllByDateAndRoomId(LocalDate date, Integer roomId) {
+        return userReserveRepository.findAllByDateAndRoomId(date, roomId);
     }
 
     public void saveOrUpdate(UserReserve userReserve) {

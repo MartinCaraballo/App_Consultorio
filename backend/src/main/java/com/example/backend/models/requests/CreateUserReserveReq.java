@@ -7,7 +7,6 @@ import java.time.LocalTime;
 
 @Data
 public class CreateUserReserveReq {
-    private String email;
     private Integer roomId;
     private LocalTime startTime;
     private LocalDate reserveDate;
