@@ -3,7 +3,7 @@ import ReservedHourCard from "@/app/components/reserved-hour-card";
 
 export default function ReservedHours() {
     return (
-        <main className="h-screen bg-gray-600 px-4 pb-[9.75rem]">
+        <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
                 Mis Reservas
             </h1>

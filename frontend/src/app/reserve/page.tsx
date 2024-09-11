@@ -3,12 +3,15 @@
 import React, {useEffect, useState} from "react";
 import HourCard from "@/app/components/hour-card";
 import {ReserveDTO} from "@/app/models/ReserveDTO";
+import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
+import { useRouter } from "next/navigation";
 
 export default function ReservePage() {
+    const router = useRouter();
 
     const formatDate = (date: Date): string => {
         const year = date.getFullYear();
-        const month = date.getMonth().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
@@ -19,10 +22,51 @@ export default function ReservePage() {
     // Boolean to enter to edit mode and exit from it.
     const [editingReserve, setEditingReserve] = useState(false);
 
+    // Function to set the editing reserve mode from the card component.
+    const setEditingMode = (mode: boolean) => {
+        setEditingReserve(mode);
+    };
+
+    // State to manage hours to reserve
+    const [hoursToReserve, setHoursToReserve] = useState<string[]>([]);
+
+    // Function to add the selected card to reserve to the list.
+    const addHourToReserve = (startTime: string) => {
+        setHoursToReserve(prevHours => [...prevHours, startTime]);
+    }
+
+    // Function to remove the canceled card to reserve in the list.
+    const removeHourToReserve = (startTimeCanceled: string) => {
+        setHoursToReserve(prevHours => {
+            const updatedHours = prevHours.filter(hour => hour !== startTimeCanceled);
+            if (updatedHours.length === 0) {
+                setEditingReserve(false);
+            }
+            return updatedHours;
+        });
+    }
+
+    // Function to clear the list of hours to reserve
+    const clearHoursToReserve = () => {
+        setHoursToReserve([]);
+        setEditingReserve(false);
+        setReserveCards([]);
+    }
+
+    // State of the modal to confirm reserve.
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const updateReserveCardsFromModal = () => {
+        fetchReserves(selectedRoom, selectedDayIndex, selectedDayDate);
+    }
+
     // Handle room selection in combobox.
     const handleChangeRoom = (event: any) => {
         const value = event.currentTarget.value.toString().split(" ")[1]
         setSelectedRoom(value);
+        clearHoursToReserve();
         fetchReserves(value, selectedDayIndex, selectedDayDate);
     }
 
@@ -44,23 +88,63 @@ export default function ReservePage() {
     const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
 
     async function fetchWeek() {
-        const res = await fetch('http://localhost:8080/week');
-        const data = await res.json();
-        setWeekDates(data);
+        try {
+            const res = await fetch('http://localhost:8080/week', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            if (res.status===403) {
+                router.push('/login');
+            }
+            const data = await res.json();
+            setWeekDates(data);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     async function fetchRooms() {
-        const res = await fetch('http://localhost:8080/rooms');
-        const data = await res.json();
-        setRooms(data);
+        try {
+            const res = await fetch('http://localhost:8080/rooms', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            if (res.status===403) {
+                router.push('/login');
+            }
+            const data = await res.json();
+            setRooms(data);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     async function fetchReserves(roomId: number, dayIndex: number, date: string) {
-        const res = await fetch(
-            `http://localhost:8080/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`
-        );
-        const data: ReserveDTO[] = await res.json();
-        setReserveCards(data);
+        try {
+            const res = await fetch(
+                `http://localhost:8080/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                }
+            );
+            if (res.status===403) {
+                router.push('/login');
+            }
+
+            const data: ReserveDTO[] = await res.json();
+            setReserveCards(data);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     useEffect(() => {
@@ -85,6 +169,7 @@ export default function ReservePage() {
                                     setSelectedDay(daysNameOfWeek[index]);
                                     setSelectedDayIndex(index);
                                     setSelectedDayDate(formatDate(date));
+                                    clearHoursToReserve();
                                     fetchReserves(selectedRoom, index, formatDate(date));
                                 }}
                                 className={`flex-shrink-0 w-28 text-center py-2 cursor-pointer ${
@@ -113,6 +198,7 @@ export default function ReservePage() {
                     </div>
                     {editingReserve && (
                         <button
+                            onClick={openModal}
                             className="py-1 bg-green-500 rounded-full px-2 font-bold text-lg border-2 border-green-800"
                             disabled={!editingReserve}
                         >
@@ -136,11 +222,23 @@ export default function ReservePage() {
                                 start_date={startTime}
                                 end_date={endTime}
                                 canCancel={reserve.canCancel}
+                                setEditingModeFunction={setEditingMode}
+                                addHourToReserveListFunction={addHourToReserve}
+                                removeHourToReserveListFunction={removeHourToReserve}
                             />
                         );
                     })}
                 </div>
             </div>
+            <ConfirmReserveModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                hoursToReserve={hoursToReserve}
+                selectedDayDate={selectedDayDate}
+                selectedRoomId={selectedRoom}
+                clearHoursToReserve={clearHoursToReserve}
+                updateReserveCards={updateReserveCardsFromModal}
+            />
         </main>
     );
 }

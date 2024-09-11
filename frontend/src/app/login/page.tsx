@@ -19,11 +19,12 @@ export default function LoginPage() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
+            credentials: 'include',
         });
 
         if (response.ok) {
             router.push('/reserve');
-        } else if (response.status === 401) {
+        } else if (response.status === 401 || response.status === 404) {
             const responseBody = await response.json();
             setError(responseBody.message);
         }

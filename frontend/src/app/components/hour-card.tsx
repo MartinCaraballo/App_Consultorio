@@ -1,18 +1,27 @@
+import {useState} from "react";
+
 type propsType = {
     start_date: Date,
     end_date: Date,
     clientName?: string,
     clientLastName?: string,
     canCancel: boolean,
+    setEditingModeFunction: (mode: boolean) => void;
+    addHourToReserveListFunction: (selectedStartTime: string) => void;
+    removeHourToReserveListFunction: (canceledStartTime: string) => void;
 }
 
 const HourCard = (props: propsType) => {
 
+    // Function to show the hours with 2 digits.
     const formatTime = (date: Date): string => {
         const hours = date.getHours().toString().padStart(2, '0');
         const minutes = date.getMinutes().toString().padStart(2, '0');
         return `${hours}:${minutes}`;
     };
+
+    // Boolean indicating if the card is being selected or not.
+    const [editingMode, setEditingMode] = useState(false);
 
     return (
         <main className="py-1">
@@ -26,13 +35,27 @@ const HourCard = (props: propsType) => {
                         {props.clientName ? `Reservado por ${props.clientName} ${props.clientLastName}` : 'Libre para reservar'}
                     </p>
                 </div>
-                {!props.clientName && (
+                {!props.clientName && !editingMode &&(
                     <button
-                        className={`border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg ${props.canCancel ? 'bg-red-600 border-red-800' : 'bg-black border-black'}`}>
-                        {props.canCancel ? 'Cancelar' : 'Reservar'}
+                        onClick={() => {
+                            props.setEditingModeFunction(true);
+                            setEditingMode(true);
+                            props.addHourToReserveListFunction(formatTime(props.start_date));
+                        }}
+                        className={'border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg bg-black border-black'}>
+                        Reservar
                     </button>
-                )
-                }
+                )}
+                {!props.clientName && editingMode && (
+                    <button
+                        onClick={() => {
+                            setEditingMode(false);
+                            props.removeHourToReserveListFunction(formatTime(props.start_date));
+                        }}
+                        className={'border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg bg-red-600 border-red-800'}>
+                        Cancelar
+                    </button>
+                )}
             </div>
         </main>
     );
