@@ -34,6 +34,7 @@ public class ReserveController {
     private final UserService userService;
     private final AdminService adminService;
 
+    // TODO: CHECK THE DATE AND START TIME IN THE ROOM BEFORE MAKE THE RESERVE.
     @Transactional
     @PostMapping
     public ResponseEntity<String> postUserReserve(@RequestBody List<CreateUserReserveReq> listReserveReq) {
@@ -53,13 +54,15 @@ public class ReserveController {
             if (user.isEmpty() || room.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+
             UserReserveKey reserveKey = new UserReserveKey();
             reserveKey.setEmail(userEmail);
             reserveKey.setStartTime(createReserveReq.getStartTime());
             reserveKey.setRoomId(createReserveReq.getRoomId());
+            reserveKey.setReserveDate(createReserveReq.getReserveDate());
+
             UserReserve userReserve = new UserReserve();
             userReserve.setReserveKey(reserveKey);
-            userReserve.setReserveDate(createReserveReq.getReserveDate());
             userReserve.setRoom(room.get());
             userReserve.setUser(user.get());
 
@@ -106,13 +109,14 @@ public class ReserveController {
             UserReserveKey reserveKey = userReserve.getReserveKey();
             Integer reserveRoomId = reserveKey.getRoomId();
             LocalTime startTime = reserveKey.getStartTime();
+            LocalDate reserveDate = reserveKey.getReserveDate();
             boolean canCancel = userHaveAccess(user.getEmail());
             ReserveDTO reserveDTO = new ReserveDTO(
                     user.getName(),
                     user.getLastName(),
                     reserveRoomId,
                     startTime,
-                    userReserve.getReserveDate(),
+                    reserveDate,
                     canCancel
             );
             existingReserves.put(startTime, reserveDTO);

@@ -24,7 +24,4 @@ public class UserReserve {
     @MapsId("roomId")
     @JoinColumn(name = "room_id")
     private Room room;
-
-    @Column(name = "reserve_date", nullable = false)
-    private LocalDate reserveDate;
 }

@@ -15,6 +15,8 @@ public class CustomUserDetails implements UserDetails {
 
     private String email;
     private String password;
+    private String name;
+    private String lastName;
     private boolean isAdmin;
 
     @Override

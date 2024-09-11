@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,7 +85,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<String> logInUser(
             @RequestBody CustomUserDetails customUserDetails,
-            HttpServletResponse response) throws UnauthorizedUserException {
+            HttpServletResponse response) throws AuthenticationException, UnauthorizedUserException {
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 customUserDetails.getEmail(), customUserDetails.getPassword()
         );
@@ -104,7 +105,7 @@ public class AuthController {
 
     private Cookie createAuthCookie(String token) {
         Cookie cookie = new Cookie("authToken", token);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
         cookie.setMaxAge((int) Duration.ofHours(2).toSeconds());
         return cookie;

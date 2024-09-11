@@ -4,6 +4,7 @@ import jakarta.persistence.Embeddable;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
@@ -15,4 +16,6 @@ public class UserReserveKey implements Serializable {
     private Integer roomId;
 
     private LocalTime startTime;
+
+    private LocalDate reserveDate;
 }

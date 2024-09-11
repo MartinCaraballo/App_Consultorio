@@ -7,12 +7,9 @@ import com.example.backend.models.Login;
 import com.example.backend.repositories.AdminRepository;
 import com.example.backend.repositories.LoginRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AuthorizationServiceException;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,16 +22,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final AdminRepository adminRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws AuthenticationException {
+    public UserDetails loadUserByUsername(String username) throws AuthenticationException, UnauthorizedUserException {
         Login login = loginRepository.findById(username)
                 .orElseThrow(() -> new UnauthorizedUserException("Email or password are incorrect"));
 
         if (!login.getAuthorized()) {
             throw new UnauthorizedUserException("User not authorized yet");
         }
+
         CustomUserDetails customUserDetails = new CustomUserDetails();
         customUserDetails.setEmail(login.getEmail());
         customUserDetails.setPassword(login.getPassword());
+        customUserDetails.setName(login.getUser().getName());
+        customUserDetails.setLastName(login.getUser().getLastName());
 
         Optional<Admin> dbAdmin = adminRepository.findById(username);
         if (dbAdmin.isPresent()) {
