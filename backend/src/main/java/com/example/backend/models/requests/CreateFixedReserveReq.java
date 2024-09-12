@@ -8,5 +8,6 @@ import java.sql.Time;
 public class CreateFixedReserveReq {
     private Integer dayIndex;
     private Time startTime;
+    private Time endTime;
     private Integer roomId;
 }

@@ -23,7 +23,6 @@ const Profile = () => {
             try {
                 const decodedToken = jwtDecode<JwtPayload>(token);
                 setUserInfo(decodedToken);
-                console.log(decodedToken);
             } catch (error) {
                 console.error('Error decoding token:', error);
             }

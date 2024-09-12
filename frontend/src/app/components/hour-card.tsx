@@ -56,6 +56,15 @@ const HourCard = (props: propsType) => {
                         Cancelar
                     </button>
                 )}
+                {props.canCancel && (
+                    <button
+                        onClick={() => {
+                            // Cancelar reserva
+                        }}
+                        className={'border-2 h-10 text-sm text-white px-1 rounded-xl 2xl:text-lg bg-black border-red-800'}>
+                        Cancelar
+                    </button>
+                )}
             </div>
         </main>
     );

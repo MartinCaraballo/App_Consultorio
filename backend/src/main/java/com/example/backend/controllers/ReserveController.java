@@ -2,10 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.compositekeys.FixedReserveKey;
 import com.example.backend.compositekeys.UserReserveKey;
-import com.example.backend.models.FixedReserve;
-import com.example.backend.models.Room;
-import com.example.backend.models.User;
-import com.example.backend.models.UserReserve;
+import com.example.backend.models.*;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.models.requests.CreateFixedReserveReq;
 import com.example.backend.models.requests.CreateUserReserveReq;
@@ -14,10 +11,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,19 +31,19 @@ public class ReserveController {
     private final UserService userService;
     private final AdminService adminService;
 
-    // TODO: CHECK THE DATE AND START TIME IN THE ROOM BEFORE MAKE THE RESERVE.
     @Transactional
     @PostMapping
     public ResponseEntity<String> postUserReserve(@RequestBody List<CreateUserReserveReq> listReserveReq) {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        LocalDateTime nowDateTime =  LocalDateTime.now();
+        String userEmail = getUserByContextToken();
+        LocalDateTime nowDateTime = LocalDateTime.now();
 
         for (CreateUserReserveReq createReserveReq : listReserveReq) {
 
             if (createReserveReq.getReserveDate().isBefore(nowDateTime.toLocalDate()))
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-            if (createReserveReq.getStartTime().isBefore(nowDateTime.toLocalTime()))
+            if (createReserveReq.getReserveDate().isEqual(nowDateTime.toLocalDate()) &&
+                    createReserveReq.getStartTime().isBefore(nowDateTime.toLocalTime()))
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
             Optional<User> user = userService.findById(userEmail);
@@ -75,14 +72,32 @@ public class ReserveController {
     // TODO: Endpoint only for admins
     @Transactional
     @PostMapping("/fixed")
-    public ResponseEntity<String> postFixedReserve(@RequestBody CreateFixedReserveReq createReserveReq) {
+    public ResponseEntity<String> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @DeleteMapping
+    public ResponseEntity<String> cancelReserve(@RequestParam Integer roomId,
+                                                @RequestParam Integer dayIndex,
+                                                @RequestParam LocalDate date) {
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // TODO: ENDPOINT ONLY FOR ADMINS.
+    @DeleteMapping("/fixed")
+    public ResponseEntity<String> cancelFixedReserve(@RequestParam Integer roomId,
+                                                     @RequestParam Integer dayIndex,
+                                                     @RequestParam LocalTime startTime) {
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping
-    public ResponseEntity<List<ReserveDTO>> getAllUserReservesOfDay(@RequestParam Integer roomId,
-                                                                    @RequestParam Integer dayIndex,
-                                                                    @RequestParam LocalDate date) {
+    public ResponseEntity<List<ReserveDTO>> getAllUsersReservesOfDay(@RequestParam Integer roomId,
+                                                                     @RequestParam Integer dayIndex,
+                                                                     @RequestParam LocalDate date) {
         List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomId(dayIndex, roomId);
         List<UserReserve> userReserves = userReserveService.findAllByDateAndRoomId(date, roomId);
         Map<LocalTime, ReserveDTO> existingReserves = new HashMap<>();
@@ -144,8 +159,51 @@ public class ReserveController {
         return new ResponseEntity<>(dayReserves, HttpStatus.OK);
     }
 
-    private boolean userHaveAccess(String id) {
+    @GetMapping("/active")
+    public ResponseEntity<String> getUserReserves() {
+        LocalDate nowDateTime = LocalDate.now();
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // TODO: ENDPOINT ONLY FOR ADMINS.
+    @GetMapping("/fixed")
+    public ResponseEntity<List<ReserveDTO>> getFixedReserves(@RequestParam Integer roomId,
+                                                             @RequestParam Integer dayIndex) {
+        String user = getUserByContextToken();
+        Admin admin = adminService.findById(user).orElse(null);
+
+        if (admin == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        User adminUserData = admin.getUser();
+        Set<FixedReserve> userFixedReserves = admin.getFixedReserves();
+        List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(userFixedReserves.size());
+
+        for (FixedReserve fixedReserve : userFixedReserves) {
+            ReserveDTO reserveDTO = new ReserveDTO(
+                    adminUserData.getName(),
+                    adminUserData.getLastName(),
+                    fixedReserve.getRoom().getRoomId(),
+                    fixedReserve.getFixedReserveKey().getStartTime().toLocalTime(),
+                    null,
+                    true
+            );
+            userFixedReservesDTO.add(reserveDTO);
+        }
+
+
+        return new ResponseEntity<>(userFixedReservesDTO, HttpStatus.OK);
+    }
+
+
+    private boolean userHaveAccess(String id) {
+        String user = getUserByContextToken();
         return user.equals(id);
+    }
+
+    private String getUserByContextToken() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

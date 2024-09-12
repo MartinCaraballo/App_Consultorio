@@ -3,5 +3,6 @@ export interface ReserveDTO {
     lastName: string;
     roomId: number,
     startTime: number[];
+    reserveDate: Date;
     canCancel: boolean;
 }
