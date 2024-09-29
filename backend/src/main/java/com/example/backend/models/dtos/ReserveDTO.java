@@ -13,6 +13,7 @@ public class ReserveDTO {
     private String lastName;
     private Integer roomId;
     private LocalTime startTime;
+    private LocalTime endTime;
     private LocalDate reserveDate;
     private boolean canCancel;
 }

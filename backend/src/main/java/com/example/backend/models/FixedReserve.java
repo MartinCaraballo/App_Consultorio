@@ -18,7 +18,8 @@ public class FixedReserve {
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name = "email", referencedColumnName = "email")
+    @MapsId("email")
+    @JoinColumn(name = "email")
     private Admin admin;
 
 }

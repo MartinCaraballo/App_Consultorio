@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +16,18 @@ public class WeekDaysController {
 
     @GetMapping
     public ResponseEntity<List<LocalDate>> getWeekDates() {
-        List<LocalDate> weekDates = new ArrayList<>(6);
+        List<LocalDate> weekDates = new ArrayList<>(12);
         LocalDate today = LocalDate.now();
-        // setting to monday
-        LocalDate current = today.minusDays(today.getDayOfWeek().getValue() - 1);
-        for (int i = 0; i < 6; i++) {
-            weekDates.add(current);
-            current = current.plusDays(1);
+        LocalDate end = today.plusWeeks(1);
+
+        while (!today.isAfter(end)) {
+            if (today.getDayOfWeek().getValue() % 7 == 0) {
+                today = today.plusDays(1);
+            }
+            weekDates.add(today);
+            today = today.plusDays(1);
         }
+
 
         return new ResponseEntity<>(weekDates, HttpStatus.OK);
     }

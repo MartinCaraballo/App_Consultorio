@@ -1,9 +1,6 @@
 package com.example.backend.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -11,6 +8,10 @@ import lombok.Data;
 @Table(name = "Prices")
 public class Price {
     @Id
+    @GeneratedValue
+    private Integer id;
+
+    @Column(name = "hours", nullable = false)
     private Integer hours;
 
     @Column(name = "price_per_hour", nullable = false)

@@ -5,14 +5,13 @@ import jakarta.persistence.Embeddable;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.sql.Time;
+import java.time.LocalTime;
 
 @Data
 @Embeddable
 public class FixedReserveKey implements Serializable {
     private Integer dayIndex;
-    @Column(insertable = false, updatable=false)
     private String email;
-    private Time startTime;
+    private LocalTime startTime;
     private Integer roomId;
 }

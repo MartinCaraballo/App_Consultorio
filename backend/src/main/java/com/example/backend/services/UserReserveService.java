@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.compositekeys.UserReserveKey;
 import com.example.backend.models.UserReserve;
 import com.example.backend.repositories.UserReserveRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,10 @@ public class UserReserveService {
 
     public void saveOrUpdate(UserReserve userReserve) {
         userReserveRepository.save(userReserve);
+    }
+
+    public void deleteByUserReserveKey(UserReserveKey userReserveKey) {
+        userReserveRepository.deleteByReserveKey(userReserveKey);
     }
 
 }

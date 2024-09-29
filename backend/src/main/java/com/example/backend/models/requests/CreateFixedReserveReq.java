@@ -2,12 +2,12 @@ package com.example.backend.models.requests;
 
 import lombok.Data;
 
-import java.sql.Time;
+import java.time.LocalTime;
 
 @Data
 public class CreateFixedReserveReq {
     private Integer dayIndex;
-    private Time startTime;
-    private Time endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private Integer roomId;
 }
