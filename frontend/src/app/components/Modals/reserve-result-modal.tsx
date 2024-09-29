@@ -4,7 +4,7 @@ interface ResultModalProps {
     isOpen: boolean;
     onClose: () => void;
     message: string;
-    type: 'success' | 'error'; // Añadir tipo de mensaje
+    type: 'success' | 'error';
 }
 
 const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, message, type }) => {

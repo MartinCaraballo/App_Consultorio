@@ -4,7 +4,8 @@ import React, {useEffect, useState} from "react";
 import HourCard from "@/app/components/hour-card";
 import {ReserveDTO} from "@/app/models/ReserveDTO";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
+import InfoModal from "@/app/components/Modals/info-modal";
 
 export default function ReservePage() {
     const router = useRouter();
@@ -58,8 +59,16 @@ export default function ReservePage() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
+    const [infoModalMessage, setInfoModalMessage] = useState<string>('');
+    const [infoModalSuccess, setInfoModalSuccess] = useState<boolean>(true);
+
+    const handleInfoModalClose = () => {
+        setIsInfoModalOpen(false);
+    };
+
     const updateReserveCardsFromModal = () => {
-        fetchReserves(selectedRoom, selectedDayIndex, selectedDayDate);
+        fetchReserves(selectedRoom, selectedDayIndex, formatDate(selectedDayDate));
     }
 
     // Handle room selection in combobox.
@@ -67,20 +76,14 @@ export default function ReservePage() {
         const value = event.currentTarget.value.toString().split(" ")[1]
         setSelectedRoom(value);
         clearHoursToReserve();
-        fetchReserves(value, selectedDayIndex, selectedDayDate);
+        fetchReserves(value, selectedDayIndex, formatDate(selectedDayDate));
     }
 
-    // week day index.
-    const todayDate = new Date();
-    const today = todayDate.getDay() - 1;
-    const dayToHighlight = today > 0 ? today : 0;
-
+    const today = new Date();
     // Name of the days in the week.
-    const daysNameOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    // Selected day to highlight in the bar.
-    const [selectedDay, setSelectedDay] = useState(daysNameOfWeek[dayToHighlight]);
-    const [selectedDayIndex, setSelectedDayIndex] = useState(0);
-    const [selectedDayDate, setSelectedDayDate] = useState(formatDate(new Date()));
+    const daysNameOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const [selectedDayIndex, setSelectedDayIndex] = useState(today.getDay());
+    const [selectedDayDate, setSelectedDayDate] = useState(today);
 
     // Fetch week days, rooms and reserves data
     const [rooms, setRooms] = useState([]);
@@ -96,7 +99,7 @@ export default function ReservePage() {
                 },
                 credentials: 'include',
             });
-            if (res.status===403) {
+            if (res.status === 403) {
                 router.push('/login');
             }
             const data = await res.json();
@@ -115,7 +118,7 @@ export default function ReservePage() {
                 },
                 credentials: 'include',
             });
-            if (res.status===403) {
+            if (res.status === 403) {
                 router.push('/login');
             }
             const data = await res.json();
@@ -136,7 +139,7 @@ export default function ReservePage() {
                     credentials: 'include',
                 }
             );
-            if (res.status===403) {
+            if (res.status === 403) {
                 router.push('/login');
             }
 
@@ -147,10 +150,36 @@ export default function ReservePage() {
         }
     }
 
+    const cancelReserve = async (roomId: number, date: string, startTime: string) => {
+        try {
+            const res = await fetch(`http://localhost:8080/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            if (res.status === 200) {
+                setInfoModalMessage('Reserva cancelada con éxito.');
+                setInfoModalSuccess(true);
+            } else if (res.status === 401) {
+                setInfoModalMessage('No se cumplen las condiciones horarias para cancelar la reserva.');
+                setInfoModalSuccess(false);
+            } else {
+                setInfoModalMessage('Error al cancelar la reserva. Por favor, inténtelo de nuevo.')
+                setInfoModalSuccess(false);
+            }
+        } catch (error) {
+            setInfoModalMessage('Error de conexión. Por favor, inténtelo más tarde.')
+            setInfoModalSuccess(false);
+        } finally {
+            fetchReserves(selectedRoom, selectedDayIndex, formatDate(selectedDayDate));
+            setIsInfoModalOpen(true);
+        }
+    };
+
     useEffect(() => {
         fetchWeek();
         fetchRooms();
-        fetchReserves(selectedRoom, selectedDayIndex, selectedDayDate);
+        fetchReserves(selectedRoom, selectedDayIndex, formatDate(selectedDayDate));
     }, []);
 
     return (
@@ -161,24 +190,26 @@ export default function ReservePage() {
             <div className="rounded-lg bg-white h-full overflow-y-auto">
                 <div className="flex justify-center p-2 border-gray-300 rounded-lg">
                     <div className="inline-flex overflow-x-auto max-w-full font-bold">
-                        {weekDates.map((day, index) => (
-                            <div
-                                key={index}
-                                onClick={() => {
-                                    const date = new Date(day);
-                                    setSelectedDay(daysNameOfWeek[index]);
-                                    setSelectedDayIndex(index);
-                                    setSelectedDayDate(formatDate(date));
-                                    clearHoursToReserve();
-                                    fetchReserves(selectedRoom, index, formatDate(date));
-                                }}
-                                className={`flex-shrink-0 w-28 text-center py-2 cursor-pointer ${
-                                    selectedDay === daysNameOfWeek[index] ? 'bg-gray-700 text-white' : 'text-gray-700'
-                                } rounded-lg transition-colors duration-300`}
-                            >
-                                {`${daysNameOfWeek[index]} ${new Date(day).getDate()}`}
-                            </div>
-                        ))}
+                        {weekDates.map((day, index) => {
+                            const dayDate = new Date(day);
+                            const weekDayIndex = dayDate.getDay();
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => {
+                                        setSelectedDayIndex(weekDayIndex);
+                                        setSelectedDayDate(dayDate);
+                                        clearHoursToReserve();
+                                        fetchReserves(selectedRoom, weekDayIndex, formatDate(dayDate));
+                                    }}
+                                    className={`flex-shrink-0 w-28 text-center py-2 cursor-pointer ${
+                                        selectedDayDate.getDate() === dayDate.getDate() ? 'bg-gray-700 text-white' : 'text-gray-700'
+                                    } rounded-lg transition-colors duration-300`}
+                                >
+                                    {`${daysNameOfWeek[weekDayIndex]} ${dayDate.getDate()}`}
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
                 <div className={`px-4 flex flex-wrap ${editingReserve ? 'justify-evenly' : ''}`}>
@@ -206,25 +237,30 @@ export default function ReservePage() {
                         </button>
                     )}
                 </div>
-                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 overflow-y-auto max-h-[80vg]">
+                <div
+                    className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 overflow-y-auto max-h-[80vg]">
                     {reserveCards.map((reserve) => {
                         const startTime = new Date();
                         startTime.setHours(reserve.startTime[0]);
                         startTime.setMinutes(reserve.startTime[1]);
 
-                        const endTime = new Date(startTime);
-                        endTime.setHours(endTime.getHours() + 1);
+                        const endTime = new Date();
+                        endTime.setHours(reserve.endTime[0]);
+                        endTime.setMinutes(reserve.endTime[1]);
                         return (
                             <HourCard
                                 key={reserve.startTime.toString()}
                                 clientName={reserve.name}
                                 clientLastName={reserve.lastName}
-                                start_date={startTime}
-                                end_date={endTime}
+                                startDate={startTime}
+                                endDate={endTime}
+                                reserveDate={reserve.reserveDate}
+                                roomId={reserve.roomId}
                                 canCancel={reserve.canCancel}
                                 setEditingModeFunction={setEditingMode}
                                 addHourToReserveListFunction={addHourToReserve}
                                 removeHourToReserveListFunction={removeHourToReserve}
+                                cancelReserveFunction={cancelReserve}
                             />
                         );
                     })}
@@ -234,10 +270,16 @@ export default function ReservePage() {
                 isOpen={isModalOpen}
                 onClose={closeModal}
                 hoursToReserve={hoursToReserve}
-                selectedDayDate={selectedDayDate}
+                selectedDayDate={formatDate(selectedDayDate)}
                 selectedRoomId={selectedRoom}
                 clearHoursToReserve={clearHoursToReserve}
                 updateReserveCards={updateReserveCardsFromModal}
+            />
+            <InfoModal
+                isOpen={isInfoModalOpen}
+                onClose={handleInfoModalClose}
+                message={infoModalMessage}
+                success={infoModalSuccess}
             />
         </main>
     );

@@ -4,6 +4,9 @@ import {useEffect, useState} from 'react';
 import {jwtDecode} from 'jwt-decode';
 import {useRouter} from 'next/navigation';
 import Image from 'next/image';
+import UserManagementModal from "@/app/components/Modals/user-management-modal";
+import ApprovalModal from "@/app/components/Modals/approval-modal";
+import PriceModificationModal from "@/app/components/Modals/price-modification-modal";
 
 interface JwtPayload {
     sub: string;
@@ -38,6 +41,20 @@ const Profile = () => {
         router.push('/login');
     };
 
+    const [users, setUsers] = useState([
+        { id: 1, name: 'Usuario Uno', email: 'uno@example.com', isAdmin: false, isApproved: false },
+        { id: 2, name: 'Usuario Dos', email: 'dos@example.com', isAdmin: true, isApproved: false },
+    ]);
+
+    const [prices, setPrices] = useState([
+        { id: 1, hours: 10, pricePerHour: 280.00 },
+        { id: 2, hours: 20, pricePerHour: 500.00 },
+    ]);
+
+    const [isUserModalOpen, setUserModalOpen] = useState(false);
+    const [isApprovalModalOpen, setApprovalModalOpen] = useState(false);
+    const [isPriceModalOpen, setPriceModalOpen] = useState(false);
+
     return (
         <main className="flex flex-col min-h-screen bg-gray-600 px-4 pb-16">
             <div className="flex flex-col items-center place-content-center flex-grow">
@@ -56,25 +73,34 @@ const Profile = () => {
                     </div>
                     <ul className="mt-4 space-y-4">
                         {userInfo?.role === 'ADMIN' &&
-                            <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/approvals" className="text-white hover:underline">
-                                    Autorizaciones Pendientes
-                                </a>
-                            </li>
-                        }
-                        {userInfo?.role === 'ADMIN' &&
-                            <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/approvals" className="text-white hover:underline">
-                                    Ver Usuarios
-                                </a>
-                            </li>
+                            <>
+                                <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
+                                    <button
+                                        onClick={() => setApprovalModalOpen(true)}
+                                        className="text-white hover:underline"
+                                    >
+                                        Autorizaciones Pendientes
+                                    </button>
+                                </li>
+                                <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
+                                    <button
+                                        onClick={() => setUserModalOpen(true)}
+                                        className="text-white hover:underline w-full h-full">
+                                        Ver Usuarios
+                                    </button>
+                                </li>
+                                <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
+                                    <button
+                                        onClick={() => setPriceModalOpen(true)}
+                                        className="text-white hover:underline"
+                                    >
+                                        Modificar Precios
+                                    </button>
+                                </li>
+                            </>
+
                         }
                         <>
-                            <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/settings" className="text-white hover:underline">
-                                    Configuración
-                                </a>
-                            </li>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                 <a href="/profile/change-email" className="text-white hover:underline">
                                     Cambiar Correo Electrónico
@@ -99,6 +125,24 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+            <UserManagementModal
+                isOpen={isUserModalOpen}
+                onClose={() => setUserModalOpen(false)}
+                users={users}
+                setUsers={setUsers}
+            />
+            <ApprovalModal
+                isOpen={isApprovalModalOpen}
+                onClose={() => setApprovalModalOpen(false)}
+                users={users}
+                setUsers={setUsers}
+            />
+            <PriceModificationModal
+                isOpen={isPriceModalOpen}
+                onClose={() => setPriceModalOpen(false)}
+                prices={prices}
+                setPrices={setPrices}
+            />
         </main>
     );
 };

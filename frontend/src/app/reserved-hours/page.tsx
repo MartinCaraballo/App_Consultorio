@@ -5,9 +5,7 @@ import ReservedHourCard from "@/app/components/reserved-hour-card";
 import FixedReserveModal from "@/app/components/Modals/adm-fixed-reserves-modal";
 import {jwtDecode} from "jwt-decode";
 import { useRouter } from "next/navigation";
-import HourCard from "@/app/components/hour-card";
 import {ReserveDTO} from "@/app/models/ReserveDTO";
-import HourPanelCard from "@/app/components/hour-panel-card";
 
 interface JwtPayload {
     sub: string;

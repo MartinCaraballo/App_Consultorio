@@ -57,9 +57,8 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                 setResultType('success');
                 clearHoursToReserve();
             } else if (res.status === 401) {
-                setResultMessage('No estás autorizado para realizar esta acción.');
+                setResultMessage('No se cumplen con las condiciones horarias para efectuar la reserva.');
                 setResultType('error');
-                router.push('/login');
             } else {
                 setResultMessage('Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo.');
                 setResultType('error');

@@ -1,7 +1,7 @@
 type propsType = {
     start_date: Date,
     end_date: Date,
-    reserveDate: Date,
+    reserveDate: number[],
     room: number,
 }
 
@@ -24,7 +24,7 @@ const ReservedHourCard = (props: propsType) => {
                         {`${formatTime(props.start_date)} - ${formatTime(props.end_date)}`}
                     </h1>
                     <p className="py-2 px-2 font-medium">
-                        {`${daysNameOfWeek[props.reserveDate.getDay() - 1]} ${props.reserveDate.getDate()} - Consultorio ${props.room}`}
+                        {/*{`${daysNameOfWeek[props.reserveDate.getDay() - 1]} ${props.reserveDate.getDate()} - Consultorio ${props.room}`}*/}
                     </p>
                 </div>
             </div>
