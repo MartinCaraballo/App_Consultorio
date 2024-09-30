@@ -28,7 +28,8 @@ public class SecurityConfig {
                                 "auth/login"
                         ).permitAll()
                         .requestMatchers(
-                                "/reserve/fixed").hasAuthority("ROLE_ADMIN")
+                                "/reserve/fixed",
+                                "/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest()
                         .authenticated()
                 )
