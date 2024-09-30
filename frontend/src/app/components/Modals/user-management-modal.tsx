@@ -1,33 +1,15 @@
 import React from 'react';
 
-interface User {
-    id: number;
-    name: string;
-    isAdmin: boolean;
-}
-
 interface UserManagementModalProps {
     isOpen: boolean;
     onClose: () => void;
-    users: User[];
-    setUsers: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
-const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClose, users, setUsers }) => {
-    const toggleAdmin = (userId: number) => {
-        setUsers(users.map(user =>
-            user.id === userId ? { ...user, isAdmin: !user.isAdmin } : user
-        ));
-    };
-
-    const deleteUser = (userId: number) => {
-        setUsers(users.filter(user => user.id !== userId));
-    };
-
+const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
-    const adminUsers = users.filter(user => user.isAdmin);
-    const regularUsers = users.filter(user => !user.isAdmin);
+    let adminUsers: User[] = [];
+    let regularUsers: User[] = [];
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -46,13 +28,11 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                             <span className="font-bold">{user.name}</span>
                             <div>
                                 <button
-                                    onClick={() => toggleAdmin(user.id)}
                                     className="mr-2 p-1 bg-red-500 text-white rounded"
                                 >
                                     Quitar Admin
                                 </button>
                                 <button
-                                    onClick={() => deleteUser(user.id)}
                                     className="p-1 bg-red-600 text-white rounded"
                                 >
                                     Eliminar
@@ -69,13 +49,11 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                             <span>{user.name}</span>
                             <div>
                                 <button
-                                    onClick={() => toggleAdmin(user.id)}
                                     className="mr-2 p-1 bg-green-500 text-white rounded"
                                 >
                                     Hacer Admin
                                 </button>
                                 <button
-                                    onClick={() => deleteUser(user.id)}
                                     className="p-1 bg-red-600 text-white rounded"
                                 >
                                     Eliminar

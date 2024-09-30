@@ -4,30 +4,12 @@ import React, { useState } from 'react';
 interface PriceModificationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    prices: Price[];
-    setPrices: React.Dispatch<React.SetStateAction<Price[]>>;
 }
 
-const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen, onClose, prices, setPrices }) => {
+const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen, onClose }) => {
     const [editedPrice, setEditedPrice] = useState<Price | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (editedPrice) {
-            const { name, value } = e.target;
-            setEditedPrice({ ...editedPrice, [name]: value ? parseFloat(value) : 0 });
-        }
-    };
-
-    const handleEdit = (price: Price) => {
-        setEditedPrice(price);
-    };
-
-    const savePrice = () => {
-        if (editedPrice) {
-            setPrices(prices.map(price => (price.id === editedPrice.id ? editedPrice : price)));
-            setEditedPrice(null);
-        }
-    };
+    let prices: Price[] = [];
 
     if (!isOpen) return null;
 
@@ -50,7 +32,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                                     type="number"
                                     name="hours"
                                     value={editedPrice?.id === price.id ? editedPrice.hours : ''}
-                                    onChange={handleChange}
+                                    // onChange={handleChange}
                                     placeholder="Horas"
                                     className="border p-1 rounded w-20 mr-2"
                                 />
@@ -58,12 +40,11 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                                     type="number"
                                     name="price_per_hour"
                                     value={editedPrice?.id === price.id ? editedPrice.pricePerHour : ''}
-                                    onChange={handleChange}
+                                    // onChange={handleChange}
                                     placeholder="Precio/Hora"
                                     className="border p-1 rounded w-28 mr-2"
                                 />
                                 <button
-                                    onClick={() => handleEdit(price)}
                                     className="p-1 bg-blue-500 text-white rounded"
                                 >
                                     Editar
@@ -74,7 +55,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                 </ul>
                 {editedPrice && (
                     <div className="mt-4 flex justify-end">
-                        <button onClick={savePrice} className="p-2 bg-green-500 text-white rounded">
+                        <button className="p-2 bg-green-500 text-white rounded">
                             Guardar Cambios
                         </button>
                     </div>

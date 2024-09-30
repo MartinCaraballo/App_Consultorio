@@ -41,16 +41,6 @@ const Profile = () => {
         router.push('/login');
     };
 
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Usuario Uno', email: 'uno@example.com', isAdmin: false, isApproved: false },
-        { id: 2, name: 'Usuario Dos', email: 'dos@example.com', isAdmin: true, isApproved: false },
-    ]);
-
-    const [prices, setPrices] = useState([
-        { id: 1, hours: 10, pricePerHour: 280.00 },
-        { id: 2, hours: 20, pricePerHour: 500.00 },
-    ]);
-
     const [isUserModalOpen, setUserModalOpen] = useState(false);
     const [isApprovalModalOpen, setApprovalModalOpen] = useState(false);
     const [isPriceModalOpen, setPriceModalOpen] = useState(false);
@@ -128,20 +118,14 @@ const Profile = () => {
             <UserManagementModal
                 isOpen={isUserModalOpen}
                 onClose={() => setUserModalOpen(false)}
-                users={users}
-                setUsers={setUsers}
             />
             <ApprovalModal
                 isOpen={isApprovalModalOpen}
                 onClose={() => setApprovalModalOpen(false)}
-                users={users}
-                setUsers={setUsers}
             />
             <PriceModificationModal
                 isOpen={isPriceModalOpen}
                 onClose={() => setPriceModalOpen(false)}
-                prices={prices}
-                setPrices={setPrices}
             />
         </main>
     );
