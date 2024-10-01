@@ -42,6 +42,8 @@ export default function RegisterPage() {
             const responseBody = await response.json();
             const bodyMessage = responseBody.message;
             setError(bodyMessage);
+        } else {
+            setError("Los datos ingresados coinciden con un usuario existente.");
         }
     }
 

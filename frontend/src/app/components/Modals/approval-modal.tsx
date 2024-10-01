@@ -43,7 +43,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
 
     async function acceptUser(userEmail: string, name: string, lastName:string) {
         try {
-            const res = await fetch (`http://localhost:8080/admin/accept-user/${userEmail}`, {
+            const res = await fetch(`http://localhost:8080/admin/accept-user/${userEmail}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
