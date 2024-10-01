@@ -1,10 +1,11 @@
 package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.models.Admin;
 import com.example.backend.models.Login;
 import com.example.backend.models.Price;
 import com.example.backend.models.User;
-import com.example.backend.models.dtos.UserDTO;
+import com.example.backend.services.AdminService;
 import com.example.backend.services.LoginService;
 import com.example.backend.services.PriceService;
 import com.example.backend.services.UserService;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,6 +26,28 @@ public class AdminController {
     private final UserService userService;
     private final PriceService priceService;
     private final LoginService loginService;
+    private final AdminService adminService;
+
+    @Transactional
+    @PostMapping
+    public ResponseEntity<String> makeUserAdmin(@RequestBody Admin admin) {
+        User user = userService.findById(admin.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Admin newAdmin = new Admin();
+        newAdmin.setUser(user);
+        adminService.saveOrUpdate(newAdmin);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> removeAdmin(@PathVariable String id) {
+        Admin admin = adminService.findById(id).orElseThrow();
+        adminService.delete(admin);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @GetMapping("/unauthorized-users")
     public ResponseEntity<List<User>> getUnauthorizedUsers() {
@@ -34,7 +58,7 @@ public class AdminController {
         return new ResponseEntity<>(unauthorizedUsers, HttpStatus.OK);
     }
 
-    @PutMapping("accept-user/{id}")
+    @PutMapping("/accept-user/{id}")
     public ResponseEntity<String> acceptUser(@PathVariable String id) {
         Login userLogin = loginService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with email %s not found", id)));
@@ -47,7 +71,7 @@ public class AdminController {
                 HttpStatus.OK);
     }
 
-    @PutMapping("reject-user/{id}")
+    @PutMapping("/reject-user/{id}")
     public ResponseEntity<String> rejectUser(@PathVariable String id) {
         Login userLogin = loginService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with email %s not found", id)));
@@ -61,12 +85,18 @@ public class AdminController {
         );
     }
 
-    @GetMapping("/all-users")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<Login> userLogins = loginService.findAll();
+    @GetMapping("/admin-users")
+    public ResponseEntity<List<User>> getAllAdminUsers() {
+        List<User> adminUsers = adminService.findAllAdminUsers();
 
-        // Never will be null (at least one user do a successful login).
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(adminUsers, HttpStatus.OK);
+    }
+
+    @GetMapping("/regular-users")
+    public ResponseEntity<List<User>> getAllRegularUsers() {
+        List<User> regularUsers = userService.findAllRegularUsers();
+
+        return new ResponseEntity<>(regularUsers, HttpStatus.OK);
     }
 
     @GetMapping("/prices")

@@ -18,7 +18,7 @@ public class UserService {
         return userRepository.findById(email);
     }
 
-    public List<User> getAllUsers() { return userRepository.findAll(); }
+    public List<User> findAllRegularUsers() { return userRepository.findAllRegularUsers(); }
 
     public List<User> findNotAuthorized() {
         return userRepository.findNotAuthorizedUsers();
