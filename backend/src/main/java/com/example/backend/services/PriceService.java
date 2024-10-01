@@ -17,4 +17,10 @@ public class PriceService {
         return priceRepository.findAllByOrderByHoursAsc();
     }
 
+    public void saveOrUpdatePrice(Price price) {
+        priceRepository.save(price);
+    }
+
+    public void deletePrice(Integer id) { priceRepository.deleteById(id); }
+
 }

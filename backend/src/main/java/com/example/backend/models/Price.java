@@ -8,7 +8,8 @@ import lombok.Data;
 @Table(name = "Prices")
 public class Price {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "price_sequence")
+    @SequenceGenerator(name = "price_sequence", sequenceName = "price_sequence", allocationSize = 1)
     private Integer id;
 
     @Column(name = "hours", nullable = false)

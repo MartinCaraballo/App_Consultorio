@@ -8,4 +8,6 @@ import java.util.List;
 public interface PriceRepository extends JpaRepository<Price, Integer> {
 
     List<Price> findAllByOrderByHoursAsc();
+
+    void deleteById(int id);
 }
