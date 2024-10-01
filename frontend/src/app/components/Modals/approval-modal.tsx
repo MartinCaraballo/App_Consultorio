@@ -26,9 +26,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
         try {
             const res = await fetch('http://localhost:8080/admin/unauthorized-users', {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 credentials: 'include',
             });
             if (res.status === 403) {

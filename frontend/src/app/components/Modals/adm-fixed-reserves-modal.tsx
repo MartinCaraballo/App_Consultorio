@@ -129,9 +129,11 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     };
 
     useEffect(() => {
-        fetchRooms();
-        fetchReservedSlots(selectedRoom, dayIndex);
-    }, []);
+        if (isOpen) {
+            fetchRooms();
+            fetchReservedSlots(selectedRoom, dayIndex);
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
