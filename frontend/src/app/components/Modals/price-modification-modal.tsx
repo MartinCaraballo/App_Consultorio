@@ -32,7 +32,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
 
     async function fetchPrices() {
         try {
-            const res = await fetch('http://localhost:8080/admin/prices', {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/prices`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -49,7 +49,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
 
     async function addPrice() {
         try {
-            const res = await fetch('http://localhost:8080/admin/prices', {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/prices`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ hours: hoursToPost, pricePerHour: pricePerHoursToPost }),
@@ -73,7 +73,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
 
     async function updatePrice(newPrice: Price) {
         try {
-            const res = await fetch(`http://localhost:8080/admin/prices`, {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/prices`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: newPrice.id, hours: newPrice.hours, pricePerHour: newPrice.pricePerHour }),
@@ -98,7 +98,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
 
     async function deletePrice(id: number) {
         try {
-            const res = await fetch(`http://localhost:8080/admin/prices/${id}`,{
+            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/prices/${id}`,{
                 method: 'DELETE',
                 credentials: 'include',
             });

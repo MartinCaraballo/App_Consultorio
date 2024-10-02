@@ -30,7 +30,7 @@ export default function ReservedHours() {
     async function fetchActiveReserves() {
         try {
             const res = await fetch(
-                `http://localhost:8080/reserve/active`, {
+                `http://${process.env.BACKEND_URL}/reserve/active`, {
                     method: 'GET',
                     credentials: 'include',
                 }

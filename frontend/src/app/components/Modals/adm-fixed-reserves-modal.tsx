@@ -30,7 +30,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     const fetchReservedSlots = async (roomId: number, dayIndex: number) => {
         try {
-            const response = await fetch(`http://localhost:8080/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}`, {
+            const response = await fetch(`http://${process.env.BACKEND_URL}/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}`, {
                 method: 'GET',
                 credentials: 'include',
             });
@@ -49,7 +49,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     async function fetchRooms() {
         try {
-            const res = await fetch('http://localhost:8080/rooms', {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/rooms`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         };
 
         try {
-            const res = await fetch('http://localhost:8080/reserve/fixed', {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/reserve/fixed`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload),
@@ -112,7 +112,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     const handleCancel = async (roomId: number, dayIndex: number, startTime: string) => {
         try {
-            const res = await fetch(`http://localhost:8080/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}&startTime=${startTime}`, {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}&startTime=${startTime}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });

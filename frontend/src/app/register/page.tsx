@@ -30,7 +30,7 @@ export default function RegisterPage() {
             return;
         }
 
-        const response = await fetch('http://localhost:8080/auth/register', {
+        const response = await fetch(`http://${process.env.BACKEND_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, name, lastName, phoneNumber }),

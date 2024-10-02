@@ -45,7 +45,7 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
     const postReserves = async () => {
         const reservesPayload = createReservePayload();
         try {
-            const res = await fetch('http://localhost:8080/reserve', {
+            const res = await fetch(`http://${process.env.BACKEND_URL}/reserve`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(reservesPayload),
