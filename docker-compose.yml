@@ -9,9 +9,12 @@ services:
       - USER_DEFAULT_LAST_NAME=Admin
       - USER_DEFAULT_PASSWORD=MGcc2003@@
       - USER_DEFAULT_PHONE_NUMBER=099677264
+      - CORS_ORIGIN=http://4.228.229.158:3000
     ports:
       - "8080:8080"
   frontend:
     build: ./frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=4.228.229.158:8080
     ports:
       - "3000:3000"
