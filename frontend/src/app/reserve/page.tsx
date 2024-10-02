@@ -92,7 +92,7 @@ export default function ReservePage() {
 
     async function fetchWeek() {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/week`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/week`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function ReservePage() {
 
     async function fetchRooms() {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/rooms`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function ReservePage() {
     async function fetchReserves(roomId: number, dayIndex: number, date: string) {
         try {
             const res = await fetch(
-                `http://${process.env.BACKEND_URL}/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`, {
+                `http://${process.env.NEXT_PUBLIC_API_URL}/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ export default function ReservePage() {
 
     const cancelReserve = async (roomId: number, date: string, startTime: string) => {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });

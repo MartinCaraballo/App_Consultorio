@@ -24,7 +24,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
 
     async function fetchUnauthorizedUsers() {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/unauthorized-users`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/unauthorized-users`, {
                 method: 'GET',
                 credentials: 'include',
             });
@@ -40,7 +40,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
 
     async function acceptUser(userEmail: string, name: string, lastName:string) {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/accept-user/${userEmail}`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/accept-user/${userEmail}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -61,7 +61,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
 
     async function rejectUser(userEmail: string, name: string, lastName:string) {
         try {
-            const res = await fetch (`http://${process.env.BACKEND_URL}/admin/reject-user/${userEmail}`, {
+            const res = await fetch (`http://${process.env.NEXT_PUBLIC_API_URL}/admin/reject-user/${userEmail}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

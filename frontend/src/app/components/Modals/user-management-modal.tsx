@@ -25,7 +25,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
 
     async function fetchAdminUsers() {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/admin-users`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/admin-users`, {
                 method: 'GET',
                 credentials: 'include',
             });
@@ -41,7 +41,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
 
     async function fetchRegularUsers() {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/regular-users`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/regular-users`, {
                 method: 'GET',
                 credentials: 'include',
             });
@@ -62,7 +62,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
 
     async function removeAdmin(adminEmail: string) {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin/${adminEmail}`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/${adminEmail}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -84,7 +84,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
 
     async function makeAdmin(user: User) {
         try {
-            const res = await fetch(`http://${process.env.BACKEND_URL}/admin`, {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email }),
