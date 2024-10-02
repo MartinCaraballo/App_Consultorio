@@ -1,15 +1,17 @@
 services:
-  mysql:
-    image: mysql:8.4.0
-    ports:
-      - "3306:3306"
+  backend:
+    build: ./backend
     environment:
-      - MYSQL_ROOT_PASSWORD=app_reservas123@@
-      - MYSQL_USER=app_reservas
-      - MYSQL_PASSWORD=app_reservas123@@
-      - MYSQL_DATABASE=app_reservas
-    healthcheck:
-      test: ["CMD", "bash", "-c", "mysql --user=$$USER_NAME --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"]
-      interval: 5s
-      timeout: 50s
-      retries: 10
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://appreservas.database.windows.net:1433;database=app_reservas;user=martin.caraballo@appreservas;password=MGcc2003@@;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+      - JWT_SECRET=c64a2afae524c600504a95994a8dbbdbde8a446e5a95a1171da181ffe917e2b02e782bfdf43066066010244bf9f6cf7a41ff7fbd3062b215f7a6fcf3bbeb467d45d8510e19d116866a839eaa7036cdea579efc63631fe7ebf516c7d7f777928d08dfedaa109a26d69fec8351f35428070c50b9b85f9e2ac4a76dee8c84605084f7b524e5201a93203cba1f369302d64d9018ca556e2f4b018f9e11cb5441fb18b7f2da8eff5ef29cdb36069948e6d93b34774c33eab2a0532112e9d06e34df037916bed2ef306b579330c458bb9d3fb881bef311078d260f212a2a328414d81af1593be79f05b7e865ca2d7af4bb39935893fbae2a22fc2d9ff991702689c4b1
+      - USER_DEFAULT_EMAIL=admin@admin.com
+      - USER_DEFAULT_NAME=Admin
+      - USER_DEFAULT_LAST_NAME=Admin
+      - USER_DEFAULT_PASSWORD=MGcc2003@@
+      - USER_DEFAULT_PHONE_NUMBER=099677264
+    ports:
+      - "8080:8080"
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
