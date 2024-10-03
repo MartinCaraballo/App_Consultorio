@@ -13,9 +13,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -82,9 +84,9 @@ public class ReserveController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // TODO: Endpoint only for admins
     @Transactional
     @PostMapping("/fixed")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
         String user = getUserByContextToken();
         LocalTime startTime = createFixedReserveReq.getStartTime();
@@ -137,9 +139,9 @@ public class ReserveController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // TODO: ENDPOINT ONLY FOR ADMINS.
     @Transactional
     @DeleteMapping("/fixed")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> cancelFixedReserve(@RequestParam Integer roomId,
                                                      @RequestParam Integer dayIndex,
                                                      @RequestParam LocalTime startTime) {
@@ -226,15 +228,33 @@ public class ReserveController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<String> getUserReserves() {
-        LocalDate nowDateTime = LocalDate.now();
+    public ResponseEntity<List<ReserveDTO>> getWeekUserReserves() {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        LocalDate today = LocalDate.now();
+        // setting to monday
+        LocalDate startWeekDate = today.minusDays(today.getDayOfWeek().getValue() - 1);
+        LocalDate endWeekDate = today.plusWeeks(1);
+        List<UserReserve> userWeekReserves = userReserveService.findAllWeekUserReserve(startWeekDate, endWeekDate, user);
+        List<ReserveDTO> result = new ArrayList<>(userWeekReserves.size());
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        for (UserReserve userReserve : userWeekReserves) {
+            LocalTime reserveStartTime = userReserve.getReserveKey().getStartTime();
+            result.add(new ReserveDTO(
+                    null,
+                    null,
+                    userReserve.getRoom().getRoomId(),
+                    reserveStartTime,
+                    reserveStartTime.plusHours(1),
+                    userReserve.getReserveKey().getReserveDate(),
+                    false
+            ));
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    // TODO: ENDPOINT ONLY FOR ADMINS.
     @GetMapping("/fixed")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<ReserveDTO>> getFixedReserves(@RequestParam Integer roomId,
                                                              @RequestParam Integer dayIndex) {
         String user = getUserByContextToken();

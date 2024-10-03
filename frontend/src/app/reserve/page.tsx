@@ -2,7 +2,6 @@
 
 import React, {useEffect, useState} from "react";
 import HourCard from "@/app/components/hour-card";
-import {ReserveDTO} from "@/app/models/ReserveDTO";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
 import {useRouter} from "next/navigation";
 import InfoModal from "@/app/components/Modals/info-modal";

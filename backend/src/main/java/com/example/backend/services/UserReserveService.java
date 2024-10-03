@@ -19,6 +19,10 @@ public class UserReserveService {
         return userReserveRepository.findAllByDateAndRoomId(date, roomId);
     }
 
+    public List<UserReserve> findAllWeekUserReserve(LocalDate startWeekDate, LocalDate endWeekDate, String userEmail) {
+        return userReserveRepository.findAllWeekUserReserve(startWeekDate, endWeekDate, userEmail);
+    }
+
     public void saveOrUpdate(UserReserve userReserve) {
         userReserveRepository.save(userReserve);
     }

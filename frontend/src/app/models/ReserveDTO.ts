@@ -1,4 +1,4 @@
-export interface ReserveDTO {
+interface ReserveDTO {
     name: string;
     lastName: string;
     roomId: number,

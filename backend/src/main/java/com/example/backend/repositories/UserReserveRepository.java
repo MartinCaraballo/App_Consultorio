@@ -13,5 +13,8 @@ public interface UserReserveRepository extends JpaRepository<UserReserve, UserRe
     @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate=:date AND u.room.roomId=:roomId")
     List<UserReserve> findAllByDateAndRoomId(LocalDate date, Integer roomId);
 
+    @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate BETWEEN :startWeekDate AND :endWeekDate AND u.reserveKey.email = :userEmail")
+    List<UserReserve> findAllWeekUserReserve(LocalDate startWeekDate, LocalDate endWeekDate, String userEmail);
+
     void deleteByReserveKey(UserReserveKey userReserveKey);
 }

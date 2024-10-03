@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const router = useRouter();
   return (
-      <div className="flex h-screen justify-center items-center">
+      <div className="flex h-screen justify-center items-center px-4">
           <div
-              className="flex flex-col justify-center items-center p-8 border-4 border-gray-600 w-1/4 h-1/2 rounded-2xl">
+              className="flex flex-col justify-center items-center p-8 border-4 border-gray-600 w-screen md:w-1/2 lg:w-1/4 h-1/2 rounded-2xl">
               <button
                   className="text-2xl p-4 rounded-xl w-56 border-2 border-gray-600 group transition duration-300 hover:bg-gray-300"
                   onClick={() => {
