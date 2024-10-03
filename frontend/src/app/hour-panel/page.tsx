@@ -2,35 +2,22 @@
 
 import React, {useEffect, useState} from "react";
 import HourPanelCard from "@/app/components/hour-panel-card";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 export default function HourPanel() {
     const router = useRouter();
 
     const [weekCost, setWeekCost] = useState<WeekCostDTO | undefined>(undefined);
 
-    async function fetchWeekReservedDaysAndCost() {
+    useEffect(() => {
         try {
-            const res = await fetch(
-                `http://${process.env.NEXT_PUBLIC_API_URL}/user/week-cost`, {
-                    method: 'GET',
-                    credentials: 'include',
-                }
-            );
-            if (res.status===403) {
-                router.push('/login');
-            }
-
-            const data: WeekCostDTO = await res.json();
-            console.log(data)
-            setWeekCost(data);
+            fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/week-cost`, {
+                method: 'GET',
+                credentials: 'include',
+            }).then((res) => res.json()).then((data) => setWeekCost(data));
         } catch (e) {
             console.log(e);
         }
-    }
-
-    useEffect(() => {
-        fetchWeekReservedDaysAndCost();
     }, []);
 
     return (
@@ -50,7 +37,7 @@ export default function HourPanel() {
                 </div>
             </div>
             <div
-                className="absolute bottom-[80px] left-4 right-4 bg-white flex flex-col items-center py-1 h-16 rounded-lg font-bold">
+                className="absolute bottom-[80px] left-4 right-4 bg-white flex flex-col items-center py-1 h-16 rounded-lg font-bold text-lg">
                 <p>{`Total de horas: ${weekCost ? weekCost.totalHours : 0} hs`}</p>
                 <p>{`Costo total: $${weekCost ? weekCost.totalCost : 0}`}</p>
             </div>
