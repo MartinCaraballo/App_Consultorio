@@ -13,8 +13,11 @@ import java.util.zip.CheckedOutputStream;
 @EnableWebMvc
 @EnableMethodSecurity
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${cors.origin}")
-    private String CORS_ORIGIN;
+    @Value("${cors.origin.dns}")
+    private String CORS_ORIGIN_DNS;
+
+    @Value("${cors.origin.ip}")
+    private String CORS_ORIGIN_IP;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -26,7 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:80",
                         "http://127.0.0.1",
                         "http://localhost",
-                        CORS_ORIGIN
+                        CORS_ORIGIN_DNS,
+                        CORS_ORIGIN_IP
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
