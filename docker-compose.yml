@@ -1,0 +1,15 @@
+services:
+  mysql:
+    image: mysql:8.4.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=app_reservas123@@
+      - MYSQL_USER=app_reservas
+      - MYSQL_PASSWORD=app_reservas123@@
+      - MYSQL_DATABASE=app_reservas
+    healthcheck:
+      test: ["CMD", "bash", "-c", "mysql --user=$$USER_NAME --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"]
+      interval: 5s
+      timeout: 50s
+      retries: 10
