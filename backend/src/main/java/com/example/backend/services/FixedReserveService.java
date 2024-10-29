@@ -18,6 +18,10 @@ public class FixedReserveService {
         return fixedReserveRepository.findAllByDayIndexAndRoomId(dayIndex, roomId);
     }
 
+    public List<FixedReserve> findAllByDayIndexAndRoomIdAndAdminEmail(Integer dayIndex, Integer roomId, String adminEmail) {
+        return fixedReserveRepository.findAllByDayIndexAndRoomIdAndAdminEmail(dayIndex, roomId, adminEmail);
+    }
+
     public void saveOrUpdate(FixedReserve fixedReserve) {
         fixedReserveRepository.save(fixedReserve);
     }

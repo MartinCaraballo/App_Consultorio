@@ -12,5 +12,8 @@ public interface FixedReserveRepository extends JpaRepository<FixedReserve, Fixe
     @Query("SELECT f FROM FixedReserve f WHERE f.fixedReserveKey.dayIndex= :dayIndex AND f.room.roomId= :roomId")
     List<FixedReserve> findAllByDayIndexAndRoomId(Integer dayIndex, Integer roomId);
 
+    @Query("SELECT f FROM FixedReserve f WHERE f.fixedReserveKey.dayIndex= :dayIndex AND f.room.roomId= :roomId AND f.fixedReserveKey.email= :adminEmail")
+    List<FixedReserve> findAllByDayIndexAndRoomIdAndAdminEmail(Integer dayIndex, Integer roomId, String adminEmail);
+
     void deleteByFixedReserveKey(FixedReserveKey fixedReserveKey);
 }

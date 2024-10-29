@@ -264,8 +264,14 @@ public class ReserveController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         User adminUserData = admin.getUser();
-        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomId(dayIndex, roomId);
+        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomIdAndAdminEmail(dayIndex, roomId, adminUserData.getEmail());
 
+        List<ReserveDTO> userFixedReservesDTO = getReserveDTOS(fixedReserves, adminUserData);
+
+        return new ResponseEntity<>(userFixedReservesDTO, HttpStatus.OK);
+    }
+
+    private static List<ReserveDTO> getReserveDTOS(List<FixedReserve> fixedReserves, User adminUserData) {
         List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(fixedReserves.size());
 
         for (FixedReserve fixedReserve : fixedReserves) {
@@ -280,8 +286,7 @@ public class ReserveController {
             );
             userFixedReservesDTO.add(reserveDTO);
         }
-
-        return new ResponseEntity<>(userFixedReservesDTO, HttpStatus.OK);
+        return userFixedReservesDTO;
     }
 
     private boolean userHaveAccess(String id) {

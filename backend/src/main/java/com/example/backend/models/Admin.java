@@ -17,7 +17,4 @@ public class Admin {
     @JoinColumn(name = "email", referencedColumnName = "email")
     private User user;
 
-    @OneToMany(mappedBy="admin")
-    private Set<FixedReserve> fixedReserves;
-
 }
