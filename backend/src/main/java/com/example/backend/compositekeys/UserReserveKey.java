@@ -14,8 +14,6 @@ import java.time.LocalTime;
 @Embeddable
 public class UserReserveKey implements Serializable {
 
-    private String email;
-
     private Integer roomId;
 
     private LocalTime startTime;

@@ -10,6 +10,7 @@ import com.example.backend.models.requests.ChangePasswordReq;
 import com.example.backend.models.requests.ReportErrorReq;
 import com.example.backend.repositories.LoginRepository;
 import com.example.backend.services.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,6 +101,15 @@ public class UserController {
         loginRepository.save(login);
 
         return new ResponseEntity<>("User password changed successfully.", HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword() {
+        String user = getUserByContextToken();
+        String token = UUID.randomUUID().toString();
+
+
+        return new ResponseEntity<>("Reset token sended to user email successfully.", HttpStatus.OK);
     }
 
     @PostMapping("/report")

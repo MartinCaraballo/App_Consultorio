@@ -68,7 +68,6 @@ public class ReserveController {
             }
 
             UserReserveKey reserveKey = new UserReserveKey();
-            reserveKey.setEmail(userEmail);
             reserveKey.setStartTime(createReserveReq.getStartTime());
             reserveKey.setRoomId(createReserveReq.getRoomId());
             reserveKey.setReserveDate(createReserveReq.getReserveDate());
@@ -131,7 +130,6 @@ public class ReserveController {
         UserReserveKey reserveKey = new UserReserveKey();
         reserveKey.setRoomId(roomId);
         reserveKey.setReserveDate(date);
-        reserveKey.setEmail(user);
         reserveKey.setStartTime(startTime);
 
         userReserveService.deleteByUserReserveKey(reserveKey);
