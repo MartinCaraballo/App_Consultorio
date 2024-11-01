@@ -24,6 +24,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
 
     async function fetchUnauthorizedUsers() {
         try {
+            setUnauthorizedUsers([]);
             const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/unauthorized-users`, {
                 method: 'GET',
                 credentials: 'include',

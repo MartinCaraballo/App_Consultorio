@@ -7,6 +7,8 @@ import Image from 'next/image';
 import UserManagementModal from "@/app/components/Modals/user-management-modal";
 import ApprovalModal from "@/app/components/Modals/approval-modal";
 import PriceModificationModal from "@/app/components/Modals/price-modification-modal";
+import ChangePasswordModal from "@/app/components/Modals/change-password-modal";
+import ReportErrorModal from "@/app/components/Modals/report-error-modal";
 
 interface JwtPayload {
     sub: string;
@@ -35,15 +37,20 @@ const Profile = () => {
     }, [router]);
 
     const handleLogout = async () => {
-        // Aquí deberías manejar la lógica de cierre de sesión
-        await fetch('/api/logout', {method: 'POST'});
-        // Cookie.remove('jwt-token'); // Eliminar el token de las cookies
-        router.push('/login');
+        // document.cookie = `authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+        await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        // router.push('/login');
     };
 
     const [isUserModalOpen, setUserModalOpen] = useState(false);
     const [isApprovalModalOpen, setApprovalModalOpen] = useState(false);
     const [isPriceModalOpen, setPriceModalOpen] = useState(false);
+    const [isChangePassModalOpen, setChangePassModalOpen] = useState(false);
+    const [isReportErrorModalOpen, setReportErrorModalOpen] = useState(false);
 
     return (
         <main className="flex flex-col min-h-screen bg-gray-600 px-4 pb-16">
@@ -92,19 +99,18 @@ const Profile = () => {
                         }
                         <>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/change-email" className="text-white hover:underline">
-                                    Cambiar Correo Electrónico
-                                </a>
-                            </li>
-                            <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/change-password" className="text-white hover:underline">
+                                <button
+                                    onClick={() => setChangePassModalOpen(true)}
+                                    className="text-white hover:underline">
                                     Cambiar Contraseña
-                                </a>
+                                </button>
                             </li>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
-                                <a href="/profile/report-issue" className="text-white hover:underline">
+                                <button
+                                    onClick={() => setReportErrorModalOpen(true)}
+                                    className="text-white hover:underline">
                                     Reportar un Problema
-                                </a>
+                                </button>
                             </li>
                         </>
                     </ul>
@@ -126,6 +132,14 @@ const Profile = () => {
             <PriceModificationModal
                 isOpen={isPriceModalOpen}
                 onClose={() => setPriceModalOpen(false)}
+            />
+            <ChangePasswordModal
+                isOpen={isChangePassModalOpen}
+                onClose={() => setChangePassModalOpen(false)}
+            />
+            <ReportErrorModal
+                isOpen={isReportErrorModalOpen}
+                onClose={() => setReportErrorModalOpen(false)}
             />
         </main>
     );
