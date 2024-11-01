@@ -16,7 +16,6 @@ public class UserReserve {
     private UserReserveKey reserveKey;
 
     @ManyToOne
-    @MapsId("email")
     @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
     private User user;
 
