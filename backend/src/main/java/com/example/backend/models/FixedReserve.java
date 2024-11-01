@@ -19,7 +19,7 @@ public class FixedReserve {
 
     @ManyToOne
     @MapsId("email")
-    @JoinColumn(name = "email")
+    @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
     private Admin admin;
 
 }

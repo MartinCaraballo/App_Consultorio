@@ -98,7 +98,6 @@ public class ReserveController {
 
         while (startTime.isBefore(endTime)) {
             FixedReserveKey fixedReserveKey = new FixedReserveKey();
-            fixedReserveKey.setEmail(user);
             fixedReserveKey.setRoomId(createFixedReserveReq.getRoomId());
             fixedReserveKey.setStartTime(startTime);
             fixedReserveKey.setDayIndex(createFixedReserveReq.getDayIndex());
@@ -146,7 +145,6 @@ public class ReserveController {
 
         String user = getUserByContextToken();
         FixedReserveKey fixedReserveKey = new FixedReserveKey();
-        fixedReserveKey.setEmail(user);
         fixedReserveKey.setRoomId(roomId);
         fixedReserveKey.setDayIndex(dayIndex);
         fixedReserveKey.setStartTime(startTime);
