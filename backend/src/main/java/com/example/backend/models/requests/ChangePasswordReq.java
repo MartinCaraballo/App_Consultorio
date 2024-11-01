@@ -1,4 +1,6 @@
 package com.example.backend.models.requests;
 
-public class ChangePasswordReq {
+import lombok.Data;
+
+public record ChangePasswordReq(String oldPassword, String newPassword) {
 }

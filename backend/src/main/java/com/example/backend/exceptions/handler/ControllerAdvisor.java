@@ -1,5 +1,6 @@
 package com.example.backend.exceptions.handler;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.example.backend.exceptions.InvalidUserRegistrationException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.ResourceAlreadyExistsException;
@@ -110,6 +111,16 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         body.put("request description", req.getDescription(false));
 
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<Object> handleJWTVerificationException(JWTVerificationException ex, WebRequest req) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("request description", req.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
 }

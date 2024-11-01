@@ -1,19 +1,21 @@
 package com.example.backend.controllers;
 
+import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.models.Login;
 import com.example.backend.models.Price;
 import com.example.backend.models.UserReserve;
 import com.example.backend.models.dtos.DayCostDTO;
 import com.example.backend.models.dtos.WeekCostDTO;
-import com.example.backend.services.PriceService;
-import com.example.backend.services.UserReserveService;
-import com.example.backend.services.UserService;
+import com.example.backend.models.requests.ChangePasswordReq;
+import com.example.backend.models.requests.ReportErrorReq;
+import com.example.backend.repositories.LoginRepository;
+import com.example.backend.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -23,9 +25,13 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final UserReserveService userReserveService;
     private final PriceService priceService;
+    private final LoginService loginService;
+    private final LoginRepository loginRepository;
+    private final SendEmailService sendEmailService;
+    private final UserService userService;
 
     @GetMapping("/week-cost")
     public ResponseEntity<WeekCostDTO> getWeekCostAndHours() {
@@ -79,6 +85,29 @@ public class UserController {
 
         WeekCostDTO weekCost = new WeekCostDTO(dayCosts, totalCost, userWeekReserves.size());
         return new ResponseEntity<>(weekCost, HttpStatus.OK);
+    }
+
+    @PostMapping("/change-pass")
+    public ResponseEntity<String> changeUserPassword(@RequestBody ChangePasswordReq changePasswordReq) {
+        String user = getUserByContextToken();
+        Login login = loginService.findById(user).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(changePasswordReq.oldPassword(), login.getPassword())) {
+            return new ResponseEntity<>("Old and new password dont match.", HttpStatus.UNAUTHORIZED);
+        }
+
+        login.setPassword(passwordEncoder.encode(changePasswordReq.newPassword()));
+        loginRepository.save(login);
+
+        return new ResponseEntity<>("User password changed successfully.", HttpStatus.OK);
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<String> reportError(@RequestBody ReportErrorReq reportErrorReq) {
+        String user = getUserByContextToken();
+        sendEmailService.sendSimpleMail(reportErrorReq.message(), user);
+
+        return new ResponseEntity<>("Error received successfully.", HttpStatus.OK);
     }
 
     private String getUserByContextToken() {

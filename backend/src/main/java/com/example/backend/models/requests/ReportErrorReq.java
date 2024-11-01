@@ -1,4 +1,4 @@
 package com.example.backend.models.requests;
 
-public class ReportErrorReq {
+public record ReportErrorReq(String message) {
 }

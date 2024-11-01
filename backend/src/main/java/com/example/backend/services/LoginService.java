@@ -22,6 +22,8 @@ public class LoginService {
         return loginRepository.findById(email);
     }
 
+    public Login getPasswordByEmail(String email) { return loginRepository.getPasswordByEmail(email); }
+
     public void saveOrUpdate(Login login) {
         loginRepository.save(login);
     }

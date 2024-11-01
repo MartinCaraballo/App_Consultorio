@@ -264,7 +264,9 @@ public class ReserveController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         User adminUserData = admin.getUser();
-        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomIdAndAdminEmail(dayIndex, roomId, adminUserData.getEmail());
+        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomIdAndAdminEmail(
+                dayIndex, roomId, adminUserData.getEmail()
+        );
 
         List<ReserveDTO> userFixedReservesDTO = getReserveDTOS(fixedReserves, adminUserData);
 
