@@ -2,10 +2,8 @@
 
 import React, {useEffect, useState} from "react";
 import HourPanelCard from "@/app/components/hour-panel-card";
-import {useRouter} from "next/navigation";
 
 export default function HourPanel() {
-    const router = useRouter();
 
     const [weekCost, setWeekCost] = useState<WeekCostDTO | undefined>(undefined);
 

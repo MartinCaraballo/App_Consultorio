@@ -1,15 +1,12 @@
-// components/ReserveModal.tsx
 'use client'
 
 import React, {useEffect, useState} from 'react';
-import {useRouter} from "next/navigation";
 
 const daysOfWeek = [
     'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
 ];
 
 const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({isOpen, onClose}) => {
-    const router = useRouter();
 
     // Function to show the hours with 2 digits.
     const formatTime = (date: Date): string => {
@@ -36,8 +33,6 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             if (response.ok) {
                 const data = await response.json();
                 setReservedSlots(data);
-            } else if (response.status === 403) {
-                router.push('/login');
             } else {
                 setStatus('Error al cargar las reservas.');
             }
@@ -55,9 +50,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 },
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
+
             const data = await res.json();
             setRooms(data);
         } catch (e) {

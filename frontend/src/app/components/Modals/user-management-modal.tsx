@@ -1,4 +1,3 @@
-import { useRouter } from 'next/navigation';
 import React from 'react';
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -9,7 +8,6 @@ interface UserManagementModalProps {
 }
 
 const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClose }) => {
-    const router = useRouter();
 
     const [adminUsers, setAdminUsers] = React.useState<User[]>([]);
     const [regularUsers, setRegularUsers] = React.useState<User[]>([]);
@@ -29,9 +27,6 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 method: 'GET',
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
             const data: User[] = await res.json();
             setAdminUsers(data);
         } catch (e) {
@@ -45,9 +40,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 method: 'GET',
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
+
             const data: User[] = await res.json();
             setRegularUsers(data);
         } catch (e) {
@@ -66,9 +59,8 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 method: 'DELETE',
                 credentials: 'include'
             });
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+
+            if (res.status === 200) {
                 setShowMessage(true);
                 setStatusMessage(`El usuario con el correo ${adminEmail} fue eliminado de la lista de Admins con éxito.`);
                 fetchUsers();
@@ -90,9 +82,8 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 body: JSON.stringify({ email: user.email }),
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+
+            if (res.status === 200) {
                 setShowMessage(true);
                 setStatusMessage(`El usuario ${user.name} ${user.lastName} fue agregado al grupo de Admins con éxito.`);
                 fetchUsers();

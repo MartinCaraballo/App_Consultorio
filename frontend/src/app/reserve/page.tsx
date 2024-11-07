@@ -3,11 +3,9 @@
 import React, {useEffect, useState} from "react";
 import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
-import {useRouter} from "next/navigation";
 import InfoModal from "@/app/components/Modals/info-modal";
 
 export default function ReservePage() {
-    const router = useRouter();
 
     const formatDate = (date: Date): string => {
         const year = date.getFullYear();
@@ -98,9 +96,6 @@ export default function ReservePage() {
                 },
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
             const data = await res.json();
             setWeekDates(data);
         } catch (e) {
@@ -117,9 +112,6 @@ export default function ReservePage() {
                 },
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
             const data = await res.json();
             setRooms(data);
         } catch (e) {
@@ -138,9 +130,6 @@ export default function ReservePage() {
                     credentials: 'include',
                 }
             );
-            if (res.status === 403) {
-                router.push('/login');
-            }
 
             const data: ReserveDTO[] = await res.json();
             setReserveCards(data);

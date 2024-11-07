@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import {useRouter} from "next/navigation";
 
 interface ReportErrorModalProps {
     isOpen: boolean;
@@ -7,7 +6,6 @@ interface ReportErrorModalProps {
 }
 
 const ReportErrorModal: React.FC<ReportErrorModalProps> = ({ isOpen, onClose }) => {
-    const router = useRouter();
 
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [message, setMessage] = useState<string>('');
@@ -22,9 +20,7 @@ const ReportErrorModal: React.FC<ReportErrorModalProps> = ({ isOpen, onClose }) 
                 credentials: 'include',
             });
 
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+            if (res.status === 200) {
                 setMessage('Informe de error enviado exitosamente.');
                 setMessageType('success');
                 setErrorMessage('');

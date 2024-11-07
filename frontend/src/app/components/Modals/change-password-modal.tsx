@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import {useRouter} from "next/navigation";
 
 interface ChangePasswordModalProps {
     isOpen: boolean;
@@ -7,8 +6,6 @@ interface ChangePasswordModalProps {
 }
 
 const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose }) => {
-    const router = useRouter();
-
     const [currentPassword, setCurrentPassword] = useState<string>('');
     const [newPassword, setNewPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -24,9 +21,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 credentials: 'include',
             });
 
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+            if (res.status === 200) {
                 setMessage('Cambio de contraseña exitoso.');
                 setMessageType('success');
             } else if (res.status === 401) {

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import {useRouter} from "next/navigation";
+import React from 'react';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
 
@@ -9,8 +8,6 @@ interface PriceModificationModalProps {
 }
 
 const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen, onClose }) => {
-    const router = useRouter();
-
     const [prices, setPrices] = React.useState<Price[]>([]);
 
     const [priceToSave, setPriceToSave] = React.useState<Price | undefined>(undefined);
@@ -37,9 +34,7 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
+
             const data = await res.json();
             setPrices(data);
         } catch (e) {
@@ -55,9 +50,8 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                 body: JSON.stringify({ hours: hoursToPost, pricePerHour: pricePerHoursToPost }),
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 201) {
+
+            if (res.status === 201) {
                 setShowMessage(true);
                 setStatusMessage("Precio añadido con éxito.")
                 fetchPrices();
@@ -79,9 +73,8 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                 body: JSON.stringify({ id: newPrice.id, hours: newPrice.hours, pricePerHour: newPrice.pricePerHour }),
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+
+            if (res.status === 200) {
                 setShowMessage(true);
                 setStatusMessage("Precio actualizado con éxito.")
                 setPriceToSave(undefined);
@@ -102,9 +95,8 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
                 method: 'DELETE',
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            } else if (res.status === 200) {
+
+            if (res.status === 200) {
                 setShowMessage(true);
                 setStatusMessage("Precio eliminado con éxito.")
                 fetchPrices();

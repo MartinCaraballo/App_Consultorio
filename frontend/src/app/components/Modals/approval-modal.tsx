@@ -1,5 +1,4 @@
 import React from 'react';
-import { useRouter } from "next/navigation";
 
 interface ApprovalModalProps {
     isOpen: boolean;
@@ -7,8 +6,6 @@ interface ApprovalModalProps {
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
-    const router = useRouter();
-
     const [unauthorizedUsers, setUnauthorizedUsers] = React.useState<User[]>([]);
     const [showMessage, setShowMessage] = React.useState(false);
     const [statusMessage, setStatusMessage] = React.useState('');
@@ -29,9 +26,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
                 method: 'GET',
                 credentials: 'include',
             });
-            if (res.status === 403) {
-                router.push('/login');
-            }
+
             const data = await res.json();
             setUnauthorizedUsers(data);
         } catch (e) {

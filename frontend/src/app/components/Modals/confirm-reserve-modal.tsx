@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import {useRouter} from "next/navigation";
 import ResultModal from "@/app/components/Modals/reserve-result-modal";
 
 interface ConfirmReserveModalProps {
@@ -14,8 +13,6 @@ interface ConfirmReserveModalProps {
 
 const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
     {isOpen, onClose, hoursToReserve, selectedDayDate, selectedRoomId, clearHoursToReserve, updateReserveCards}) => {
-
-    const router = useRouter();
 
     const [showResultModal, setShowResultModal] = useState(false);
     const [resultType, setResultType] = useState<'success' | 'error'>('success');

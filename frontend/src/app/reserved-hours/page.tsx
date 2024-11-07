@@ -34,10 +34,6 @@ export default function ReservedHours() {
                     credentials: 'include',
                 }
             );
-            if (res.status===403) {
-                router.push('/login');
-            }
-
             const data: ReserveDTO[] = await res.json();
             setReserveCards(data);
         } catch (e) {
