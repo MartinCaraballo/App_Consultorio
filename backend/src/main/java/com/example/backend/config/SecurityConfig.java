@@ -25,7 +25,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
                                 "auth/register",
-                                "auth/login"
+                                "auth/login",
+                                "user/reset-password"
                         ).permitAll()
                         .requestMatchers(
                                 "/reserve/fixed",

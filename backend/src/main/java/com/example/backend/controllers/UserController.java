@@ -2,16 +2,19 @@ package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.models.Login;
+import com.example.backend.models.PasswordResetToken;
 import com.example.backend.models.Price;
 import com.example.backend.models.UserReserve;
 import com.example.backend.models.dtos.DayCostDTO;
 import com.example.backend.models.dtos.WeekCostDTO;
 import com.example.backend.models.requests.ChangePasswordReq;
 import com.example.backend.models.requests.ReportErrorReq;
+import com.example.backend.models.requests.ResetPasswordReq;
 import com.example.backend.repositories.LoginRepository;
 import com.example.backend.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,12 +22,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+
+    @Value("${cors.origin.dns}")
+    String recoverPasswordURL;
 
     private final PasswordEncoder passwordEncoder;
     private final UserReserveService userReserveService;
@@ -104,10 +111,21 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword() {
-        String user = getUserByContextToken();
+    public ResponseEntity<String> resetPassword(HttpServletRequest request, @RequestBody ResetPasswordReq resetPasswordReq) {
+        Login loginData = loginService.findById(resetPasswordReq.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         String token = UUID.randomUUID().toString();
 
+        LocalDateTime reqDateTime = LocalDateTime.now();
+        LocalDateTime expDateTime = LocalDateTime.now().plusDays(1);
+
+        PasswordResetToken passwordResetToken = new PasswordResetToken(loginData, reqDateTime, expDateTime, token);
+        userService.createPasswordResetTokenForUser(passwordResetToken);
+
+        String recoverPasswordFullUrl = recoverPasswordURL + "/recover?token=" + token;
+
+        sendEmailService.sendRecoverPasswordEmail(resetPasswordReq.email(), passwordResetToken, recoverPasswordFullUrl);
 
         return new ResponseEntity<>("Reset token sended to user email successfully.", HttpStatus.OK);
     }
@@ -115,7 +133,7 @@ public class UserController {
     @PostMapping("/report")
     public ResponseEntity<String> reportError(@RequestBody ReportErrorReq reportErrorReq) {
         String user = getUserByContextToken();
-        sendEmailService.sendSimpleMail(reportErrorReq.message(), user);
+        sendEmailService.sendErrorReportMail(reportErrorReq.message(), user);
 
         return new ResponseEntity<>("Error received successfully.", HttpStatus.OK);
     }

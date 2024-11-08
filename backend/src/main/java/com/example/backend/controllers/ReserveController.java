@@ -69,7 +69,6 @@ public class ReserveController {
 
             UserReserveKey reserveKey = new UserReserveKey();
             reserveKey.setStartTime(createReserveReq.getStartTime());
-            reserveKey.setRoomId(createReserveReq.getRoomId());
             reserveKey.setReserveDate(createReserveReq.getReserveDate());
 
             UserReserve userReserve = new UserReserve();
@@ -98,7 +97,6 @@ public class ReserveController {
 
         while (startTime.isBefore(endTime)) {
             FixedReserveKey fixedReserveKey = new FixedReserveKey();
-            fixedReserveKey.setRoomId(createFixedReserveReq.getRoomId());
             fixedReserveKey.setStartTime(startTime);
             fixedReserveKey.setDayIndex(createFixedReserveReq.getDayIndex());
 
@@ -126,12 +124,8 @@ public class ReserveController {
         }
 
         String user = getUserByContextToken();
-        UserReserveKey reserveKey = new UserReserveKey();
-        reserveKey.setRoomId(roomId);
-        reserveKey.setReserveDate(date);
-        reserveKey.setStartTime(startTime);
 
-        userReserveService.deleteByUserReserveKey(reserveKey);
+        userReserveService.deleteUserReserve(date, startTime, roomId, user);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -145,11 +139,10 @@ public class ReserveController {
 
         String user = getUserByContextToken();
         FixedReserveKey fixedReserveKey = new FixedReserveKey();
-        fixedReserveKey.setRoomId(roomId);
         fixedReserveKey.setDayIndex(dayIndex);
         fixedReserveKey.setStartTime(startTime);
 
-        fixedReserveService.deleteByFixedReserveKey(fixedReserveKey);
+        fixedReserveService.deleteFixedReserve(fixedReserveKey, roomId, user);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -165,7 +158,7 @@ public class ReserveController {
         for (FixedReserve fixedReserve : fixedReserves) {
             User user = fixedReserve.getAdmin().getUser();
             FixedReserveKey fixedReserveKey = fixedReserve.getFixedReserveKey();
-            Integer reserveRoomId = fixedReserveKey.getRoomId();
+            Integer reserveRoomId = fixedReserve.getRoom().getRoomId();
             LocalTime startTime = fixedReserveKey.getStartTime();
             LocalTime endTime = fixedReserveKey.getStartTime().plusHours(1);
             ReserveDTO reserveDTO = new ReserveDTO(
@@ -183,7 +176,7 @@ public class ReserveController {
         for (UserReserve userReserve : userReserves) {
             User user = userReserve.getUser();
             UserReserveKey reserveKey = userReserve.getReserveKey();
-            Integer reserveRoomId = reserveKey.getRoomId();
+            Integer reserveRoomId = userReserve.getRoom().getRoomId();
             LocalTime startTime = reserveKey.getStartTime();
             LocalTime endTime = reserveKey.getStartTime().plusHours(1);
             LocalDate reserveDate = reserveKey.getReserveDate();

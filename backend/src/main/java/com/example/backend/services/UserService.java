@@ -1,6 +1,9 @@
 package com.example.backend.services;
 
+import com.example.backend.models.Login;
+import com.example.backend.models.PasswordResetToken;
 import com.example.backend.models.User;
+import com.example.backend.repositories.PasswordResetTokenRepository;
 import com.example.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public Optional<User> findById(String email) {
         return userRepository.findById(email);
@@ -30,5 +34,9 @@ public class UserService {
 
     public void delete(User user) {
         userRepository.delete(user);
+    }
+
+    public void createPasswordResetTokenForUser(PasswordResetToken passwordResetToken) {
+        passwordResetTokenRepository.save(passwordResetToken);
     }
 }

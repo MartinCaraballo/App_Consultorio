@@ -30,6 +30,21 @@ export default function LoginPage() {
         }
     }
 
+    async function sendRecoverPasswordReq(email: string) {
+        try {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({email})
+            });
+
+            console.log(res.status)
+
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     return (
         <main className="flex items-center justify-center h-screen">
             <div className="flex min-h-3/4 min-w-96 flex-col justify-center px-6 py-12 lg:px-8 rounded-xl border-2 border-gray-200">
@@ -52,7 +67,11 @@ export default function LoginPage() {
                                 <label htmlFor="password"
                                        className="block text-sm font-medium leading-6 text-gray-900">Contraseña</label>
                                 <div className="text-sm">
-                                    <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">¿Olvidaste tu contraseña?</a>
+                                    <a
+                                        href={"/forgot-password"}
+                                        className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                        ¿Olvidaste tu contraseña?
+                                    </a>
                                 </div>
                             </div>
                             <div className="mt-2">

@@ -1,13 +1,12 @@
 package com.example.backend.services;
 
-import com.example.backend.compositekeys.UserReserveKey;
 import com.example.backend.models.UserReserve;
-import com.example.backend.models.dtos.DayCostDTO;
 import com.example.backend.repositories.UserReserveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -28,8 +27,8 @@ public class UserReserveService {
         userReserveRepository.save(userReserve);
     }
 
-    public void deleteByUserReserveKey(UserReserveKey userReserveKey) {
-        userReserveRepository.deleteByReserveKey(userReserveKey);
+    public void deleteUserReserve(LocalDate reserveDate, LocalTime startTime, Integer roomId, String email) {
+        userReserveRepository.deleteReserve(reserveDate, startTime, roomId, email);
     }
 
 }

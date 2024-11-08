@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
 
 export default function NavigationBar() {
     const pathname = usePathname().split('/')[1];
-    if (pathname === 'login' || pathname === 'register' || pathname === '') {
+    if (pathname === 'login' || pathname === 'register' || pathname === '' || pathname === 'forgot-password') {
         return null;
     }
     return (

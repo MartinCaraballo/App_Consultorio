@@ -3,6 +3,7 @@ package com.example.backend.repositories;
 import com.example.backend.compositekeys.FixedReserveKey;
 import com.example.backend.models.FixedReserve;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -15,5 +16,7 @@ public interface FixedReserveRepository extends JpaRepository<FixedReserve, Fixe
     @Query("SELECT f FROM FixedReserve f WHERE f.fixedReserveKey.dayIndex= :dayIndex AND f.room.roomId= :roomId AND f.admin.email= :adminEmail")
     List<FixedReserve> findAllByDayIndexAndRoomIdAndAdminEmail(Integer dayIndex, Integer roomId, String adminEmail);
 
-    void deleteByFixedReserveKey(FixedReserveKey fixedReserveKey);
+    @Modifying
+    @Query("DELETE FROM FixedReserve f WHERE f.fixedReserveKey= :fixedReserveKey AND f.room.roomId= :roomId AND f.admin.email = :email")
+    void deleteFixedReserve(FixedReserveKey fixedReserveKey, Integer roomId, String email);
 }

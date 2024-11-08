@@ -26,8 +26,8 @@ public class FixedReserveService {
         fixedReserveRepository.save(fixedReserve);
     }
 
-    public void deleteByFixedReserveKey(FixedReserveKey fixedReserveKey) {
-        fixedReserveRepository.deleteByFixedReserveKey(fixedReserveKey);
+    public void deleteFixedReserve(FixedReserveKey fixedReserveKey, Integer roomId, String email) {
+        fixedReserveRepository.deleteFixedReserve(fixedReserveKey, roomId, email);
     }
 
 }

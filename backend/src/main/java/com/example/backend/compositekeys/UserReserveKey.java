@@ -13,10 +13,6 @@ import java.time.LocalTime;
 @Setter
 @Embeddable
 public class UserReserveKey implements Serializable {
-
-    private Integer roomId;
-
     private LocalTime startTime;
-
     private LocalDate reserveDate;
 }

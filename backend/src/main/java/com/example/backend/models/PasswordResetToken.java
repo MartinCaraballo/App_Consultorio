@@ -1,16 +1,16 @@
 package com.example.backend.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@AllArgsConstructor
 @Entity
 public class PasswordResetToken {
 
-    private static final int EXPIRATION_TIME = 60 * 24;
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "token_sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String token;
@@ -19,5 +19,16 @@ public class PasswordResetToken {
     @JoinColumn(nullable = false, name = "email", referencedColumnName = "email")
     private Login login;
 
-    private LocalDate expiryDate;
+    private LocalDateTime reqDateTime;
+    private LocalDateTime expiryDateTime;
+
+    public PasswordResetToken() {
+    }
+
+    public PasswordResetToken(Login loginData, LocalDateTime reqDateTime, LocalDateTime expDateTime, String token) {
+        this.login = loginData;
+        this.reqDateTime = reqDateTime;
+        this.expiryDateTime = expDateTime;
+        this.token = token;
+    }
 }
