@@ -38,11 +38,6 @@ const Profile = () => {
 
     const handleLogout = async () => {
         document.cookie = `authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-        await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-        });
         router.push('/login');
     };
 

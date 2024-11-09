@@ -73,12 +73,12 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-auto">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-auto overflow-y-auto h-3/5 sm:h-max">
                 <h2 className="text-lg font-bold mb-4 text-gray-800">
                     Confirmar Reserva
                 </h2>
                 <>
-                    <ul className="list-disc pl-5 mb-4 text-gray-700">
+                    <ul className="list-disc pl-5 mb-4 text-gray-700 overflow-y-auto">
                         {hoursToReserve.map((hour, index) => (
                             <li key={index} className="mb-2">
                                 {`${hour} - ${formatTime(hour)}`}

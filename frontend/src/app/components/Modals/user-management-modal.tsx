@@ -97,6 +97,27 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
         }
     }
 
+    async function removeRegularUser(userEmail: string) {
+        try {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/user/${userEmail}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (res.status === 200) {
+                setShowMessage(true);
+                setStatusMessage(`El usuario con el correo ${userEmail} fue eliminado de la lista de Admins con éxito.`);
+                fetchUsers();
+            } else {
+                setShowMessage(true);
+                setStatusMessage(`Error al intentar realizar la operación.`);
+            }
+            setTimeout(() => setShowMessage(false), 2000);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     if (!isOpen) return null;
 
     return (
@@ -144,6 +165,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                                     Hacer Admin
                                 </button>
                                 <button
+                                    onClick={() => removeRegularUser(user.email)}
                                     className="p-1 bg-red-600 text-white rounded"
                                 >
                                     <FontAwesomeIcon icon={faTrashCan}/>
