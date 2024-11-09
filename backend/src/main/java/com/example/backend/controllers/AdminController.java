@@ -1,20 +1,17 @@
 package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.models.Admin;
-import com.example.backend.models.Login;
-import com.example.backend.models.Price;
-import com.example.backend.models.User;
-import com.example.backend.services.AdminService;
-import com.example.backend.services.LoginService;
-import com.example.backend.services.PriceService;
-import com.example.backend.services.UserService;
+import com.example.backend.models.*;
+import com.example.backend.models.dtos.MonthlyCostDTO;
+import com.example.backend.models.dtos.ReserveDTO;
+import com.example.backend.services.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +24,8 @@ public class AdminController {
     private final PriceService priceService;
     private final LoginService loginService;
     private final AdminService adminService;
+    private final UserReserveService userReserveService;
+    private final FixedReserveService fixedReserveService;
 
     @Transactional
     @PostMapping
@@ -41,10 +40,26 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<String> removeAdmin(@PathVariable String id) {
         Admin admin = adminService.findById(id).orElseThrow();
+        fixedReserveService.deleteAllByAdminEmail(admin.getEmail());
         adminService.delete(admin);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Transactional
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity<String> removeUser(@PathVariable String id) {
+        Login login = loginService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Login not found")
+        );
+        User user = login.getUser();
+        userReserveService.deleteAllByUserEmail(login.getEmail());
+        loginService.delete(login);
+        userService.delete(user);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -106,6 +121,23 @@ public class AdminController {
         if (prices.isEmpty()) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(prices, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-reserve-data/{id}")
+    public ResponseEntity<MonthlyCostDTO> getUserReservesAndCost(@PathVariable String id,
+                                                             @RequestParam LocalDate startDate,
+                                                             @RequestParam LocalDate endDate) {
+        User user = userService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
+        );
+        List<UserReserve> userReserveList = userReserveService.findAllReserveBetweenDates(startDate, endDate, id);
+        int userMonthCost = userService.getReserveCost(userReserveList);
+
+        List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
+
+        MonthlyCostDTO userMonthCostDTO = new MonthlyCostDTO(userReserveDTO, userMonthCost, userReserveList.size());
+
+        return new ResponseEntity<>(userMonthCostDTO, HttpStatus.OK);
     }
 
     @Transactional

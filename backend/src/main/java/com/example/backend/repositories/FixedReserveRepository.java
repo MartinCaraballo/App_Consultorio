@@ -19,4 +19,8 @@ public interface FixedReserveRepository extends JpaRepository<FixedReserve, Fixe
     @Modifying
     @Query("DELETE FROM FixedReserve f WHERE f.fixedReserveKey= :fixedReserveKey AND f.room.roomId= :roomId AND f.admin.email = :email")
     void deleteFixedReserve(FixedReserveKey fixedReserveKey, Integer roomId, String email);
+
+    @Modifying
+    @Query("DELETE FROM FixedReserve f WHERE f.admin.email= :adminEmail")
+    void deleteAllByAdminEmail(String adminEmail);
 }

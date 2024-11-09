@@ -219,25 +219,16 @@ public class ReserveController {
     @GetMapping("/active")
     public ResponseEntity<List<ReserveDTO>> getWeekUserReserves() {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        User userData = userService.findById(user).orElseThrow(
+                () -> new ResourceNotFoundException("User not found")
+        );
+
         LocalDate today = LocalDate.now();
         // setting to monday
         LocalDate startWeekDate = today.minusDays(today.getDayOfWeek().getValue() - 1);
         LocalDate endWeekDate = today.plusWeeks(1);
-        List<UserReserve> userWeekReserves = userReserveService.findAllWeekUserReserve(startWeekDate, endWeekDate, user);
-        List<ReserveDTO> result = new ArrayList<>(userWeekReserves.size());
-
-        for (UserReserve userReserve : userWeekReserves) {
-            LocalTime reserveStartTime = userReserve.getReserveKey().getStartTime();
-            result.add(new ReserveDTO(
-                    null,
-                    null,
-                    userReserve.getRoom().getRoomId(),
-                    reserveStartTime,
-                    reserveStartTime.plusHours(1),
-                    userReserve.getReserveKey().getReserveDate(),
-                    false
-            ));
-        }
+        List<UserReserve> userWeekReserves = userReserveService.findAllReserveBetweenDates(startWeekDate, endWeekDate, user);
+        List<ReserveDTO> result = userReserveService.getReserveDTOS(userWeekReserves, userData);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -257,35 +248,17 @@ public class ReserveController {
                 dayIndex, roomId, adminUserData.getEmail()
         );
 
-        List<ReserveDTO> userFixedReservesDTO = getReserveDTOS(fixedReserves, adminUserData);
+        List<ReserveDTO> userFixedReservesDTO = fixedReserveService.getReserveDTOS(fixedReserves, adminUserData);
 
         return new ResponseEntity<>(userFixedReservesDTO, HttpStatus.OK);
     }
 
-    private static List<ReserveDTO> getReserveDTOS(List<FixedReserve> fixedReserves, User adminUserData) {
-        List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(fixedReserves.size());
-
-        for (FixedReserve fixedReserve : fixedReserves) {
-            ReserveDTO reserveDTO = new ReserveDTO(
-                    adminUserData.getName(),
-                    adminUserData.getLastName(),
-                    fixedReserve.getRoom().getRoomId(),
-                    fixedReserve.getFixedReserveKey().getStartTime(),
-                    fixedReserve.getFixedReserveKey().getStartTime().plusHours(1),
-                    null,
-                    true
-            );
-            userFixedReservesDTO.add(reserveDTO);
-        }
-        return userFixedReservesDTO;
+    private String getUserByContextToken() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     private boolean userHaveAccess(String id) {
-        String user = getUserByContextToken();
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return user.equals(id);
-    }
-
-    private String getUserByContextToken() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

@@ -1,8 +1,6 @@
 package com.example.backend.services;
 
-import com.example.backend.models.Login;
-import com.example.backend.models.PasswordResetToken;
-import com.example.backend.models.User;
+import com.example.backend.models.*;
 import com.example.backend.repositories.PasswordResetTokenRepository;
 import com.example.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +15,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PriceService priceService;
 
     public Optional<User> findById(String email) {
         return userRepository.findById(email);
@@ -38,5 +37,29 @@ public class UserService {
 
     public void createPasswordResetTokenForUser(PasswordResetToken passwordResetToken) {
         passwordResetTokenRepository.save(passwordResetToken);
+    }
+
+    public int getReserveCost(List<UserReserve> userReserveList) {
+        List<Price> prices = priceService.getAllPricesOrderedAscByHours();
+        int actualPriceIndex = 0;
+        Price actualPrice = prices.getFirst();
+
+        int totalHours = userReserveList.size();
+        int totalCost = 0;
+
+        while (totalHours > 0) {
+            int aux = totalHours - actualPrice.getHours();
+            if (aux > 0) {
+                totalHours = aux;
+                totalCost += actualPrice.getHours() * actualPrice.getPricePerHour();
+                actualPriceIndex++;
+                actualPrice = prices.get(actualPriceIndex);
+            } else {
+                totalCost += totalHours * actualPrice.getPricePerHour();
+                totalHours = aux;
+            }
+        }
+
+        return totalCost;
     }
 }

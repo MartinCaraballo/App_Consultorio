@@ -9,11 +9,13 @@ import com.example.backend.models.dtos.DayCostDTO;
 import com.example.backend.models.dtos.WeekCostDTO;
 import com.example.backend.models.requests.ChangePasswordReq;
 import com.example.backend.models.requests.ReportErrorReq;
+import com.example.backend.models.requests.ResetPasswordByTokenReq;
 import com.example.backend.models.requests.ResetPasswordReq;
 import com.example.backend.repositories.LoginRepository;
 import com.example.backend.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.bouncycastle.oer.its.etsi102941.AuthorizationResponseMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +37,6 @@ public class UserController {
 
     private final PasswordEncoder passwordEncoder;
     private final UserReserveService userReserveService;
-    private final PriceService priceService;
     private final LoginService loginService;
     private final LoginRepository loginRepository;
     private final SendEmailService sendEmailService;
@@ -58,13 +59,12 @@ public class UserController {
             currentDate = currentDate.plusDays(1);
         }
 
-        List<UserReserve> userWeekReserves = userReserveService.findAllWeekUserReserve(startWeekDate, endWeekDate, user);
+        List<UserReserve> userWeekReserves = userReserveService.findAllReserveBetweenDates(startWeekDate, endWeekDate, user);
 
         for (UserReserve userReserve : userWeekReserves) {
             reservesGroupedByDate.get(userReserve.getReserveKey().getReserveDate()).add(userReserve);
         }
 
-        List<Price> prices = priceService.getAllPricesOrderedAscByHours();
         List<DayCostDTO> dayCosts = new ArrayList<>();
 
         for (Map.Entry<LocalDate, ArrayList<UserReserve>> entry : reservesGroupedByDate.entrySet()) {
@@ -73,26 +73,26 @@ public class UserController {
             dayCosts.add(dayCostDTO);
         }
 
-        int totalHours = userWeekReserves.size();
-        int actualPriceIndex = 0;
-        Price actualPrice = prices.getFirst();
-
-        int totalCost = 0;
-        while (totalHours > 0) {
-            int aux = totalHours - actualPrice.getHours();
-            if (aux > 0) {
-                totalHours = aux;
-                totalCost += actualPrice.getHours() * actualPrice.getPricePerHour();
-                actualPriceIndex++;
-                actualPrice = prices.get(actualPriceIndex);
-            } else {
-                totalCost += totalHours * actualPrice.getPricePerHour();
-                totalHours = aux;
-            }
-        }
-
-        WeekCostDTO weekCost = new WeekCostDTO(dayCosts, totalCost, userWeekReserves.size());
+        WeekCostDTO weekCost = new WeekCostDTO(
+                dayCosts, userService.getReserveCost(userWeekReserves), userWeekReserves.size()
+        );
         return new ResponseEntity<>(weekCost, HttpStatus.OK);
+    }
+
+    @GetMapping("monthly-cost")
+    public ResponseEntity<Integer> getMonthlyCost() {
+        String userMail = getUserByContextToken();
+
+        LocalDate today = LocalDate.now();
+        LocalDate monthStart = LocalDate.of(today.getYear(), today.getMonth(), 1);
+        LocalDate monthEnd = today.plusMonths(1);
+
+        return new ResponseEntity<>(
+                userService.getReserveCost(
+                        userReserveService.findAllReserveBetweenDates(monthStart, monthEnd, userMail)
+                ),
+                HttpStatus.OK
+        );
     }
 
     @PostMapping("/change-pass")
@@ -123,11 +123,18 @@ public class UserController {
         PasswordResetToken passwordResetToken = new PasswordResetToken(loginData, reqDateTime, expDateTime, token);
         userService.createPasswordResetTokenForUser(passwordResetToken);
 
-        String recoverPasswordFullUrl = recoverPasswordURL + "/recover?token=" + token;
+        String recoverPasswordFullUrl = recoverPasswordURL + ":3000/forgot-password?token=" + token;
 
         sendEmailService.sendRecoverPasswordEmail(resetPasswordReq.email(), passwordResetToken, recoverPasswordFullUrl);
 
         return new ResponseEntity<>("Reset token sended to user email successfully.", HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password-token")
+    public ResponseEntity<String> resetPasswordByToken(@RequestBody ResetPasswordByTokenReq resetPasswordByTokenReq) {
+        // TODO: MAKE THE METHOD
+        
+        return new ResponseEntity<>("Password reseted successfully.", HttpStatus.OK);
     }
 
     @PostMapping("/report")
