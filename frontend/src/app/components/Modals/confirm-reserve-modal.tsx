@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from "react";
 import ResultModal from "@/app/components/Modals/reserve-result-modal";
 
 interface ConfirmReserveModalProps {
@@ -11,59 +11,81 @@ interface ConfirmReserveModalProps {
     updateReserveCards: () => void;
 }
 
-const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
-    {isOpen, onClose, hoursToReserve, selectedDayDate, selectedRoomId, clearHoursToReserve, updateReserveCards}) => {
-
+const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = ({
+    isOpen,
+    onClose,
+    hoursToReserve,
+    selectedDayDate,
+    selectedRoomId,
+    clearHoursToReserve,
+    updateReserveCards,
+}) => {
     const [showResultModal, setShowResultModal] = useState(false);
-    const [resultType, setResultType] = useState<'success' | 'error'>('success');
-    const [resultMessage, setResultMessage] = useState('');
+    const [resultType, setResultType] = useState<"success" | "error">(
+        "success"
+    );
+    const [resultMessage, setResultMessage] = useState("");
+    const [confirmDisabled, setConfirmDisabled] = useState(false);
 
     // Function to format time
     const formatTime = (timeString: string): string => {
-        const [hour, minute] = timeString.split(':').map(Number);
+        const [hour, minute] = timeString.split(":").map(Number);
         const plusHour = hour + 1;
-        return `${plusHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        return `${plusHour.toString().padStart(2, "0")}:${minute
+            .toString()
+            .padStart(2, "0")}`;
     };
 
     // Create JSON payload for reservation
     const createReservePayload = () => {
-        return hoursToReserve.map(hour => {
-            const [startHour, startMinute] = hour.split(':').map(Number);
-            const startTime = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
+        return hoursToReserve.map((hour) => {
+            const [startHour, startMinute] = hour.split(":").map(Number);
+            const startTime = `${startHour
+                .toString()
+                .padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
             return {
                 roomId: selectedRoomId,
                 startTime: startTime,
-                reserveDate: selectedDayDate
+                reserveDate: selectedDayDate,
             };
         });
     };
 
     // Function to post reserves
     const postReserves = async () => {
+        setConfirmDisabled(true);
         const reservesPayload = createReservePayload();
         try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/reserve`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(reservesPayload),
-                credentials: 'include',
-            });
+            const res = await fetch(
+                `http://${process.env.NEXT_PUBLIC_API_URL}/reserve`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(reservesPayload),
+                    credentials: "include",
+                }
+            );
 
             if (res.status === 201) {
-                setResultMessage('¡Tu reserva ha sido realizada con éxito!');
-                setResultType('success');
+                setResultMessage("¡Tu reserva ha sido realizada con éxito!");
+                setResultType("success");
                 clearHoursToReserve();
             } else if (res.status === 401) {
-                setResultMessage('No se cumplen con las condiciones horarias para efectuar la reserva.');
-                setResultType('error');
+                setResultMessage(
+                    "No se cumplen con las condiciones horarias para efectuar la reserva."
+                );
+                setResultType("error");
             } else {
-                setResultMessage('Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo.');
-                setResultType('error');
+                setResultMessage(
+                    "Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo."
+                );
+                setResultType("error");
             }
+            setConfirmDisabled(false);
             updateReserveCards();
         } catch (error) {
-            setResultMessage('Hubo un error al confirmar la reserva.');
-            setResultType('error');
+            setResultMessage("Hubo un error al confirmar la reserva.");
+            setResultType("error");
         } finally {
             setShowResultModal(true);
         }
@@ -94,6 +116,7 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                         </button>
                         <button
                             onClick={postReserves}
+                            disabled={confirmDisabled}
                             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300"
                         >
                             Confirmar
