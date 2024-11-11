@@ -62,7 +62,25 @@ const UserDataPage = ({
                     className="rounded-lg absolute top-9 right-4"
                 />
             </div>
-            <div className="rounded-lg bg-white h-full overflow-y-auto"></div>
+            <div className="rounded-lg bg-white h-full overflow-y-auto">
+                <div className="flex flex-col space-y-4 mx-80 mt-16 text-white">
+                    <div className="flex flex-row rounded-lg bg-gray-700 p-4">
+                        <div className="basis-1/2">Reserve</div>
+                        <div className="basis-1/2">Date</div>
+                        <div className="basis-1/2">Monthly Cost</div>
+                    </div>
+                    <div className="flex flex-row rounded-lg bg-gray-700 p-4">
+                        <div className="basis-1/2">Reserve</div>
+                        <div className="basis-1/2">Date</div>
+                        <div className="basis-1/2">Monthly Cost</div>
+                    </div>
+                    <div className="flex flex-row rounded-lg bg-gray-700 p-4">
+                        <div className="basis-1/2">Reserve</div>
+                        <div className="basis-1/2">Date</div>
+                        <div className="basis-1/2">Monthly Cost</div>
+                    </div>
+                </div>
+            </div>
         </main>
     );
 };
