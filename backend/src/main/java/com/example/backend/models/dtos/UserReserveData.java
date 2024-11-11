@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @AllArgsConstructor
-public class MonthlyCostDTO {
+public class UserReserveData {
     private List<ReserveDTO> monthReserves;
     private Integer monthlyCost;
     private Integer totalHours;

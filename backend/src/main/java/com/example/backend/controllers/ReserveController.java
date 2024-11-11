@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -85,7 +84,7 @@ public class ReserveController {
     @Transactional
     @PostMapping("/fixed")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<String> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
+    public ResponseEntity<List<String>> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
         String user = getUserByContextToken();
         LocalTime startTime = createFixedReserveReq.getStartTime();
         LocalTime endTime = createFixedReserveReq.getEndTime();
@@ -95,7 +94,25 @@ public class ReserveController {
         Admin admin = adminService.findById(user).
                 orElseThrow(() -> new UnauthorizedUserException("User not authorized"));
 
+        LocalDate today = LocalDate.now();
+        List<UserReserve> allUserReservesAfterToday = userReserveService.findAllUserReservesAfterGivenDate(today);
+        Map<LocalTime, UserReserve> userReservesInSelectedDayIndex = new HashMap<>();
+
+        for (UserReserve userReserve : allUserReservesAfterToday) {
+            LocalDate reserveDate = userReserve.getReserveKey().getReserveDate();
+            int reserveDayIndex = reserveDate.getDayOfWeek().getValue();
+
+            if (reserveDayIndex == createFixedReserveReq.getDayIndex()) {
+                LocalTime reserveDateTime = userReserve.getReserveKey().getStartTime();
+                userReservesInSelectedDayIndex.put(reserveDateTime, userReserve);
+            }
+        }
+
+        List<String> conflictingReserves = new ArrayList<>();
         while (startTime.isBefore(endTime)) {
+            if (userReservesInSelectedDayIndex.get(startTime) != null)
+                conflictingReserves.add(startTime.toString());
+
             FixedReserveKey fixedReserveKey = new FixedReserveKey();
             fixedReserveKey.setStartTime(startTime);
             fixedReserveKey.setDayIndex(createFixedReserveReq.getDayIndex());
@@ -109,7 +126,7 @@ public class ReserveController {
             startTime = startTime.plusHours(1);
         }
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(conflictingReserves, HttpStatus.CREATED);
     }
 
     @Transactional

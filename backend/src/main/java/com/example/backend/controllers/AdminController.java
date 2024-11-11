@@ -2,7 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.models.*;
-import com.example.backend.models.dtos.MonthlyCostDTO;
+import com.example.backend.models.dtos.UserReserveData;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.services.*;
 import jakarta.transaction.Transactional;
@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -124,9 +123,9 @@ public class AdminController {
     }
 
     @GetMapping("/get-reserve-data/{id}")
-    public ResponseEntity<MonthlyCostDTO> getUserReservesAndCost(@PathVariable String id,
-                                                             @RequestParam LocalDate startDate,
-                                                             @RequestParam LocalDate endDate) {
+    public ResponseEntity<UserReserveData> getUserReservesAndCost(@PathVariable String id,
+                                                                  @RequestParam LocalDate startDate,
+                                                                  @RequestParam LocalDate endDate) {
         User user = userService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
         );
@@ -135,7 +134,7 @@ public class AdminController {
 
         List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
 
-        MonthlyCostDTO userMonthCostDTO = new MonthlyCostDTO(userReserveDTO, userMonthCost, userReserveList.size());
+        UserReserveData userMonthCostDTO = new UserReserveData(userReserveDTO, userMonthCost, userReserveList.size());
 
         return new ResponseEntity<>(userMonthCostDTO, HttpStatus.OK);
     }
