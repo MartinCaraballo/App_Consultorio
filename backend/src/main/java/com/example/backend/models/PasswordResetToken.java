@@ -2,11 +2,13 @@ package com.example.backend.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Entity
+@Data
 public class PasswordResetToken {
 
     @Id

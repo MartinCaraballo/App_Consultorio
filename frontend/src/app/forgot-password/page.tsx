@@ -1,8 +1,11 @@
 'use client'
 
 import {FormEvent, useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
 
 const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) => {
+    const router = useRouter();
+
     const [email, setEmail] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,9 +24,6 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setSuccessMessage(null);
-        setErrorMessage(null);
-
         try {
             const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password`, {
                 method: "POST",
@@ -36,12 +36,20 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
             } else {
                 setErrorMessage("Error al enviar el correo de recuperación, intente nuevamente más tarde.");
             }
+
+            setTimeout(() => {
+                    setIsModalOpen(false);
+                    setSuccessMessage(null);
+                    setErrorMessage(null);
+                }, 3000
+            );
+
         } catch (e) {
             console.error(e)
         }
     };
 
-    const handlePasswordReset = (e: FormEvent) => {
+    const handlePasswordReset = async (e: FormEvent) => {
         e.preventDefault();
 
         if (newPassword !== confirmPassword) {
@@ -49,9 +57,33 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
             return;
         }
 
-        // TODO: CALL API METHOD
-        console.log("New password set:", newPassword);
-        setIsModalOpen(false);
+        try {
+            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password-token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: searchParams.token, newPassword: newPassword }),
+            });
+
+            if (res.ok) {
+                setSuccessMessage("Contraseña cambiada con éxito!");
+                setTimeout(() => router.push("/login"), 2000);
+                return;
+            } else if (res.status === 400) {
+                setErrorMessage("El token no es válido.")
+            } else {
+                setErrorMessage("A ocurrido un error. Inténtelo más tarde.")
+            }
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                setSuccessMessage(null);
+                setErrorMessage(null);
+                }, 3000
+            );
+
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     return (
@@ -133,6 +165,12 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
                             {passwordError && (
                                 <p className="text-center text-red-600">{passwordError}</p>
                             )}
+                            {successMessage && (
+                                <p className="mt-4 text-center text-green-600">{successMessage}</p>
+                            )}
+                            {errorMessage && (
+                                <p className="mt-4 text-center text-red-600">{errorMessage}</p>
+                            )}
 
                             <button
                                 type="submit"
@@ -141,7 +179,6 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
                                 Reiniciar Contraseña
                             </button>
                         </form>
-
                         <button
                             onClick={() => setIsModalOpen(false)}
                             className="mt-4 w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"

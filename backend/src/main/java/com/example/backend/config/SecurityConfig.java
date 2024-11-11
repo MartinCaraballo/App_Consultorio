@@ -26,7 +26,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "auth/register",
                                 "auth/login",
-                                "user/reset-password"
+                                "user/reset-password",
+                                "user/reset-password-token"
                         ).permitAll()
                         .requestMatchers(
                                 "/reserve/fixed",

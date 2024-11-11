@@ -12,6 +12,7 @@ import com.example.backend.models.requests.ReportErrorReq;
 import com.example.backend.models.requests.ResetPasswordByTokenReq;
 import com.example.backend.models.requests.ResetPasswordReq;
 import com.example.backend.repositories.LoginRepository;
+import com.example.backend.repositories.PasswordResetTokenRepository;
 import com.example.backend.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final PasswordResetTokenService passwordResetTokenService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     @Value("${cors.origin.dns}")
     String recoverPasswordURL;
 
@@ -132,8 +135,14 @@ public class UserController {
 
     @PostMapping("/reset-password-token")
     public ResponseEntity<String> resetPasswordByToken(@RequestBody ResetPasswordByTokenReq resetPasswordByTokenReq) {
-        // TODO: MAKE THE METHOD
-        
+        PasswordResetToken passwordResetToken = passwordResetTokenService.findEmailByToken(resetPasswordByTokenReq.token());
+        Login targetUser = passwordResetToken.getLogin();
+
+        targetUser.setPassword(passwordEncoder.encode(resetPasswordByTokenReq.newPassword()));
+        loginRepository.save(targetUser);
+
+        passwordResetTokenService.delete(passwordResetToken);
+
         return new ResponseEntity<>("Password reseted successfully.", HttpStatus.OK);
     }
 
