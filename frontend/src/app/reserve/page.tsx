@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
 import InfoModal from "@/app/components/Modals/info-modal";
-import AxiosInstance from "../../utils/axios_instance";
+import axiosInstance from "../../utils/axios_instance";
 import { error } from "console";
 
 export default function ReservePage() {
@@ -104,7 +104,7 @@ export default function ReservePage() {
 
     async function fetchWeek() {
         try {
-            AxiosInstance.get("/week").then((res) => setWeekDates(res.data));
+            axiosInstance.get("/week").then((res) => setWeekDates(res.data));
         } catch (e) {
             console.log(e);
         }
@@ -112,7 +112,7 @@ export default function ReservePage() {
 
     async function fetchRooms() {
         try {
-            AxiosInstance.get("/rooms").then((res) => setRooms(res.data));
+            axiosInstance.get("/rooms").then((res) => setRooms(res.data));
         } catch (e) {
             console.log(e);
         }
@@ -124,7 +124,7 @@ export default function ReservePage() {
         date: string
     ) {
         try {
-            AxiosInstance.get<ReserveDTO[]>(
+            axiosInstance.get<ReserveDTO[]>(
                 `/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`
             ).then((res) => setReserveCards(res.data));
         } catch (e) {
@@ -138,7 +138,7 @@ export default function ReservePage() {
         startTime: string
     ) => {
         try {
-            AxiosInstance.delete(
+            axiosInstance.delete(
                 `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
             )
                 .then((res) => {

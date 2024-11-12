@@ -1,8 +1,19 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 
-const AxiosInstance = axios.create({
+const axiosInstance = axios.create({
     withCredentials: true,
     baseURL: `http://${process.env.NEXT_PUBLIC_API_URL}`,
 });
 
-export default AxiosInstance;
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+        if (error.response?.status === 403) {
+            // Redirect to /login if the status code is 403
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
+export default axiosInstance;
