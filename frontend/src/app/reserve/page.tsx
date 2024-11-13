@@ -5,8 +5,13 @@ import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
 import InfoModal from "@/app/components/Modals/info-modal";
 import axiosInstance from "../../utils/axios_instance";
+import loading from "../components/loading/loading";
+import LoadingComponent from "../components/loading/loading";
 
 export default function ReservePage() {
+    const [loading, setLoading] = useState(true);
+    const [loadingReserves, setLoadingReserves] = useState(false);
+
     const formatDate = (date: Date): string => {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -79,6 +84,7 @@ export default function ReservePage() {
         const value = event.currentTarget.value.toString().split(" ")[1];
         setSelectedRoom(value);
         clearHoursToReserve();
+        setLoadingReserves(true);
         fetchReserves(value, selectedDayIndex, formatDate(selectedDayDate));
     };
 
@@ -123,9 +129,14 @@ export default function ReservePage() {
         date: string
     ) {
         try {
-            axiosInstance.get<ReserveDTO[]>(
-                `/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`
-            ).then((res) => setReserveCards(res.data));
+            axiosInstance
+                .get<ReserveDTO[]>(
+                    `/reserve?roomId=${roomId}&dayIndex=${dayIndex}&date=${date}`
+                )
+                .then((res) => {
+                    setReserveCards(res.data);
+                })
+                .finally(() => setLoadingReserves(false));
         } catch (e) {
             console.log(e);
         }
@@ -137,9 +148,10 @@ export default function ReservePage() {
         startTime: string
     ) => {
         try {
-            axiosInstance.delete(
-                `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
-            )
+            axiosInstance
+                .delete(
+                    `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
+                )
                 .then(() => {
                     setInfoModalMessage("Reserva cancelada con éxito.");
                     setInfoModalSuccess(true);
@@ -172,14 +184,20 @@ export default function ReservePage() {
     };
 
     useEffect(() => {
-        fetchWeek();
-        fetchRooms();
-        fetchReserves(
-            selectedRoom,
-            selectedDayIndex,
-            formatDate(selectedDayDate)
-        );
+        Promise.all([
+            fetchWeek(),
+            fetchRooms(),
+            fetchReserves(
+                selectedRoom,
+                selectedDayIndex,
+                formatDate(selectedDayDate)
+            ),
+        ]).then(() => setLoading(false));
     }, []);
+
+    if (loading) {
+        return <div>{<LoadingComponent />}</div>;
+    }
 
     return (
         <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
@@ -199,6 +217,7 @@ export default function ReservePage() {
                                         setSelectedDayIndex(weekDayIndex);
                                         setSelectedDayDate(dayDate);
                                         clearHoursToReserve();
+                                        setLoadingReserves(true);
                                         fetchReserves(
                                             selectedRoom,
                                             weekDayIndex,
@@ -220,6 +239,11 @@ export default function ReservePage() {
                         })}
                     </div>
                 </div>
+                {loadingReserves && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                        {<LoadingComponent />}
+                    </div>
+                )}
                 <div
                     className={`px-4 flex flex-wrap ${
                         editingReserve ? "justify-evenly" : ""
