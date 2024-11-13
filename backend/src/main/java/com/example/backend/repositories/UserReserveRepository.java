@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface UserReserveRepository extends JpaRepository<UserReserve, UserReserveKey> {
 
-    @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate= :date")
+    @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate >= :date")
     List<UserReserve> findAllUserReservesAfterGivenDate(LocalDate date);
 
     @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate= :date AND u.room.roomId= :roomId")
@@ -28,4 +28,8 @@ public interface UserReserveRepository extends JpaRepository<UserReserve, UserRe
     @Modifying
     @Query("DELETE FROM UserReserve u WHERE u.user.email= :userEmail")
     void deleteAllByUserEmail(String userEmail);
+
+    @Modifying
+    @Query("DELETE FROM UserReserve u WHERE u.reserveKey.reserveDate <= :refDate")
+    void deleteAllReservesPastRefDate(LocalDate refDate);
 }

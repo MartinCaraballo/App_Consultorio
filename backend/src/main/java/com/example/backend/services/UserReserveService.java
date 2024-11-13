@@ -39,7 +39,13 @@ public class UserReserveService {
         userReserveRepository.deleteReserve(reserveDate, startTime, roomId, email);
     }
 
-    public void deleteAllByUserEmail(String email) { userReserveRepository.deleteAllByUserEmail(email); }
+    public void deleteAllByUserEmail(String email) {
+        userReserveRepository.deleteAllByUserEmail(email);
+    }
+
+    public void deleteAllReservesPastRefDate(LocalDate refDate) {
+        userReserveRepository.deleteAllReservesPastRefDate(refDate);
+    }
 
     public List<ReserveDTO> getReserveDTOS(List<UserReserve> userReserves, User adminUserData) {
         List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(userReserves.size());
