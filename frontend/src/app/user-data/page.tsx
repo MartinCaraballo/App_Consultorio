@@ -56,14 +56,23 @@ const UserDataPage = ({
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
                 Información de:
             </h1>
-            <div>
-                <input
-                    type="date"
-                    className="rounded-lg absolute top-9 right-4"
-                />
-            </div>
+
             <div className="rounded-lg bg-white h-full overflow-y-auto">
-                <div className="flex flex-col space-y-4 mx-80 mt-16 text-white">
+                <div className="flex justify-center p-2 mt-8">
+                    <div className="font-bold">
+                        Desde:
+                        <input
+                            type="date"
+                            className="rounded-lg ml-2 mr-5 border-2 border-gray-300"
+                        />
+                        Hasta:
+                        <input
+                            type="date"
+                            className="rounded-lg ml-2 border-2 border-gray-300"
+                        />
+                    </div>
+                </div>
+                <div className="flex flex-col space-y-4 mx-80 mt-8 text-white">
                     <div className="flex flex-row rounded-lg bg-gray-700 p-4">
                         <div className="basis-1/2">Reserve</div>
                         <div className="basis-1/2">Date</div>
