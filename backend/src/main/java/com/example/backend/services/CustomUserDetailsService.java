@@ -7,6 +7,9 @@ import com.example.backend.models.Login;
 import com.example.backend.repositories.AdminRepository;
 import com.example.backend.repositories.LoginRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Internal;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,12 +25,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final AdminRepository adminRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws AuthenticationException, UnauthorizedUserException {
+    public UserDetails loadUserByUsername(String username) throws BadCredentialsException, InternalAuthenticationServiceException {
         Login login = loginRepository.findById(username)
                 .orElseThrow(() -> new UnauthorizedUserException("Email or password are incorrect"));
 
         if (!login.getAuthorized()) {
-            throw new UnauthorizedUserException("User not authorized yet");
+            throw new InternalAuthenticationServiceException("User not authorized yet");
         }
 
         CustomUserDetails customUserDetails = new CustomUserDetails();
