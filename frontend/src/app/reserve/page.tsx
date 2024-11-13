@@ -148,6 +148,7 @@ export default function ReservePage() {
         startTime: string
     ) => {
         try {
+            setLoadingReserves(true);
             axiosInstance
                 .delete(
                     `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
@@ -184,6 +185,7 @@ export default function ReservePage() {
     };
 
     useEffect(() => {
+        setLoading(true);
         Promise.all([
             fetchWeek(),
             fetchRooms(),

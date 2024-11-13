@@ -1,10 +1,12 @@
-'use client'
+"use client";
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import ReservedHourCard from "@/app/components/reserved-hour-card";
 import FixedReserveModal from "@/app/components/Modals/adm-fixed-reserves-modal";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/utils/axios_instance";
+import LoadingComponent from "../components/loading/loading";
 
 interface JwtPayload {
     sub: string;
@@ -16,6 +18,7 @@ interface JwtPayload {
 
 export default function ReservedHours() {
     const router = useRouter();
+    const [loading, setLoading] = useState(true);
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -24,35 +27,26 @@ export default function ReservedHours() {
 
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-
     const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
     async function fetchActiveReserves() {
-        try {
-            const res = await fetch(
-                `http://${process.env.NEXT_PUBLIC_API_URL}/reserve/active`, {
-                    method: 'GET',
-                    credentials: 'include',
-                }
-            );
-            const data: ReserveDTO[] = await res.json();
-            setReserveCards(data);
-        } catch (e) {
-            console.log(e);
-        }
+        axiosInstance
+            .get<ReserveDTO[]>("/reserve/active")
+            .then((res) => setReserveCards(res.data))
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
         fetchActiveReserves();
-        const token = document.cookie.split('=')[1];
+        const token = document.cookie.split("=")[1];
         if (token) {
             try {
                 const decodedToken = jwtDecode<JwtPayload>(token);
-                setIsAdmin(decodedToken.role === 'ADMIN');
+                setIsAdmin(decodedToken.role === "ADMIN");
             } catch (error) {
-                console.error('Error decoding token:', error);
+                console.error("Error decoding token:", error);
             }
         } else {
-            router.push('/login');
+            router.push("/login");
         }
     }, [router]);
 
@@ -61,6 +55,11 @@ export default function ReservedHours() {
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
                 Mis Reservas
             </h1>
+            {loading && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    {<LoadingComponent />}
+                </div>
+            )}
             <div className="rounded-lg bg-white h-full text-lg overflow-y-auto">
                 {isAdmin && (
                     <div className="flex flex-row px-4 justify-center">
@@ -72,8 +71,7 @@ export default function ReservedHours() {
                         </button>
                     </div>
                 )}
-                <div
-                    className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 max-h-[80vg]">
+                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 max-h-[80vg]">
                     {reserveCards.map((reserve, index) => {
                         return (
                             <ReservedHourCard
@@ -81,12 +79,13 @@ export default function ReservedHours() {
                                 startTime={reserve.startTime}
                                 endTime={reserve.endTime}
                                 reserveDate={reserve.reserveDate}
-                                room={reserve.roomId} />
+                                room={reserve.roomId}
+                            />
                         );
                     })}
                 </div>
             </div>
-            <FixedReserveModal isOpen={isModalOpen} onClose={closeModal}/>
+            <FixedReserveModal isOpen={isModalOpen} onClose={closeModal} />
         </main>
     );
 }

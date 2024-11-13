@@ -1,6 +1,7 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import ResultModal from "@/app/components/Modals/reserve-result-modal";
 import axiosInstance from "@/utils/axios_instance";
+import LoadingComponent from "../loading/loading";
 
 interface ConfirmReserveModalProps {
     isOpen: boolean;
@@ -12,13 +13,16 @@ interface ConfirmReserveModalProps {
     updateReserveCards: () => void;
 }
 
-const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (props: ConfirmReserveModalProps) => {
+const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
+    props: ConfirmReserveModalProps
+) => {
     const [showResultModal, setShowResultModal] = useState(false);
     const [resultType, setResultType] = useState<"success" | "error">(
         "success"
     );
     const [resultMessage, setResultMessage] = useState("");
     const [confirmDisabled, setConfirmDisabled] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     // Function to format time
     const formatTime = (timeString: string): string => {
@@ -46,9 +50,11 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (props: ConfirmR
 
     // Function to post reserves
     const postReserves = async () => {
+        setLoading(true);
         setConfirmDisabled(true);
         const reservesPayload = createReservePayload();
-        axiosInstance.post('/reserve', reservesPayload)
+        axiosInstance
+            .post("/reserve", reservesPayload)
             .then(() => {
                 setResultMessage("¡Tu reserva ha sido realizada con éxito!");
                 setResultType("success");
@@ -68,6 +74,7 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (props: ConfirmR
                 }
             })
             .finally(() => {
+                setLoading(false);
                 setConfirmDisabled(false);
                 props.updateReserveCards();
                 setShowResultModal(true);
@@ -78,11 +85,15 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (props: ConfirmR
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 z-50">
-            <div
-                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-auto overflow-y-auto h-3/5 sm:h-max">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-auto overflow-y-auto h-3/5 sm:h-max">
                 <h2 className="text-lg font-bold mb-4 text-gray-800">
                     Confirmar Reserva
                 </h2>
+                {loading && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                        {<LoadingComponent />}
+                    </div>
+                )}
                 <>
                     <ul className="list-disc pl-5 mb-4 text-gray-700 overflow-y-auto">
                         {props.hoursToReserve.map((hour, index) => (

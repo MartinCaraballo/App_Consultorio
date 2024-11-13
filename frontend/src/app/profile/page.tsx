@@ -1,14 +1,15 @@
-'use client'
+"use client";
 
-import {useEffect, useState} from 'react';
-import {jwtDecode} from 'jwt-decode';
-import {useRouter} from 'next/navigation';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import UserManagementModal from "@/app/components/Modals/user-management-modal";
 import ApprovalModal from "@/app/components/Modals/approval-modal";
 import PriceModificationModal from "@/app/components/Modals/price-modification-modal";
 import ChangePasswordModal from "@/app/components/Modals/change-password-modal";
 import ReportErrorModal from "@/app/components/Modals/report-error-modal";
+import LoadingComponent from "../components/loading/loading";
 
 interface JwtPayload {
     sub: string;
@@ -23,22 +24,22 @@ const Profile = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const token = document.cookie.split('=')[1];
+        const token = document.cookie.split("=")[1];
         if (token) {
             try {
                 const decodedToken = jwtDecode<JwtPayload>(token);
                 setUserInfo(decodedToken);
             } catch (error) {
-                console.error('Error decoding token:', error);
+                console.error("Error decoding token:", error);
             }
         } else {
-            router.push('/login');
+            router.push("/login");
         }
     }, [router]);
 
     const handleLogout = async () => {
         document.cookie = `authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-        router.push('/login');
+        router.push("/login");
     };
 
     const [isUserModalOpen, setUserModalOpen] = useState(false);
@@ -64,11 +65,13 @@ const Profile = () => {
                         <p className="mt-2 text-gray-600">{userInfo?.sub}</p>
                     </div>
                     <ul className="mt-4 space-y-4">
-                        {userInfo?.role === 'ADMIN' &&
+                        {userInfo?.role === "ADMIN" && (
                             <>
                                 <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                     <button
-                                        onClick={() => setApprovalModalOpen(true)}
+                                        onClick={() =>
+                                            setApprovalModalOpen(true)
+                                        }
                                         className="text-white hover:underline"
                                     >
                                         Autorizaciones Pendientes
@@ -77,7 +80,8 @@ const Profile = () => {
                                 <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                     <button
                                         onClick={() => setUserModalOpen(true)}
-                                        className="text-white hover:underline w-full h-full">
+                                        className="text-white hover:underline w-full h-full"
+                                    >
                                         Ver Usuarios
                                     </button>
                                 </li>
@@ -90,27 +94,33 @@ const Profile = () => {
                                     </button>
                                 </li>
                             </>
-
-                        }
+                        )}
                         <>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                 <button
                                     onClick={() => setChangePassModalOpen(true)}
-                                    className="text-white hover:underline">
+                                    className="text-white hover:underline"
+                                >
                                     Cambiar Contraseña
                                 </button>
                             </li>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                 <button
-                                    onClick={() => setReportErrorModalOpen(true)}
-                                    className="text-white hover:underline">
+                                    onClick={() =>
+                                        setReportErrorModalOpen(true)
+                                    }
+                                    className="text-white hover:underline"
+                                >
                                     Reportar un Problema
                                 </button>
                             </li>
                         </>
                     </ul>
                     <div className="text-center h-12 mt-16 rounded-xl place-content-center bg-red-600">
-                        <button onClick={handleLogout} className="text-white hover:underline">
+                        <button
+                            onClick={handleLogout}
+                            className="text-white hover:underline"
+                        >
                             Cerrar Sesión
                         </button>
                     </div>
