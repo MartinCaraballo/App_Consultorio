@@ -1,6 +1,7 @@
 import React from 'react';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
+import axiosInstance from "@/utils/axios_instance";
 
 interface PriceModificationModalProps {
     isOpen: boolean;
@@ -28,86 +29,60 @@ const PriceModificationModal: React.FC<PriceModificationModalProps> = ({ isOpen,
     }, [isOpen]);
 
     async function fetchPrices() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/prices`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            setPrices(data);
-        } catch (e) {
-            console.log(e);
-        }
+        axiosInstance.get(`/admin/prices`)
+            .then(res => setPrices(res.data))
+            .catch(e => console.error(e));
     }
 
     async function addPrice() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/prices`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hours: hoursToPost, pricePerHour: pricePerHoursToPost }),
-                credentials: 'include',
-            });
-
-            if (res.status === 201) {
+        axiosInstance.post('/admin/prices', { hours: hoursToPost, pricePerHour: pricePerHoursToPost })
+            .then(() => {
                 setShowMessage(true);
                 setStatusMessage("Precio añadido con éxito.")
-                fetchPrices();
-            } else {
+            })
+            .catch(() => {
                 setShowMessage(true);
                 setStatusMessage("Error al intentar agregar el precio.")
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            })
+            .finally(() => {
+                fetchPrices();
+                setTimeout(() => setShowMessage(false), 2000);
+            });
     }
 
     async function updatePrice(newPrice: Price) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/prices`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: newPrice.id, hours: newPrice.hours, pricePerHour: newPrice.pricePerHour }),
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.put(
+            '/admin/prices',
+            { id: newPrice.id, hours: newPrice.hours, pricePerHour: newPrice.pricePerHour })
+            .then(() => {
                 setShowMessage(true);
-                setStatusMessage("Precio actualizado con éxito.")
+                setStatusMessage("Precio actualizado con éxito.");
                 setPriceToSave(undefined);
-                fetchPrices();
-            } else {
+            })
+            .catch(() => {
                 setShowMessage(true);
                 setStatusMessage("Error al intentar actualizar el precio.")
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            })
+            .finally(() => {
+                setTimeout(() => setShowMessage(false), 2000);
+                fetchPrices()
+            });
     }
 
     async function deletePrice(id: number) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/prices/${id}`,{
-                method: 'DELETE',
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.delete(`/admin/prices/${id}`)
+            .then(() => {
                 setShowMessage(true);
                 setStatusMessage("Precio eliminado con éxito.")
-                fetchPrices();
-            } else {
+            })
+            .catch(() => {
                 setShowMessage(true);
                 setStatusMessage("Error al intentar eliminar el precio.")
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            })
+            .finally(() => {
+                fetchPrices();
+                setTimeout(() => setShowMessage(false), 2000);
+            })
     }
 
     if (!isOpen) return null;

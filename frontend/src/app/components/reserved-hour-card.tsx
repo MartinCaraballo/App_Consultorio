@@ -1,5 +1,3 @@
-import {start} from "node:repl";
-
 type propsType = {
     startTime: number[],
     endTime: number[],

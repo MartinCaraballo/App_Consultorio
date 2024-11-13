@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axiosInstance from "@/utils/axios_instance";
 
 interface ReportErrorModalProps {
     isOpen: boolean;
@@ -12,27 +13,17 @@ const ReportErrorModal: React.FC<ReportErrorModalProps> = ({ isOpen, onClose }) 
     const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
     async function sendErrorReport(message: string) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/report`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message }),
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.post('/user/report', { message: message })
+            .then(() => {
                 setMessage('Informe de error enviado exitosamente.');
                 setMessageType('success');
                 setErrorMessage('');
-            } else {
+            })
+            .catch(() => {
                 setMessage('Ha ocurrido un error al intentar enviar el reporte, inténtelo de nuevo más tarde.');
                 setMessageType('error');
                 setErrorMessage('');
-            }
-
-        } catch (e) {
-            console.error(e);
-        }
+            });
     }
 
     const handleSubmit = (e: React.FormEvent) => {

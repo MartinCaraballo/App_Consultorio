@@ -1,13 +1,14 @@
 import React from 'react';
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import axiosInstance from "@/utils/axios_instance";
 
 interface UserManagementModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClose }) => {
+const UserManagementModal: React.FC<UserManagementModalProps> = ({isOpen, onClose}) => {
 
     const [adminUsers, setAdminUsers] = React.useState<User[]>([]);
     const [regularUsers, setRegularUsers] = React.useState<User[]>([]);
@@ -22,30 +23,14 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
     }, [isOpen]);
 
     async function fetchAdminUsers() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/admin-users`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            const data: User[] = await res.json();
-            setAdminUsers(data);
-        } catch (e) {
-            console.log(e);
-        }
+        axiosInstance.get('/admin/admin-users')
+            .then(res => setAdminUsers(res.data));
     }
 
     async function fetchRegularUsers() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/regular-users`, {
-                method: 'GET',
-                credentials: 'include',
-            });
+        axiosInstance.get('/admin/regular-users')
+            .then(res => setRegularUsers(res.data));
 
-            const data: User[] = await res.json();
-            setRegularUsers(data);
-        } catch (e) {
-            console.log(e);
-        }
     }
 
     async function fetchUsers() {
@@ -54,68 +39,51 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
     }
 
     async function removeAdmin(adminEmail: string) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/${adminEmail}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-
-            if (res.status === 200) {
+        axiosInstance.delete(`/admin/${adminEmail}`)
+            .then(() => {
                 setShowMessage(true);
-                setStatusMessage(`El usuario con el correo ${adminEmail} fue eliminado de la lista de Admins con éxito.`);
+                setStatusMessage(`El usuario con el correo ${adminEmail} fue eliminado de la lista de Admins con éxito.`)
+            })
+            .catch(() => {
+                setShowMessage(true);
+                setStatusMessage('Error al intentar realizar la operación.')
+            })
+            .finally(() => {
                 fetchUsers();
-            } else {
-                setShowMessage(true);
-                setStatusMessage(`Error al intentar realizar la operación.`);
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+                setTimeout(() => setShowMessage(false), 2000);
+            });
     }
 
     async function makeAdmin(user: User) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email }),
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.post('/admin', {email: user.email})
+            .then(() => {
                 setShowMessage(true);
                 setStatusMessage(`El usuario ${user.name} ${user.lastName} fue agregado al grupo de Admins con éxito.`);
-                fetchUsers();
-            } else {
+            })
+            .catch(() => {
                 setShowMessage(true);
                 setStatusMessage(`Error al intentar realizar la operación.`);
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            })
+            .finally(() => {
+                setTimeout(() => setShowMessage(false), 2000);
+                fetchUsers();
+            });
     }
 
     async function removeRegularUser(userEmail: string) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/user/${userEmail}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-
-            if (res.status === 200) {
+        axiosInstance.delete(`/admin/user/${userEmail}`)
+            .then(() => {
                 setShowMessage(true);
-                setStatusMessage(`El usuario con el correo ${userEmail} fue eliminado de la lista de Admins con éxito.`);
+                setStatusMessage(`El usuario con el correo ${userEmail} fue eliminado de la lista de Admins con éxito.`)
+            })
+            .catch(() => {
+                setShowMessage(true);
+                setStatusMessage('Error al intentar realizar la operación.');
+            })
+            .finally(() => {
                 fetchUsers();
-            } else {
-                setShowMessage(true);
-                setStatusMessage(`Error al intentar realizar la operación.`);
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+                setTimeout(() => setShowMessage(false), 2000);
+            });
     }
 
     if (!isOpen) return null;
@@ -133,7 +101,8 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 <h2 className="text-lg font-semibold mb-2">Administradores</h2>
                 <ul className="space-y-2 mb-4 overflow-y-auto">
                     {adminUsers.map((user) => (
-                        <li key={user.email} className="p-2 border border-gray-300 rounded flex justify-between items-center">
+                        <li key={user.email}
+                            className="p-2 border border-gray-300 rounded flex justify-between items-center">
                             <span className="font-bold">{user.name} {user.lastName} ({user.email})</span>
                             <div>
                                 <button
@@ -155,7 +124,8 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 <h2 className="text-lg font-semibold mb-2">Usuarios Regulares</h2>
                 <ul className="space-y-2 mb-4 overflow-y-auto">
                     {regularUsers.map((user) => (
-                        <li key={user.email} className="p-2 border border-gray-300 rounded flex justify-between items-center">
+                        <li key={user.email}
+                            className="p-2 border border-gray-300 rounded flex justify-between items-center">
                             <span>{user.name} {user.lastName} ({user.email})</span>
                             <div>
                                 <button

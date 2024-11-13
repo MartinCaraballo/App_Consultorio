@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axiosInstance from "@/utils/axios_instance";
 
 interface ChangePasswordModalProps {
     isOpen: boolean;
@@ -13,27 +14,21 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
     async function changePassword() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/change-pass`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldPassword: currentPassword, newPassword: newPassword }),
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.post('/user/change-pass', {oldPassword: currentPassword, newPassword: newPassword})
+            .then(() => {
                 setMessage('Cambio de contraseña exitoso.');
                 setMessageType('success');
-            } else if (res.status === 401) {
-                setMessage('La contraseña actual ingresada no es correcta.');
-                setMessageType('error');
-            } else {
-                setMessage('Ha ocurrido un error inesperado. Vuelva a intentarlo más tarde.');
-                setMessageType('error');
-            }
-        } catch (e) {
-            console.error(e);
-        }
+            })
+            .catch(err => {
+                const status = err.response.status;
+                if (status === 401) {
+                    setMessage('La contraseña actual ingresada no es correcta.');
+                    setMessageType('error');
+                } else {
+                    setMessage('Ha ocurrido un error inesperado. Vuelva a intentarlo más tarde.');
+                    setMessageType('error');
+                }
+            });
     }
 
     const handleSubmit = (e: React.FormEvent) => {
