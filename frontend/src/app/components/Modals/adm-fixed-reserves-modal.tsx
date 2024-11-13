@@ -68,7 +68,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 fetchReservedSlots(selectedRoom, dayIndex);
                 setReserving(false);
             })
-            .catch(err => setStatus('Error al realizar la reserva. Por favor, inténtelo de nuevo.'))
+            .catch(err => setStatus('Error al realizar la reserva. Por favor, inténtelo de nuevo.'));
 
     };
 
@@ -78,7 +78,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 setStatus('Reserva cancelada con éxito.');
                 fetchReservedSlots(selectedRoom, dayIndex);
             })
-            .catch(() => setStatus('Error al cancelar la reserva. Por favor, inténtelo de nuevo.'))
+            .catch(() => setStatus('Error al cancelar la reserva. Por favor, inténtelo de nuevo.'));
     };
 
     useEffect(() => {

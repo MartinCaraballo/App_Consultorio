@@ -1,4 +1,5 @@
 import React from 'react';
+import axiosInstance from "@/utils/axios_instance";
 
 interface ApprovalModalProps {
     isOpen: boolean;
@@ -20,60 +21,41 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     async function fetchUnauthorizedUsers() {
-        try {
-            setUnauthorizedUsers([]);
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/unauthorized-users`, {
-                method: 'GET',
-                credentials: 'include',
-            });
+        setUnauthorizedUsers([]);
 
-            const data = await res.json();
-            setUnauthorizedUsers(data);
-        } catch (e) {
-            console.log(e);
-        }
+        axiosInstance.get('/admin/unauthorized-users')
+            .then(res => setUnauthorizedUsers(res.data))
+            .catch(e => console.error(e));
     }
 
     async function acceptUser(userEmail: string, name: string, lastName:string) {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/admin/accept-user/${userEmail}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
-            if (res.status === 200) {
+        axiosInstance.put(`/admin/accept-user/${userEmail}`)
+            .then(() => {
                 setStatusMessage(`Usuario ${name} ${lastName} autorizado con éxito.`);
                 setShowMessage(true);
                 fetchUnauthorizedUsers();
-            } else {
+            })
+            .catch(() => {
                 setStatusMessage("Error al intentar rechazar el usuario. Inténtelo de nuevo.");
                 setShowMessage(true);
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            });
+
+        setTimeout(() => setShowMessage(false), 2000);
     }
 
     async function rejectUser(userEmail: string, name: string, lastName:string) {
-        try {
-            const res = await fetch (`http://${process.env.NEXT_PUBLIC_API_URL}/admin/reject-user/${userEmail}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
-            if (res.status === 200) {
+        axiosInstance.put(`/admin/reject-user/${userEmail}`)
+            .then(() => {
                 setStatusMessage(`Usuario ${name} ${lastName} rechazado con éxito.`);
                 setShowMessage(true);
                 fetchUnauthorizedUsers();
-            } else {
+            })
+            .catch(() => {
                 setStatusMessage("Error al intentar rechazar el usuario. Inténtelo de nuevo.");
                 setShowMessage(true);
-            }
-            setTimeout(() => setShowMessage(false), 2000);
-        } catch (e) {
-            console.log(e);
-        }
+            });
+
+        setTimeout(() => setShowMessage(false), 2000);
     }
 
     return (
