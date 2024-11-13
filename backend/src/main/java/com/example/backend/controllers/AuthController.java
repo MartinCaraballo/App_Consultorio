@@ -59,7 +59,7 @@ public class AuthController {
         if (existingUserOpt.isPresent()) {
             return new ResponseEntity<>(
                     String.format("User with email %s already exists.", registerReq.getEmail()),
-                    HttpStatus.BAD_REQUEST
+                    HttpStatus.UNAUTHORIZED
             );
         }
 
