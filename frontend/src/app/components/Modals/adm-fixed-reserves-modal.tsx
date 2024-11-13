@@ -1,6 +1,7 @@
 'use client'
 
 import React, {useEffect, useState} from 'react';
+import axiosInstance from "@/utils/axios_instance";
 
 const daysOfWeek = [
     'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
@@ -24,45 +25,24 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(1);
 
-    const fetchReservedSlots = async (roomId: number, dayIndex: number) => {
-        try {
-            const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setReservedSlots(data);
-            } else {
-                setStatus('Error al cargar las reservas.');
-            }
-        } catch (error) {
-            setStatus('Error de conexión.');
-        }
-    };
+    async function fetchReservedSlots(roomId: number, dayIndex: number) {
+        axiosInstance.get(`/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}`)
+            .then((res) => {
+                setReservedSlots(res.data)
+            })
+            .catch(() => setStatus('Error al cargas las reservas.'));
+    }
 
     async function fetchRooms() {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            setRooms(data);
-        } catch (e) {
-            console.log(e);
-        }
+        axiosInstance.get('/rooms')
+            .then((res) => setRooms(res.data))
+            .catch(err => console.error(err));
     }
 
     // Handle room selection in combobox.
     const handleChangeRoom = (event: any) => {
         const value = event.currentTarget.value.toString().split(" ")[1]
         setSelectedRoom(value);
-        console.log(value);
         setReservedSlots([]);
         fetchReservedSlots(value, dayIndex);
     }
@@ -82,42 +62,23 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             roomId: selectedRoom,
         };
 
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/reserve/fixed`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload),
-                credentials: 'include',
-            });
-
-            if (res.status === 201) {
+        axiosInstance.post('/reserve/fixed', payload)
+            .then(() => {
                 setStatus('Reserva realizada con éxito.');
-            } else {
-                setStatus('Error al realizar la reserva. Por favor, inténtelo de nuevo.');
-            }
-            fetchReservedSlots(selectedRoom, dayIndex);
-            setReserving(false);
-        } catch (error) {
-            setStatus('Error de conexión. Por favor, inténtelo más tarde.');
-        }
+                fetchReservedSlots(selectedRoom, dayIndex);
+                setReserving(false);
+            })
+            .catch(err => setStatus('Error al realizar la reserva. Por favor, inténtelo de nuevo.'))
+
     };
 
     const handleCancel = async (roomId: number, dayIndex: number, startTime: string) => {
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}&startTime=${startTime}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-
-            if (res.status === 200) {
+        axiosInstance.delete(`/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}&startTime=${startTime}`)
+            .then(() => {
                 setStatus('Reserva cancelada con éxito.');
-            } else {
-                setStatus('Error al cancelar la reserva. Por favor, inténtelo de nuevo.');
-            }
-            fetchReservedSlots(selectedRoom, dayIndex);
-        } catch (error) {
-            setStatus('Error de conexión. Por favor, inténtelo más tarde.');
-        }
+                fetchReservedSlots(selectedRoom, dayIndex);
+            })
+            .catch(() => setStatus('Error al cancelar la reserva. Por favor, inténtelo de nuevo.'))
     };
 
     useEffect(() => {

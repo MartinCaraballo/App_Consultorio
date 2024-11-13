@@ -5,7 +5,6 @@ import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
 import InfoModal from "@/app/components/Modals/info-modal";
 import axiosInstance from "../../utils/axios_instance";
-import { error } from "console";
 
 export default function ReservePage() {
     const formatDate = (date: Date): string => {
@@ -141,7 +140,7 @@ export default function ReservePage() {
             axiosInstance.delete(
                 `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
             )
-                .then((res) => {
+                .then(() => {
                     setInfoModalMessage("Reserva cancelada con éxito.");
                     setInfoModalSuccess(true);
                     fetchReserves(
