@@ -36,23 +36,6 @@ export default function LoginPage() {
             .finally(() => setLoading(false));
     }
 
-    async function sendRecoverPasswordReq(email: string) {
-        try {
-            const res = await fetch(
-                `http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email }),
-                }
-            );
-
-            console.log(res.status);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     return (
         <main className="flex items-center justify-center h-screen">
             <div className="flex min-h-3/4 min-w-96 flex-col justify-center px-6 py-12 lg:px-8 rounded-xl border-2 border-gray-200">
@@ -132,7 +115,7 @@ export default function LoginPage() {
                                             cy="12"
                                             r="10"
                                             stroke="currentColor"
-                                            stroke-width="4"
+                                            strokeWidth="4"
                                         ></circle>
                                         <path
                                             className="opacity-75"

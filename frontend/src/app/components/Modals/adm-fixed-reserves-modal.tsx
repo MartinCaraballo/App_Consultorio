@@ -229,7 +229,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                                                 cy="164"
                                                                 r="10"
                                                                 stroke="currentColor"
-                                                                stroke-width="4"
+                                                                strokeWidth="4"
                                                             ></circle>
                                                             <path
                                                                 className="opacity-75"
@@ -303,7 +303,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                                 cy="12"
                                                 r="10"
                                                 stroke="currentColor"
-                                                stroke-width="4"
+                                                strokeWidth="4"
                                             ></circle>
                                             <path
                                                 className="opacity-75"
