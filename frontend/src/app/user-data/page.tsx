@@ -96,65 +96,64 @@ const UserDataPage = ({searchParams,}: { searchParams: { userEmail: string }; })
                 {`Información de: ${userName} ${userLastName}`}
             </h1>
             <div className="rounded-lg bg-white h-full overflow-y-auto">
-                <div className="flex flex-wrap justify-center p-4 mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
-                    <div className="font-bold text-gray-700">
-                        Desde:
+                <div className="grid py-2 sm:grid-cols-1 md:grid-cols-2">
+                    <div className="flex flex-row font-bold text-gray-700 items-center justify-self-center py-2">
+                        <p className="pr-4">Desde:</p>
                         <input
                             type="date"
-                            className="rounded-lg ml-2 mr-5 border-2 border-gray-300 px-2 py-1 mt-2 sm:mt-0"
+                            className="rounded-lg border-2 border-gray-300"
                             value={`${formatDate(selectedStartDate)}`}
                             onChange={handleStartDateChange}
                         />
                     </div>
-                    <div className="font-bold text-gray-700">
-                        Hasta:
+                    <div className="flex flex-row font-bold text-gray-700 items-center justify-self-center py-2">
+                        <p className="pr-4">Hasta:</p>
                         <input
                             type="date"
-                            className="rounded-lg ml-2 border-2 border-gray-300 px-2 py-1 mt-2 sm:mt-0"
+                            className="rounded-lg border-2 border-gray-300"
                             value={`${formatDate(selectedEndDate)}`}
                             onChange={handleEndDateChange}
                         />
                     </div>
                 </div>
-                <div className="flex flex-col justify-self-center">
-                    <div className="flex flex-col items-center justify-center mt-2 overflow-y-auto">
-                        <ul className="w-full flex flex-col items-center xl:text-lg">
-                            {userReserves.map((reserve, index) => {
-                                const startTime = new Date();
-                                startTime.setHours(reserve.startTime[0]);
-                                startTime.setMinutes(reserve.startTime[1]);
+                <div
+                    className="flex flex-col justify-self-center mt-2 overflow-y-auto w-full px-8 sm:px-16 lg:w-2/3 lg:px-0">
+                    <ul className="items-center text-lg xl:text-xl space-y-1">
+                        {userReserves.map((reserve, index) => {
+                            const startTime = new Date();
+                            startTime.setHours(reserve.startTime[0]);
+                            startTime.setMinutes(reserve.startTime[1]);
 
-                                const endTime = new Date();
-                                endTime.setHours(reserve.endTime[0]);
-                                endTime.setMinutes(reserve.endTime[1]);
+                            const endTime = new Date();
+                            endTime.setHours(reserve.endTime[0]);
+                            endTime.setMinutes(reserve.endTime[1]);
 
-                                const year = reserve.reserveDate[0].toString();
-                                const month = reserve.reserveDate[1].toString();
-                                const day = reserve.reserveDate[2].toString();
+                            const year = reserve.reserveDate[0].toString();
+                            const month = reserve.reserveDate[1].toString();
+                            const day = reserve.reserveDate[2].toString();
 
-                                return (
-                                    <li
-                                        key={index}
-                                        className="flex items-center justify-between border-b py-2 w-full sm:w-1/2 font-bold flex-col sm:flex-row rounded-lg bg-gray-700 mb-1 p-4 text-center sm:space-x-4 text-white"
-                                    >
-                                        <span className="pl-8">
-                                            {formatTime(startTime)} - {formatTime(endTime)}
-                                        </span>
-                                        <span className="pr-8">
-                                            {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
-                                        </span>
-                                    </li>
-                                );
-                            })}
+                            return (
+                                <li
+                                    key={index}
+                                    className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-20 sm:h-12"
+                                >
+                                    <span>
+                                        Hora: {formatTime(startTime)} - {formatTime(endTime)}
+                                    </span>
+                                    <span>
+                                        Fecha: {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                        <div
+                            className="flex justify-end font-bold rounded-lg text-white items-center">
                             <div
-                                className="flex items-center md:justify-end w-full sm:w-1/2 xl:text-lg font-bold flex-col sm:flex-row rounded-lg mb-1 sm:space-x-4 text-white">
-                                <div
-                                    className="flex p-4 border rounded-lg bg-gray-700 text-white font-bold">
-                                    {`Costo mensual: $${userMonthCost}`}
-                                </div>
+                                className="flex border rounded-lg bg-gray-700 text-white font-bold p-4">
+                                {`Costo mensual total: $${userMonthCost}`}
                             </div>
-                        </ul>
-                    </div>
+                        </div>
+                    </ul>
                 </div>
             </div>
         </main>
