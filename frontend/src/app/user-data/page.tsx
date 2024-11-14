@@ -1,13 +1,13 @@
 "use client";
 
 import axiosInstance from "@/utils/axios_instance";
-import {useState} from "react";
+import { useState } from "react";
 import React from "react";
 import LoadingComponent from "../components/loading/loading";
 
 const UserDataPage = ({
-                          searchParams,
-                      }: {
+    searchParams,
+}: {
     searchParams: { userEmail: string };
 }) => {
     const [loading, setLoading] = useState(true);
@@ -28,14 +28,22 @@ const UserDataPage = ({
 
     async function fetchUserReserves() {
         axiosInstance
-            .get<ReserveDTO[]>(`/admin/get-user-reserves/${searchParams.userEmail}?startDate=${'2024-11-14'}&endDate=${'2024-11-28'}`)
-            .then((res) => setUserReserves(res.data))
+            .get<ReserveDTO[]>(
+                `/admin/get-user-reserves/${
+                    searchParams.userEmail
+                }?startDate=${"2024-11-14"}&endDate=${"2024-11-28"}`
+            )
+            .then((res) => setUserReserves(res.data));
     }
 
     async function fetchUserMonthlyCost() {
         axiosInstance
-            .get<number>(`/admin/get-user-monthly-cost/${searchParams.userEmail}?startDate=${'2024-11-14'}&endDate=${'2024-11-28'}`)
-            .then((res) => setUserMonthCost(res.data))
+            .get<number>(
+                `/admin/get-user-monthly-cost/${
+                    searchParams.userEmail
+                }?startDate=${"2024-11-14"}&endDate=${"2024-11-28"}`
+            )
+            .then((res) => setUserMonthCost(res.data));
     }
 
     function handleStartDateChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -66,6 +74,7 @@ const UserDataPage = ({
                 {`Información de: ${userReserves?.pop()?.name} ${userReserves?.pop()?.lastName}`}
             </h1>
             <div className="rounded-lg bg-white h-full overflow-y-auto">
+                {/* Contenedor de fechas, responsivo con flex wrap */}
                 <div className="flex flex-wrap justify-center p-4 mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
                     <div className="font-bold text-gray-700">
                         Desde:
@@ -87,12 +96,16 @@ const UserDataPage = ({
                     </div>
                 </div>
 
+                {/* Contenedor de tablas responsivo */}
                 <div className="flex flex-col space-y-4 px-4 mt-8 xl:mx-36 2xl:mx-52 text-white">
+                    {/* Encabezado de la tabla */}
                     <div className="flex flex-col sm:flex-row rounded-lg bg-gray-700 p-4 text-center sm:space-x-4">
-                        <div className="w-full sm:w-1/3 font-bold">Reserve</div>
-                        <div className="w-full sm:w-1/3 font-bold">Date</div>
-                        <div className="w-full sm:w-1/3 font-bold">
-                            Monthly Cost
+                        <div className="w-full sm:w-1/2 font-bold">Reserve</div>
+                        <div className="w-full sm:w-1/2 font-bold">Date</div>
+                    </div>
+                    <div className="grid">
+                        <div className="flex p-4 justify-self-end justify-center border rounded-lg bg-gray-700 text-white font-bold">
+                            Costo mensual: 12312
                         </div>
                     </div>
                 </div>
