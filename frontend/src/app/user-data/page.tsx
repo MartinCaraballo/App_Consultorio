@@ -34,11 +34,11 @@ const UserDataPage = ({
         return `${hours}:${minutes}`;
     };
 
-    async function fetchUserReserves() {
+    async function fetchUserReserves(startDate: Date, endDate: Date) {
         axiosInstance
             .get<ReserveDTO[]>(
                 `/admin/get-user-reserves/${searchParams.userEmail
-                }?startDate=${"2024-11-14"}&endDate=${"2024-11-28"}`
+                }?startDate=${startDate}&endDate=${endDate}`
             )
             .then((res) => {
                 setUserReserves(res.data);
@@ -47,28 +47,40 @@ const UserDataPage = ({
                     setUserName(reserve.name);
                     setUserLastName(reserve.lastName);
                 }
-            });
+            })
+            .finally(() => setLoading(false));
     }
 
-    async function fetchUserMonthlyCost() {
+    async function fetchData(startDate: Date, endDate: Date) {
+        setLoading(true);
+        fetchUserReserves(startDate, endDate);
+        fetchUserMonthlyCost(startDate, endDate);
+    }
+
+    async function fetchUserMonthlyCost(startDate: Date, endDate: Date) {
         axiosInstance
             .get<number>(
                 `/admin/get-user-monthly-cost/${searchParams.userEmail
-                }?startDate=${"2024-11-14"}&endDate=${"2024-11-28"}`
+                }?startDate=${startDate}&endDate=${endDate}`
             )
-            .then((res) => setUserMonthCost(res.data));
+            .then((res) => setUserMonthCost(res.data))
+            .finally(() => setLoading(false));
     }
 
     function handleStartDateChange(e: React.ChangeEvent<HTMLInputElement>) {
         const eventValue = e.target.value;
         const date = eventValue.split('-');
-        setSelectedStartDate(new Date(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2])));
+        const dateFormatted = String(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
+        setSelectedStartDate(new Date(dateFormatted));
+        fetchData(dateFormatted, selectedEndDate);
     }
 
     function handleEndDateChange(e: React.ChangeEvent<HTMLInputElement>) {
         const eventValue = e.target.value;
         const date = eventValue.split('-');
-        setSelectedEndDate(new Date(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2])));
+        const dateFormatted = String(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
+        setSelectedEndDate(new Date(dateFormatted));
+        fetchData(selectedStartDate, dateFormatted);
     }
 
     React.useEffect(() => {
@@ -87,7 +99,6 @@ const UserDataPage = ({
                 {`Información de: ${userName} ${userLastName}`}
             </h1>
             <div className="rounded-lg bg-white h-full overflow-y-auto">
-                {/* Contenedor de fechas, responsivo con flex wrap */}
                 <div className="flex flex-wrap justify-center p-4 mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
                     <div className="font-bold text-gray-700">
                         Desde:
@@ -110,7 +121,7 @@ const UserDataPage = ({
                 </div>
                 <div className="flex flex-col justify-self-center">
                     <div className="flex flex-col items-center justify-center mt-2 overflow-y-auto">
-                        <ul className="w-full flex flex-col items-center">
+                        <ul className="w-full flex flex-col items-center xl:text-lg">
                             {userReserves.map((reserve, index) => {
                                 const startTime = new Date();
                                 startTime.setHours(reserve.startTime[0]);
@@ -127,25 +138,28 @@ const UserDataPage = ({
                                 return (
                                     <li
                                         key={index}
-                                        className="flex items-center justify-between border-b py-2 w-full sm:w-1/2 font-bold flex-col sm:flex-row rounded-lg bg-gray-700 p-4 text-center sm:space-x-4 text-white"
+                                        className="flex items-center justify-between border-b py-2 w-full sm:w-1/2 font-bold flex-col sm:flex-row rounded-lg bg-gray-700 mb-1 p-4 text-center sm:space-x-4 text-white"
                                     >
-                                        <span>
+                                        <span className="pl-8">
                                             {formatTime(startTime)} - {formatTime(endTime)}
                                         </span>
-                                        <span>
+                                        <span className="pr-8">
                                             {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
                                         </span>
                                     </li>
                                 );
                             })}
+                            <div
+                                className="flex items-center md:justify-end w-full sm:w-1/2 xl:text-lg font-bold flex-col sm:flex-row rounded-lg mb-1 sm:space-x-4 text-white">
+                                    <div
+                                        className="flex p-4 border rounded-lg bg-gray-700 text-white font-bold">
+                                        {`Costo mensual: $${userMonthCost}`}
+                                    </div>
+                            </div>
                         </ul>
                     </div>
 
-                    <div className="grid">
-                        <div className="flex p-4 justify-self-end justify-center border rounded-lg bg-gray-700 text-white font-bold">
-                            {`Costo mensual: $${userMonthCost}`}
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </main>
