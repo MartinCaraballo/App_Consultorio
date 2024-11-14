@@ -1,15 +1,11 @@
 "use client";
 
 import axiosInstance from "@/utils/axios_instance";
-import { useState } from "react";
+import {useState} from "react";
 import React from "react";
 import LoadingComponent from "../components/loading/loading";
 
-const UserDataPage = ({
-    searchParams,
-}: {
-    searchParams: { userEmail: string };
-}) => {
+const UserDataPage = ({searchParams,}: { searchParams: { userEmail: string }; }) => {
     const [loading, setLoading] = useState(true);
     const [userReserves, setUserReserves] = useState<ReserveDTO[]>([]);
     const [userMonthCost, setUserMonthCost] = React.useState<number>(0);
@@ -34,11 +30,10 @@ const UserDataPage = ({
         return `${hours}:${minutes}`;
     };
 
-    async function fetchUserReserves(startDate: Date, endDate: Date) {
+    async function fetchUserReserves(startDate: string, endDate: string) {
         axiosInstance
             .get<ReserveDTO[]>(
-                `/admin/get-user-reserves/${searchParams.userEmail
-                }?startDate=${startDate}&endDate=${endDate}`
+                `/admin/get-user-reserves/${searchParams.userEmail}?startDate=${startDate}&endDate=${endDate}`
             )
             .then((res) => {
                 setUserReserves(res.data);
@@ -48,49 +43,51 @@ const UserDataPage = ({
                     setUserLastName(reserve.lastName);
                 }
             })
-            .finally(() => setLoading(false));
     }
 
-    async function fetchData(startDate: Date, endDate: Date) {
+    async function fetchData(startDate: string, endDate: string) {
         setLoading(true);
-        fetchUserReserves(startDate, endDate);
-        fetchUserMonthlyCost(startDate, endDate);
+        await fetchUserReserves(startDate, endDate);
+        await fetchUserMonthlyCost(startDate, endDate);
     }
 
-    async function fetchUserMonthlyCost(startDate: Date, endDate: Date) {
+    async function fetchUserMonthlyCost(startDate: string, endDate: string) {
         axiosInstance
             .get<number>(
-                `/admin/get-user-monthly-cost/${searchParams.userEmail
-                }?startDate=${startDate}&endDate=${endDate}`
+                `/admin/get-user-monthly-cost/${searchParams.userEmail}?startDate=${startDate}&endDate=${endDate}`
             )
             .then((res) => setUserMonthCost(res.data))
-            .finally(() => setLoading(false));
     }
 
     function handleStartDateChange(e: React.ChangeEvent<HTMLInputElement>) {
         const eventValue = e.target.value;
         const date = eventValue.split('-');
-        const dateFormatted = String(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
-        setSelectedStartDate(new Date(dateFormatted));
-        fetchData(dateFormatted, selectedEndDate);
+        const dateObject = new Date(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
+        setSelectedStartDate(dateObject);
+        fetchData(formatDate(dateObject), formatDate(selectedEndDate)).finally(() => setLoading(false));
     }
 
     function handleEndDateChange(e: React.ChangeEvent<HTMLInputElement>) {
         const eventValue = e.target.value;
         const date = eventValue.split('-');
-        const dateFormatted = String(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
-        setSelectedEndDate(new Date(dateFormatted));
-        fetchData(selectedStartDate, dateFormatted);
+        const dateObject = new Date(parseInt(date[0]), parseInt(date[1]) - 1, parseInt(date[2]));
+        setSelectedEndDate(dateObject);
+        fetchData(formatDate(selectedStartDate), formatDate(dateObject)).finally(() => setLoading(false));
     }
 
     React.useEffect(() => {
+        const selectedStartDateFormatted = formatDate(selectedStartDate);
+        const selectedEndDateFormatted = formatDate(selectedEndDate);
         Promise
-            .all([fetchUserReserves(), fetchUserMonthlyCost()])
+            .all([
+                fetchUserReserves(selectedStartDateFormatted, selectedEndDateFormatted),
+                fetchUserMonthlyCost(selectedStartDateFormatted, selectedEndDateFormatted)
+            ])
             .finally(() => setLoading(false));
     }, []);
 
     if (loading) {
-        return <div>{<LoadingComponent />}</div>;
+        return <div>{<LoadingComponent/>}</div>;
     }
 
     return (
@@ -151,15 +148,13 @@ const UserDataPage = ({
                             })}
                             <div
                                 className="flex items-center md:justify-end w-full sm:w-1/2 xl:text-lg font-bold flex-col sm:flex-row rounded-lg mb-1 sm:space-x-4 text-white">
-                                    <div
-                                        className="flex p-4 border rounded-lg bg-gray-700 text-white font-bold">
-                                        {`Costo mensual: $${userMonthCost}`}
-                                    </div>
+                                <div
+                                    className="flex p-4 border rounded-lg bg-gray-700 text-white font-bold">
+                                    {`Costo mensual: $${userMonthCost}`}
+                                </div>
                             </div>
                         </ul>
                     </div>
-
-
                 </div>
             </div>
         </main>
