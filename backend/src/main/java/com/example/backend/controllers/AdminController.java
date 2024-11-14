@@ -2,7 +2,6 @@ package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.models.*;
-import com.example.backend.models.dtos.UserReserveData;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.services.*;
 import jakarta.transaction.Transactional;
@@ -122,23 +121,34 @@ public class AdminController {
         return new ResponseEntity<>(prices, HttpStatus.OK);
     }
 
-    @GetMapping("/get-reserve-data/{id}")
-    public ResponseEntity<UserReserveData> getUserReservesAndCost(@PathVariable String id,
-                                                                  @RequestParam LocalDate startDate,
-                                                                  @RequestParam LocalDate endDate) {
+    @GetMapping("/get-user-reserves/{id}")
+    public ResponseEntity<List<ReserveDTO>> getUserReservesAndCost(@PathVariable String id,
+                                                                   @RequestParam LocalDate startDate,
+                                                                   @RequestParam LocalDate endDate) {
         User user = userService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
         );
         List<UserReserve> userReserveList = userReserveService.findAllReserveBetweenDates(startDate, endDate, id);
-        int userMonthCost = userService.getReserveCost(userReserveList);
 
         List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
 
-        UserReserveData userMonthCostDTO = new UserReserveData(
-                userReserveDTO, userMonthCost, userReserveList.size(), user.getName(), user.getLastName()
+        return new ResponseEntity<>(userReserveDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-user-monthly-cost/{id}")
+    public ResponseEntity<Integer> getUserMonthlyCost(@PathVariable String id,
+                                                      @RequestParam LocalDate startDate,
+                                                      @RequestParam LocalDate endDate) {
+        User user = userService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
+        );
+        List<UserReserve> userReserveList = userReserveService.findAllReserveBetweenDates(
+                startDate, endDate, user.getEmail()
         );
 
-        return new ResponseEntity<>(userMonthCostDTO, HttpStatus.OK);
+        int userMonthCost = userService.getReserveCost(userReserveList);
+
+        return new ResponseEntity<>(userMonthCost, HttpStatus.OK);
     }
 
     @Transactional

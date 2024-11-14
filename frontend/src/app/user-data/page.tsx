@@ -1,39 +1,45 @@
 "use client";
 
 import axiosInstance from "@/utils/axios_instance";
-import { useState } from "react";
+import {useState} from "react";
 import React from "react";
 import LoadingComponent from "../components/loading/loading";
 
 const UserDataPage = ({
-    searchParams,
-}: {
+                          searchParams,
+                      }: {
     searchParams: { userEmail: string };
 }) => {
     const [loading, setLoading] = useState(true);
-    const [userReserveData, setUserReserveData] = useState<
-        UserReserveData | undefined
-    >(undefined);
+    const [userReserves, setUserReserves] = useState<ReserveDTO[] | undefined>(undefined);
+    const [userMonthCost, setUserMonthCost] = React.useState<number>(0);
 
-    async function fetchData() {
+    async function fetchUserReserves() {
         axiosInstance
-            .get<UserReserveData>(`/get-reserve-data/${searchParams.userEmail}`)
-            .then((res) => setUserReserveData(res.data))
-            .finally(() => setLoading(false));
+            .get<ReserveDTO[]>(`/admin/get-user-reserves/${searchParams.userEmail}?startDate=${'2024-11-14'}&endDate=${'2024-11-28'}`)
+            .then((res) => setUserReserves(res.data))
+    }
+
+    async function fetchUserMonthlyCost() {
+        axiosInstance
+            .get<number>(`/admin/get-user-monthly-cost/${searchParams.userEmail}?startDate=${'2024-11-14'}&endDate=${'2024-11-28'}`)
+            .then((res) => setUserMonthCost(res.data))
     }
 
     React.useEffect(() => {
-        fetchData();
-    });
+        Promise
+            .all([fetchUserReserves(), fetchUserMonthlyCost()])
+            .then(() => setLoading(false));
+    }, []);
 
     if (loading) {
-        return <div>{<LoadingComponent />}</div>;
+        return <div>{<LoadingComponent/>}</div>;
     }
 
     return (
         <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
-                {`Información de: ${userReserveData?.userName} ${userReserveData?.lastName}`}
+                {`Información de: ${userReserves?.pop()?.name} ${userReserves?.pop()?.lastName}`}
             </h1>
             <div className="rounded-lg bg-white h-full overflow-y-auto">
                 {/* Contenedor de fechas, responsivo con flex wrap */}
