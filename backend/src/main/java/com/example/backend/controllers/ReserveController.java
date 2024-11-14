@@ -100,7 +100,7 @@ public class ReserveController {
 
         for (UserReserve userReserve : allUserReservesAfterToday) {
             LocalDate reserveDate = userReserve.getReserveKey().getReserveDate();
-            int reserveDayIndex = reserveDate.getDayOfWeek().getValue();
+            int reserveDayIndex = reserveDate.getDayOfWeek().getValue() - 1;
 
             if (reserveDayIndex == createFixedReserveReq.getDayIndex()) {
                 LocalTime reserveDateTime = userReserve.getReserveKey().getStartTime();
