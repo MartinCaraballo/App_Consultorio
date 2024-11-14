@@ -9,4 +9,6 @@ public class UserReserveData {
     private List<ReserveDTO> monthReserves;
     private Integer monthlyCost;
     private Integer totalHours;
+    private String userName;
+    private String userLastName;
 }

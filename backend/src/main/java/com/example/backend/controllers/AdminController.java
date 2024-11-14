@@ -134,7 +134,9 @@ public class AdminController {
 
         List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
 
-        UserReserveData userMonthCostDTO = new UserReserveData(userReserveDTO, userMonthCost, userReserveList.size());
+        UserReserveData userMonthCostDTO = new UserReserveData(
+                userReserveDTO, userMonthCost, userReserveList.size(), user.getName(), user.getLastName()
+        );
 
         return new ResponseEntity<>(userMonthCostDTO, HttpStatus.OK);
     }
