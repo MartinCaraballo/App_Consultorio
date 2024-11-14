@@ -349,19 +349,16 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 )}
                 {status && (
                     <p
-                        className={`mt-4 border rounded-lg p-3 ${
-                            statusType === "success"
-                                ? "text-green-600 border-green-300 bg-green-100"
-                                : ""
-                        } ${
-                            statusType === "warning"
+                        className={`mt-4 border rounded-lg p-3 ${statusType === "success"
+                            ? "text-green-600 border-green-300 bg-green-100"
+                            : ""
+                            } ${statusType === "warning"
                                 ? "text-yellow-600 border-yellow-300 bg-yellow-100"
                                 : ""
-                        } ${
-                            statusType === "error"
+                            } ${statusType === "error"
                                 ? "text-red-600 border-red-300 bg-red-100"
                                 : ""
-                        }`}
+                            }`}
                     >
                         {status}
                     </p>
