@@ -28,6 +28,9 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     const [startHour, setStartHour] = useState<string>("07:00");
     const [endHour, setEndHour] = useState<string>("23:00");
     const [status, setStatus] = useState<string>("");
+    const [statusType, setStatusType] = useState<
+        "success" | "error" | "warning" | ""
+    >("");
     const [reservedSlots, setReservedSlots] = useState<ReserveDTO[]>([]);
     const [reserving, setReserving] = useState<boolean>(false);
     const [rooms, setRooms] = useState([]);
@@ -40,7 +43,10 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             .then((res) => {
                 setReservedSlots(res.data);
             })
-            .catch(() => setStatus("Error al cargas las reservas."))
+            .catch(() => {
+                setStatus("Error al cargas las reservas.");
+                setStatusType("error");
+            })
             .finally(() => setLoading(false));
     }
 
@@ -79,18 +85,31 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         };
 
         axiosInstance
-            .post("/reserve/fixed", payload)
-            .then(() => {
-                setStatus("Reserva realizada con éxito.");
-                fetchReservedSlots(selectedRoom, dayIndex);
-                setReserving(false);
+            .post<string[]>("/reserve/fixed", payload)
+            .then((res) => {
+                const data = res.data;
+                if (data.length === 0) {
+                    setStatus("Reserva realizada con éxito.");
+                    setStatusType("success");
+                    return;
+                }
+                let message =
+                    "Se encontraron reservas en los siguientes horarios:";
+                data.map((hour) => (message += `- ${hour}`));
+                setStatus(message);
+                setStatusType("warning");
             })
-            .catch((err) =>
+            .catch((err) => {
                 setStatus(
                     "Error al realizar la reserva. Por favor, inténtelo de nuevo."
-                )
-            )
-            .finally(() => setLoading(false));
+                );
+                setStatusType("error");
+            })
+            .finally(() => {
+                setLoading(false);
+                fetchReservedSlots(selectedRoom, dayIndex);
+                setReserving(false);
+            });
     };
 
     const handleCancel = async (
@@ -330,10 +349,18 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 )}
                 {status && (
                     <p
-                        className={`mt-4 ${
-                            status.includes("éxito")
-                                ? "text-green-600"
-                                : "text-red-600"
+                        className={`mt-4 border rounded-lg p-3 ${
+                            statusType === "success"
+                                ? "text-green-600 border-green-300 bg-green-100"
+                                : ""
+                        } ${
+                            statusType === "warning"
+                                ? "text-yellow-600 border-yellow-300 bg-yellow-100"
+                                : ""
+                        } ${
+                            statusType === "error"
+                                ? "text-red-600 border-red-300 bg-red-100"
+                                : ""
                         }`}
                     >
                         {status}
