@@ -5,7 +5,6 @@ import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
 import InfoModal from "@/app/components/Modals/info-modal";
 import axiosInstance from "../../utils/axios_instance";
-import loading from "../components/loading/loading";
 import LoadingComponent from "../components/loading/loading";
 
 export default function ReservePage() {

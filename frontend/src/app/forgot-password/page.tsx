@@ -2,9 +2,12 @@
 
 import {FormEvent, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
+import axiosInstance from "@/utils/axios_instance";
 
 const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) => {
     const router = useRouter();
+
+    const [loading, setLoading] = useState(false);
 
     const [email, setEmail] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -24,29 +27,23 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-            if (response.ok) {
+        setLoading(true);
+
+        axiosInstance.post('/user/reset-password', { email })
+            .then(() => {
                 setSuccessMessage("Email de recuperación enviado con éxito!");
                 setEmail("");
-            } else {
-                setErrorMessage("Error al enviar el correo de recuperación, intente nuevamente más tarde.");
-            }
-
-            setTimeout(() => {
-                    setIsModalOpen(false);
-                    setSuccessMessage(null);
-                    setErrorMessage(null);
-                }, 3000
-            );
-
-        } catch (e) {
-            console.error(e)
-        }
+            })
+            .catch(() => setErrorMessage("Error al enviar el correo de recuperación, intente nuevamente más tarde."))
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => {
+                        setIsModalOpen(false);
+                        setSuccessMessage(null);
+                        setErrorMessage(null);
+                    }, 3000
+                );
+            });
     };
 
     const handlePasswordReset = async (e: FormEvent) => {
@@ -57,33 +54,30 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
             return;
         }
 
-        try {
-            const res = await fetch(`http://${process.env.NEXT_PUBLIC_API_URL}/user/reset-password-token`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: searchParams.token, newPassword: newPassword }),
-            });
-
-            if (res.ok) {
+        setLoading(true);
+        axiosInstance.post('/user/reset-password-token', { token: searchParams.token, newPassword: newPassword })
+            .then(() => {
                 setSuccessMessage("Contraseña cambiada con éxito!");
                 setTimeout(() => router.push("/login"), 2000);
-                return;
-            } else if (res.status === 400) {
-                setErrorMessage("El token no es válido.")
-            } else {
-                setErrorMessage("A ocurrido un error. Inténtelo más tarde.")
-            }
+            })
+            .catch((err) => {
+                const status = err.response.status;
 
-            setTimeout(() => {
-                setIsModalOpen(false);
-                setSuccessMessage(null);
-                setErrorMessage(null);
-                }, 3000
-            );
-
-        } catch (e) {
-            console.error(e);
-        }
+                if (status === 400) {
+                    setErrorMessage("El token no es válido.")
+                } else {
+                    setErrorMessage("A ocurrido un error. Inténtelo más tarde.")
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => {
+                        setIsModalOpen(false);
+                        setSuccessMessage(null);
+                        setErrorMessage(null);
+                    }, 3000
+                );
+            });
     };
 
     return (
@@ -111,8 +105,28 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
 
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="flex justify-center w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
+                        {loading && (
+                            <svg
+                                className="animate-spin h-5 w-5 mr-3 ..."
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                        )}
                         Enviar correo de recuperación
                     </button>
                 </form>
@@ -146,7 +160,6 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
                                     placeholder="Ingresa la nueva contraseña"
                                 />
                             </div>
-
                             <div>
                                 <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
                                     Confirma la contraseña
@@ -174,8 +187,28 @@ const ForgotPasswordPage = ({searchParams, }: {searchParams: { token: string}}) 
 
                             <button
                                 type="submit"
-                                className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="flex justify-center w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             >
+                                {loading && (
+                                    <svg
+                                        className="animate-spin h-5 w-5 mr-3 ..."
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            stroke-width="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                )}
                                 Reiniciar Contraseña
                             </button>
                         </form>
