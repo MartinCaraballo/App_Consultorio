@@ -1,19 +1,14 @@
-import React, { useState } from "react";
-import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, {useState} from "react";
+import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import axiosInstance from "@/utils/axios_instance";
-import { useRouter } from "next/navigation";
 
 interface UserManagementModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const UserManagementModal: React.FC<UserManagementModalProps> = ({
-    isOpen,
-    onClose,
-}) => {
-    const router = useRouter();
+const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClose }) => {
     const [adminUsers, setAdminUsers] = React.useState<User[]>([]);
     const [regularUsers, setRegularUsers] = React.useState<User[]>([]);
 
@@ -178,9 +173,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
                             key={user.email}
                             className="p-2 border border-gray-300 rounded flex justify-between items-center cursor-pointer"
                             onClick={() =>
-                                router.push(
-                                    `/user-data?userEmail=${user.email}`
-                                )
+                                window.location.href = `/user-data?userEmail=${user.email}`
                             }
                         >
                             <span>
