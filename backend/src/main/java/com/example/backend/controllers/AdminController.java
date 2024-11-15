@@ -122,7 +122,7 @@ public class AdminController {
     }
 
     @GetMapping("/get-user-reserves/{id}")
-    public ResponseEntity<List<ReserveDTO>> getUserReservesAndCost(@PathVariable String id,
+    public ResponseEntity<List<ReserveDTO>> getUserReserves(@PathVariable String id,
                                                                    @RequestParam LocalDate startDate,
                                                                    @RequestParam LocalDate endDate) {
         User user = userService.findById(id).orElseThrow(
@@ -149,6 +149,15 @@ public class AdminController {
         int userMonthCost = userService.getReserveCost(userReserveList);
 
         return new ResponseEntity<>(userMonthCost, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-user-data/{id}")
+    public ResponseEntity<User> getUserData(@PathVariable String id) {
+        User user = userService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
+        );
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Transactional

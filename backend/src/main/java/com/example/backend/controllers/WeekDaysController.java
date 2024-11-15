@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class WeekDaysController {
     @GetMapping
     public ResponseEntity<List<LocalDate>> getWeekDates() {
         List<LocalDate> weekDates = new ArrayList<>(12);
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("America/Montevideo"));
         LocalDate end = today.plusWeeks(1);
 
         while (!today.isAfter(end)) {
