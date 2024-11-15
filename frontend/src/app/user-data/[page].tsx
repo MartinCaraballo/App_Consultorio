@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 import axiosInstance from "@/utils/axios_instance";
 import {useState} from "react";
 import React from "react";
 import LoadingComponent from "../components/loading/loading";
 
-const UserDataPage = ({searchParams,}: { searchParams: { userEmail: string }; }) => {
+const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }) => {
     const [loading, setLoading] = useState(true);
     const [userReserves, setUserReserves] = useState<ReserveDTO[]>([]);
     const [userMonthCost, setUserMonthCost] = React.useState<number>(0);
