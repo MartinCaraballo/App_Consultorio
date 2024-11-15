@@ -174,7 +174,8 @@ export default function ReservePage() {
                         );
                         setInfoModalSuccess(false);
                     }
-                });
+                    setIsInfoModalOpen(true);
+                }).finally(() => setLoadingReserves(false));
         } catch (error) {
             setInfoModalMessage(
                 "Error de conexión. Por favor, inténtelo más tarde."
