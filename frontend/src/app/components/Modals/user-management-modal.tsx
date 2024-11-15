@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import axiosInstance from "@/utils/axios_instance";
+import Link from "next/link";
 
 interface UserManagementModalProps {
     isOpen: boolean;
@@ -171,14 +172,17 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                     {regularUsers.map((user) => (
                         <li
                             key={user.email}
-                            className="p-2 border border-gray-300 rounded flex justify-between items-center cursor-pointer"
-                            onClick={() =>
-                                window.location.href = `/user-data?userEmail=${user.email}`
-                            }
+                            className="p-2 border border-gray-300 rounded flex justify-between items-center"
                         >
-                            <span>
-                                {user.name} {user.lastName} ({user.email})
-                            </span>
+                            <Link
+                                href={{
+                                    pathname: '/user-data',
+                                    query: { userEmail: `${user.email}`},
+                                }}>
+                                <span>
+                                    {user.name} {user.lastName} ({user.email})
+                                </span>
+                            </Link>
                             <div>
                                 <button
                                     onClick={() => makeAdmin(user)}
