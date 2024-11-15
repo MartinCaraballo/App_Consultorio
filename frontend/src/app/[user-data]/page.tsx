@@ -8,9 +8,9 @@ import LoadingComponent from "../components/loading/loading";
 const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }) => {
     const [loading, setLoading] = useState(true);
     const [userReserves, setUserReserves] = useState<ReserveDTO[]>([]);
-    const [userMonthCost, setUserMonthCost] = React.useState<number>(0);
-    const [userName, setUserName] = React.useState("");
-    const [userLastName, setUserLastName] = React.useState("");
+    const [userMonthCost, setUserMonthCost] = useState<number>(0);
+    const [userData, setUserData] = useState<User>();
+    const [loadingUserData, setLoadingUserData] = useState(true);
 
     const today = new Date();
     const [selectedStartDate, setSelectedStartDate] = React.useState<Date>(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -35,20 +35,8 @@ const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }
             .get<ReserveDTO[]>(
                 `/admin/get-user-reserves/${searchParams.userEmail}?startDate=${startDate}&endDate=${endDate}`
             )
-            .then((res) => {
-                setUserReserves(res.data);
-                const reserve = res.data.pop();
-                if (reserve) {
-                    setUserName(reserve.name);
-                    setUserLastName(reserve.lastName);
-                }
-            })
-    }
-
-    async function fetchData(startDate: string, endDate: string) {
-        setLoading(true);
-        await fetchUserReserves(startDate, endDate);
-        await fetchUserMonthlyCost(startDate, endDate);
+            .then((res) => setUserReserves(res.data))
+            .finally(() => setLoading(false));
     }
 
     async function fetchUserMonthlyCost(startDate: string, endDate: string) {
@@ -57,6 +45,19 @@ const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }
                 `/admin/get-user-monthly-cost/${searchParams.userEmail}?startDate=${startDate}&endDate=${endDate}`
             )
             .then((res) => setUserMonthCost(res.data))
+            .finally(() => setLoading(false));
+    }
+
+    async function fetchUserData() {
+        axiosInstance.get<User>(`/admin/get-user-data/${searchParams.userEmail}`)
+            .then((res) => setUserData(res.data))
+            .finally(() => setLoadingUserData(false));
+    }
+
+    async function fetchData(startDate: string, endDate: string) {
+        setLoading(true);
+        await fetchUserReserves(startDate, endDate);
+        await fetchUserMonthlyCost(startDate, endDate);
     }
 
     function handleStartDateChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -81,7 +82,8 @@ const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }
         Promise
             .all([
                 fetchUserReserves(selectedStartDateFormatted, selectedEndDateFormatted),
-                fetchUserMonthlyCost(selectedStartDateFormatted, selectedEndDateFormatted)
+                fetchUserMonthlyCost(selectedStartDateFormatted, selectedEndDateFormatted),
+                fetchUserData()
             ])
             .finally(() => setLoading(false));
     }, []);
@@ -93,7 +95,7 @@ const UserDataPage = ({ searchParams }: { searchParams: { userEmail: string }; }
     return (
         <main className="h-screen bg-gray-600 px-4 pb-[9.5rem]">
             <h1 className="py-4 font-bold text-2xl text-white sm:text-3xl">
-                {`Información de: ${userName} ${userLastName}`}
+                {`Información de: ${loadingUserData ? `Cargando...` : `${userData?.name} ${userData?.lastName}`}`}
             </h1>
             <div className="rounded-lg bg-white h-full overflow-y-auto">
                 <div className="grid py-2 sm:grid-cols-1 md:grid-cols-2">

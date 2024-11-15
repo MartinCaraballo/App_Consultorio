@@ -157,9 +157,6 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                                 >
                                     Quitar Admin
                                 </button>
-                                <button className="p-1 bg-red-600 text-white rounded">
-                                    <FontAwesomeIcon icon={faTrashCan} />
-                                </button>
                             </div>
                         </li>
                     ))}
