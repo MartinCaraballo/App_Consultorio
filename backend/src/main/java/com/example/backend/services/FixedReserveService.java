@@ -30,8 +30,8 @@ public class FixedReserveService {
         fixedReserveRepository.save(fixedReserve);
     }
 
-    public void deleteFixedReserve(FixedReserveKey fixedReserveKey, Integer roomId, String email) {
-        fixedReserveRepository.deleteFixedReserve(fixedReserveKey, roomId, email);
+    public void deleteFixedReserve(FixedReserveKey fixedReserveKey) {
+        fixedReserveRepository.deleteByFixedReserveKey(fixedReserveKey);
     }
 
     public void deleteAllByAdminEmail(String email) { fixedReserveRepository.deleteAllByAdminEmail(email); }
@@ -43,7 +43,7 @@ public class FixedReserveService {
             ReserveDTO reserveDTO = new ReserveDTO(
                     adminUserData.getName(),
                     adminUserData.getLastName(),
-                    fixedReserve.getRoom().getRoomId(),
+                    fixedReserve.getFixedReserveKey().getRoomId(),
                     fixedReserve.getFixedReserveKey().getStartTime(),
                     fixedReserve.getFixedReserveKey().getStartTime().plusHours(1),
                     null,

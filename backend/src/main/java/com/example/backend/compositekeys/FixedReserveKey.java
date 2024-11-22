@@ -15,4 +15,5 @@ import java.time.LocalTime;
 public class FixedReserveKey implements Serializable {
     private Integer dayIndex;
     private LocalTime startTime;
+    private Integer roomId;
 }

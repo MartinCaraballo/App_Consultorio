@@ -13,7 +13,8 @@ public class FixedReserve {
     private FixedReserveKey fixedReserveKey;
 
     @ManyToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "roomId", nullable = false)
+    @MapsId("roomId")
+    @JoinColumn(name = "room_id")
     private Room room;
 
     @ManyToOne

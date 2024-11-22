@@ -11,6 +11,7 @@ import com.example.backend.models.requests.CreateUserReserveReq;
 import com.example.backend.services.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -91,6 +92,7 @@ public class ReserveController {
 
         Room room = roomService.findRoomById(createFixedReserveReq.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+
         Admin admin = adminService.findById(user).
                 orElseThrow(() -> new UnauthorizedUserException("User not authorized"));
 
@@ -110,20 +112,23 @@ public class ReserveController {
 
         List<String> conflictingReserves = new ArrayList<>();
         while (startTime.isBefore(endTime)) {
-            if (userReservesInSelectedDayIndex.get(startTime) != null)
-                conflictingReserves.add(startTime.toString());
+            try {
+                if (userReservesInSelectedDayIndex.get(startTime) != null)
+                    conflictingReserves.add(startTime.toString());
 
-            FixedReserveKey fixedReserveKey = new FixedReserveKey();
-            fixedReserveKey.setStartTime(startTime);
-            fixedReserveKey.setDayIndex(createFixedReserveReq.getDayIndex());
+                FixedReserveKey fixedReserveKey = new FixedReserveKey();
+                fixedReserveKey.setStartTime(startTime);
+                fixedReserveKey.setDayIndex(createFixedReserveReq.getDayIndex());
+                fixedReserveKey.setRoomId(createFixedReserveReq.getRoomId());
 
-            FixedReserve fixedReserve = new FixedReserve();
-            fixedReserve.setFixedReserveKey(fixedReserveKey);
-            fixedReserve.setRoom(room);
-            fixedReserve.setAdmin(admin);
+                FixedReserve fixedReserve = new FixedReserve();
+                fixedReserve.setFixedReserveKey(fixedReserveKey);
+                fixedReserve.setAdmin(admin);
+                fixedReserve.setRoom(room);
 
-            fixedReserveService.saveOrUpdate(fixedReserve);
-            startTime = startTime.plusHours(1);
+                fixedReserveService.saveOrUpdate(fixedReserve);
+                startTime = startTime.plusHours(1);
+            } catch (DataIntegrityViolationException ignored) { }
         }
 
         return new ResponseEntity<>(conflictingReserves, HttpStatus.CREATED);
@@ -158,8 +163,9 @@ public class ReserveController {
         FixedReserveKey fixedReserveKey = new FixedReserveKey();
         fixedReserveKey.setDayIndex(dayIndex);
         fixedReserveKey.setStartTime(startTime);
+        fixedReserveKey.setRoomId(roomId);
 
-        fixedReserveService.deleteFixedReserve(fixedReserveKey, roomId, user);
+        fixedReserveService.deleteFixedReserve(fixedReserveKey);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
