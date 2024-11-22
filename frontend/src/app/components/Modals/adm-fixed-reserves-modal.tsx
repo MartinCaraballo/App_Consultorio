@@ -3,6 +3,10 @@
 import React, {useEffect, useState} from "react";
 import axiosInstance from "@/utils/axios_instance";
 import LoadingComponent from "../loading/loading";
+import {canInsertSemicolon} from "sucrase/dist/types/parser/traverser/util";
+import {
+    createFlightRouterStateFromLoaderTree
+} from "next/dist/server/app-render/create-flight-router-state-from-loader-tree";
 
 const daysOfWeek = [
     "Lunes",
@@ -125,13 +129,16 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 `/reserve/fixed?roomId=${roomId}&dayIndex=${dayIndex}&startTime=${startTime}`
             )
             .then(() => {
+                setStatusType('success');
                 setStatus("Reserva cancelada con éxito.");
                 fetchReservedSlots(selectedRoom, dayIndex);
             })
-            .catch(() =>
-                setStatus(
-                    "Error al cancelar la reserva. Por favor, inténtelo de nuevo."
-                )
+            .catch(() => {
+                    setStatusType('error');
+                    setStatus(
+                        "Error al cancelar la reserva. Por favor, inténtelo de nuevo."
+                    )
+                }
             )
             .finally(() => setLoading(false));
     };
@@ -149,7 +156,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-            <div className="bg-white rounded-lg shadow-md w-full max-w-xl p-6 flex flex-col">
+            <div className="bg-white rounded-lg shadow-md w-full max-w-xl p-6 flex flex-col ">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center">
                         <h1 className="text-2xl font-bold">
@@ -230,7 +237,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     </div>
                     <div>
                         <p className="block text-gray-700">Horas reservadas:</p>
-                        <div className="mt-2 max-h-24 lg:max-h-80 overflow-y-auto">
+                        <div className={`mt-2 max-h-24 ${!reserving ? 'lg:max-h-80' : ''} overflow-y-auto`}>
                             {reservedSlots.length > 0 ? (
                                 <ul>
                                     {reservedSlots.map((slot) => {
@@ -284,7 +291,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                                             ></path>
                                                         </svg>
                                                     )}
-                                                    {!loading ? "Cancelar" : ""}
+                                                    {!loading ? "Eliminar hora" : ""}
                                                 </button>
                                             </li>
                                         );
@@ -333,7 +340,13 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                                 />
                             </div>
-                            <div className="flex flex-row justify-end">
+                            <div className="flex flex-row justify-end space-x-4">
+                                <button
+                                    className="flex bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+                                    onClick={() => setReserving(false)}
+                                >
+                                    Cancelar
+                                </button>
                                 <button
                                     type="submit"
                                     className="flex bg-gray-700 text-white py-2 px-4 rounded-lg hover:bg-gray-800"
