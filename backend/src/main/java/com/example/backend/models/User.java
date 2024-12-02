@@ -22,4 +22,7 @@ public class User {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Column(name = "can_make_fix_reserve")
+    private boolean canMakeFixReserve;
+
 }

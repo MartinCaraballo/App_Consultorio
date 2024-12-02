@@ -19,6 +19,6 @@ public class FixedReserve {
 
     @ManyToOne
     @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
-    private Admin admin;
+    private User user;
 
 }

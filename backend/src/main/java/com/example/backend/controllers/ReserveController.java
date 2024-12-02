@@ -3,7 +3,6 @@ package com.example.backend.controllers;
 import com.example.backend.compositekeys.FixedReserveKey;
 import com.example.backend.compositekeys.UserReserveKey;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.exceptions.UnauthorizedUserException;
 import com.example.backend.models.*;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.models.requests.CreateFixedReserveReq;
@@ -84,17 +83,22 @@ public class ReserveController {
 
     @Transactional
     @PostMapping("/fixed")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<String>> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
-        String user = getUserByContextToken();
-        LocalTime startTime = createFixedReserveReq.getStartTime();
-        LocalTime endTime = createFixedReserveReq.getEndTime();
+        String userId = getUserByContextToken();
+        LocalTime startTime = LocalTime.of(createFixedReserveReq.getStartTime().getHour(), 0);
+        LocalTime endTime = LocalTime.of(createFixedReserveReq.getStartTime().getHour(), 0);
 
         Room room = roomService.findRoomById(createFixedReserveReq.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        Admin admin = adminService.findById(user).
-                orElseThrow(() -> new UnauthorizedUserException("User not authorized"));
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        Optional<Admin> admin = adminService.findById(userId);
+
+        if (admin.isEmpty() && !user.isCanMakeFixReserve()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
         LocalDate today = LocalDate.now();
         List<UserReserve> allUserReservesAfterToday = userReserveService.findAllUserReservesAfterGivenDate(today);
@@ -123,7 +127,7 @@ public class ReserveController {
 
                 FixedReserve fixedReserve = new FixedReserve();
                 fixedReserve.setFixedReserveKey(fixedReserveKey);
-                fixedReserve.setAdmin(admin);
+                fixedReserve.setUser(user);
                 fixedReserve.setRoom(room);
 
                 fixedReserveService.saveOrUpdate(fixedReserve);
@@ -154,12 +158,20 @@ public class ReserveController {
 
     @Transactional
     @DeleteMapping("/fixed")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> cancelFixedReserve(@RequestParam Integer roomId,
                                                      @RequestParam Integer dayIndex,
                                                      @RequestParam LocalTime startTime) {
+        String userId = getUserByContextToken();
 
-        String user = getUserByContextToken();
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        Optional<Admin> admin = adminService.findById(userId);
+
+        if (admin.isEmpty() && !user.isCanMakeFixReserve()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         FixedReserveKey fixedReserveKey = new FixedReserveKey();
         fixedReserveKey.setDayIndex(dayIndex);
         fixedReserveKey.setStartTime(startTime);
@@ -179,7 +191,7 @@ public class ReserveController {
         Map<LocalTime, ReserveDTO> existingReserves = new HashMap<>();
 
         for (FixedReserve fixedReserve : fixedReserves) {
-            User user = fixedReserve.getAdmin().getUser();
+            User user = fixedReserve.getUser();
             FixedReserveKey fixedReserveKey = fixedReserve.getFixedReserveKey();
             Integer reserveRoomId = fixedReserve.getRoom().getRoomId();
             LocalTime startTime = fixedReserveKey.getStartTime();
