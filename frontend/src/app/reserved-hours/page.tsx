@@ -26,12 +26,21 @@ export default function ReservedHours() {
     const closeModal = () => setIsModalOpen(false);
 
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [canMakeFixedReserves, setCanMakeFixedReserves] = useState<boolean>(false);
 
     const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
+
     async function fetchActiveReserves() {
         axiosInstance
             .get<ReserveDTO[]>("/reserve/active")
             .then((res) => setReserveCards(res.data))
+            .finally(() => setLoading(false));
+    }
+
+    async function getUserCanMakeFixedReserves() {
+        axiosInstance
+            .get<boolean>("/user/can-make-fixed-reserves")
+            .then((res) => setCanMakeFixedReserves(res.data))
             .finally(() => setLoading(false));
     }
 
@@ -41,7 +50,13 @@ export default function ReservedHours() {
         if (token) {
             try {
                 const decodedToken = jwtDecode<JwtPayload>(token);
-                setIsAdmin(decodedToken.role === "ADMIN");
+
+                if (decodedToken.role === "ADMIN") {
+                    setIsAdmin(true);
+                } else {
+                    getUserCanMakeFixedReserves();
+                }
+
             } catch (error) {
                 console.error("Error decoding token:", error);
             }
@@ -61,7 +76,7 @@ export default function ReservedHours() {
                 </div>
             )}
             <div className="rounded-lg bg-white h-full text-lg overflow-y-auto">
-                {isAdmin && (
+                {(isAdmin || canMakeFixedReserves) && (
                     <div className="flex flex-row px-4 justify-center">
                         <button
                             onClick={openModal}

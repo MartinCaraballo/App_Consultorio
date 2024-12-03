@@ -2,12 +2,11 @@
 
 import React, {useEffect, useState} from "react";
 import axiosInstance from "@/utils/axios_instance";
-import {DateInput, TimeInput} from "@nextui-org/date-input";
-import {CalendarDateTime, Time, ZonedDateTime} from "@internationalized/date";
+import {TimeInput} from "@nextui-org/date-input";
+import {Time} from "@internationalized/date";
 import {MappedTimeValue, TimeValue} from "@react-types/datepicker";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClock} from "@fortawesome/free-solid-svg-icons";
-import {DOMAttributeNames} from "next/dist/client/head-manager";
 
 const daysOfWeek = [
     "Lunes",
@@ -101,8 +100,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     setStatusType("success");
                     return;
                 }
-                let message =
-                    "Se encontraron reservas en los siguientes horarios:";
+                let message = "Se encontraron reservas en los siguientes horarios:";
                 data.map((hour) => (message += `- ${hour}`));
                 setStatus(message);
                 setStatusType("warning");
