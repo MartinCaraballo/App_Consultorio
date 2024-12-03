@@ -8,7 +8,7 @@ import {MappedTimeValue, TimeValue} from "@react-types/datepicker";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClock} from "@fortawesome/free-solid-svg-icons";
 
-const daysOfWeek = [
+export const daysOfWeek = [
     "Lunes",
     "Martes",
     "Miércoles",

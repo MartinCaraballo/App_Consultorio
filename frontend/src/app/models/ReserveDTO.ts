@@ -5,5 +5,6 @@ interface ReserveDTO {
     startTime: number[];
     endTime: number[];
     reserveDate: number[];
+    dayIndex: number,
     canCancel: boolean;
 }

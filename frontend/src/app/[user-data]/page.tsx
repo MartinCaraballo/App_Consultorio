@@ -6,6 +6,7 @@ import React from "react";
 import LoadingComponent from "../components/loading/loading";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown, faChevronUp} from '@fortawesome/free-solid-svg-icons';
+import {daysOfWeek} from "@/app/components/Modals/adm-fixed-reserves-modal";
 
 const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) => {
     const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
     }
 
     async function fetchUserMonthlyCost(startDate: string, endDate: string) {
+        setLoading(true);
         axiosInstance
             .get<number>(
                 `/admin/get-user-monthly-cost/${searchParams.userEmail}?startDate=${startDate}&endDate=${endDate}`
@@ -92,18 +94,24 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
 
     const toggleFixedReserves = () => {
         setShowFixedReserves(!showFixedReserves);
-        fetchUserFixedReserves();
+
+        if (!showFixedReserves) {
+            fetchUserFixedReserves();
+        }
     }
     const toggleUserReserves = () => {
         setShowUserReserves(!showUserReserves);
-        const selectedStartDateFormatted = formatDate(selectedStartDate);
-        const selectedEndDateFormatted = formatDate(selectedEndDate);
-        Promise
-            .all([
-                fetchUserReserves(selectedStartDateFormatted, selectedEndDateFormatted),
-                fetchUserMonthlyCost(selectedStartDateFormatted, selectedEndDateFormatted),
-            ])
-            .finally(() => setLoading(false));
+
+        if (!showUserReserves) {
+            const selectedStartDateFormatted = formatDate(selectedStartDate);
+            const selectedEndDateFormatted = formatDate(selectedEndDate);
+            Promise
+                .all([
+                    fetchUserReserves(selectedStartDateFormatted, selectedEndDateFormatted),
+                    fetchUserMonthlyCost(selectedStartDateFormatted, selectedEndDateFormatted),
+                ])
+                .finally(() => setLoading(false));
+        }
     }
 
     React.useEffect(() => {
@@ -140,7 +148,7 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                     </div>
                 </div>
                 <div
-                    className="flex flex-col justify-self-center mt-2 overflow-y-auto w-full px-8 sm:px-16 lg:w-2/3 lg:px-0 space-y-4">
+                    className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:w-2/3 lg:px-0 space-y-4">
                     <button onClick={toggleUserReserves}
                             className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
                         <span>{showUserReserves ? "Ocultar Reservas" : "Mostrar Reservas"}</span>
@@ -164,9 +172,12 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                                 return (
                                     <li
                                         key={index}
-                                        className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-20 sm:h-12"
+                                        className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-24 sm:h-12"
                                     >
                                     <span>
+                                        Consultorio: {reserve.roomId}
+                                    </span>
+                                        <span>
                                         Hora: {formatTime(startTime)} - {formatTime(endTime)}
                                     </span>
                                         <span>
@@ -184,15 +195,17 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                             </div>
                         </ul>
                     )}
-                    <div className="mb-4">
-                        <button onClick={toggleFixedReserves}
-                                className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
-                            <span>{showFixedReserves ? "Ocultar Reservas Fijas" : "Mostrar Reservas Fijas"}</span>
-                            <FontAwesomeIcon icon={showFixedReserves ? faChevronUp : faChevronDown}/>
-                        </button>
+                    <div
+                        className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:px-0 space-y-4">
+                        {userData?.canMakeFixedReserve && (
+                            <button onClick={toggleFixedReserves}
+                                    className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
+                                <span>{showFixedReserves ? "Ocultar Reservas Fijas" : "Mostrar Reservas Fijas"}</span>
+                                <FontAwesomeIcon icon={showFixedReserves ? faChevronUp : faChevronDown}/>
+                            </button>
+                        )}
                         {showFixedReserves && (
-                            <div
-                                className="grid place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 pb-4 overflow-y-auto">
+                            <ul className="items-center text-lg xl:text-xl space-y-1 w-full">
                                 {userFixedReserves.map((reserve, index) => {
                                     const startTime = new Date();
                                     startTime.setHours(reserve.startTime[0]);
@@ -205,15 +218,21 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                                     return (
                                         <li
                                             key={index}
-                                            className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-20 sm:h-12"
+                                            className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-24 sm:h-12"
                                         >
+                                            <span>
+                                                Consultorio: {reserve.roomId}
+                                            </span>
+                                            <span>
+                                                Día: {daysOfWeek[reserve.dayIndex]}
+                                            </span>
                                             <span>
                                                 Hora: {formatTime(startTime)} - {formatTime(endTime)}
                                             </span>
                                         </li>
                                     );
                                 })}
-                            </div>
+                            </ul>
                         )}
                     </div>
                 </div>
