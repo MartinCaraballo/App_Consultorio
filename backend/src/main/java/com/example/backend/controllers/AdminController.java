@@ -123,8 +123,8 @@ public class AdminController {
 
     @GetMapping("/get-user-reserves/{id}")
     public ResponseEntity<List<ReserveDTO>> getUserReserves(@PathVariable String id,
-                                                                   @RequestParam LocalDate startDate,
-                                                                   @RequestParam LocalDate endDate) {
+                                                            @RequestParam LocalDate startDate,
+                                                            @RequestParam LocalDate endDate) {
         User user = userService.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
         );
@@ -133,6 +133,22 @@ public class AdminController {
         List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
 
         return new ResponseEntity<>(userReserveDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-user-fixed-reserves/{id}")
+    public ResponseEntity<List<ReserveDTO>> getUserFixedReserves(@PathVariable String id) {
+
+        User user = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User with email %s not found", id)));
+
+        if (!user.isCanMakeFixedReserve())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        List<FixedReserve> userFixedReserveList = fixedReserveService.findAllByUserEmail(user.getEmail());
+
+        List<ReserveDTO> userFixedReserveDTO = fixedReserveService.getReserveDTOS(userFixedReserveList, user);
+
+        return new ResponseEntity<>(userFixedReserveDTO, HttpStatus.OK);
     }
 
     @GetMapping("/get-user-monthly-cost/{id}")
