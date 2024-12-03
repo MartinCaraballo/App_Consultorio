@@ -181,4 +181,19 @@ public class AdminController {
         priceService.deletePrice(id);
         return new ResponseEntity<>("Price deleted successfully", HttpStatus.OK);
     }
+
+    @PutMapping("/change-user-can-make-fixed-reserves/{id}")
+    public ResponseEntity<String> changeUserCanMakeFixedReserves(@PathVariable String id,
+                                                                 @RequestParam Boolean newValue) {
+        User user = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setCanMakeFixedReserve(newValue);
+        userService.saveOrUpdate(user);
+
+        return new ResponseEntity<>(
+                String.format("User can make fix reserve set to %b", newValue),
+                HttpStatus.OK);
+    }
+
 }

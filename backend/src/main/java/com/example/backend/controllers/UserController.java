@@ -1,10 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.models.Login;
-import com.example.backend.models.PasswordResetToken;
-import com.example.backend.models.Price;
-import com.example.backend.models.UserReserve;
+import com.example.backend.models.*;
 import com.example.backend.models.dtos.DayCostDTO;
 import com.example.backend.models.dtos.WeekCostDTO;
 import com.example.backend.models.requests.ChangePasswordReq;
@@ -16,7 +13,6 @@ import com.example.backend.repositories.PasswordResetTokenRepository;
 import com.example.backend.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.bouncycastle.oer.its.etsi102941.AuthorizationResponseMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +76,16 @@ public class UserController {
                 dayCosts, userService.getReserveCost(userWeekReserves), userWeekReserves.size()
         );
         return new ResponseEntity<>(weekCost, HttpStatus.OK);
+    }
+
+    @GetMapping("/can-make-fixed-reserves")
+    public ResponseEntity<Boolean> getUserCanMakeFixedReserves() {
+        String userEmail = getUserByContextToken();
+
+        User user = userService.findById(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return new ResponseEntity<>(user.isCanMakeFixedReserve(), HttpStatus.OK);
     }
 
     @GetMapping("monthly-cost")

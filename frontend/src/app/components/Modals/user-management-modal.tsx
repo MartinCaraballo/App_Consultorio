@@ -99,11 +99,30 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
             });
     }
 
+    async function changeUserCanMakeFixedReserve(userEmail: string, newValue: boolean) {
+        setLoading(true);
+        axiosInstance
+            .put(`/admin/change-user-can-make-fixed-reserves/${userEmail}?newValue=${newValue}`)
+            .then(() => {
+                setShowMessage(true);
+                setStatusMessage(`El usuario ahora ${newValue ? "puede" : "no puede"} hacer reservas fijas con éxito.`);
+            })
+            .catch(() => {
+                setShowMessage(true);
+                setStatusMessage("Error al intentar realizar la operación.");
+            })
+            .finally(() => {
+                fetchUsers();
+                setTimeout(() => setShowMessage(false), 2000);
+                setLoading(false);
+            });
+    }
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-md w-full max-w-2xl p-6 flex flex-col">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-md w-full max-w-2xl lg:max-w-4xl p-6 flex flex-col">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center">
                         <h1 className="text-2xl font-bold">
@@ -141,7 +160,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 </div>
 
                 <h2 className="text-lg font-semibold mb-2">Administradores</h2>
-                <ul className="space-y-2 mb-4 overflow-y-auto">
+                <ul className="space-y-2 mb-4 max-h-36 md:max-h-96 overflow-y-auto">
                     {adminUsers.map((user) => (
                         <li
                             key={user.email}
@@ -165,7 +184,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                 <h2 className="text-lg font-semibold mb-2">
                     Usuarios Regulares
                 </h2>
-                <ul className="space-y-2 mb-4 overflow-y-auto">
+                <ul className="space-y-2 mb-4 max-h-36 md:max-h-96 overflow-y-auto">
                     {regularUsers.map((user) => (
                         <li
                             key={user.email}
@@ -182,6 +201,12 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                             </Link>
                             <div>
                                 <button
+                                    onClick={() => changeUserCanMakeFixedReserve(user.email, !user.canMakeFixedReserve)}
+                                    className={`mr-2 p-1 ${user.canMakeFixedReserve ? "bg-red-600" : "bg-green-500"} text-white rounded`}
+                                >
+                                    {user.canMakeFixedReserve ? "Deshabilitar reservas fijas" : "Habilitar reservas fijas"}
+                                </button>
+                                <button
                                     onClick={() => makeAdmin(user)}
                                     className="mr-2 p-1 bg-green-500 text-white rounded"
                                 >
@@ -193,7 +218,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                                     }
                                     className="p-1 bg-red-600 text-white rounded"
                                 >
-                                    <FontAwesomeIcon icon={faTrashCan} />
+                                    <FontAwesomeIcon icon={faTrashCan}/>
                                 </button>
                             </div>
                         </li>

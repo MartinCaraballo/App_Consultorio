@@ -104,7 +104,7 @@ public class ReserveController {
 
         Optional<Admin> admin = adminService.findById(userId);
 
-        if (admin.isEmpty() && !user.isCanMakeFixReserve()) {
+        if (admin.isEmpty() && !user.isCanMakeFixedReserve()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -176,7 +176,7 @@ public class ReserveController {
 
         Optional<Admin> admin = adminService.findById(userId);
 
-        if (admin.isEmpty() && !user.isCanMakeFixReserve()) {
+        if (admin.isEmpty() && !user.isCanMakeFixedReserve()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
