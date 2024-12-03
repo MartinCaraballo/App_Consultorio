@@ -22,8 +22,8 @@ public class FixedReserveService {
         return fixedReserveRepository.findAllByDayIndexAndRoomId(dayIndex, roomId);
     }
 
-    public List<FixedReserve> findAllByDayIndexAndRoomIdAndAdminEmail(Integer dayIndex, Integer roomId, String adminEmail) {
-        return fixedReserveRepository.findAllByDayIndexAndRoomIdAndAdminEmail(dayIndex, roomId, adminEmail);
+    public List<FixedReserve> findAllByDayIndexAndRoomIdAndUserEmail(Integer dayIndex, Integer roomId, String userEmail) {
+        return fixedReserveRepository.findAllByDayIndexAndRoomIdAndUserEmail(dayIndex, roomId, userEmail);
     }
 
     public void saveOrUpdate(FixedReserve fixedReserve) {
@@ -34,7 +34,7 @@ public class FixedReserveService {
         fixedReserveRepository.deleteByFixedReserveKey(fixedReserveKey);
     }
 
-    public void deleteAllByAdminEmail(String email) { fixedReserveRepository.deleteAllByAdminEmail(email); }
+    public void deleteAllByUserEmail(String email) { fixedReserveRepository.deleteAllByUserEmail(email); }
 
     public List<ReserveDTO> getReserveDTOS(List<FixedReserve> fixedReserves, User adminUserData) {
         List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(fixedReserves.size());

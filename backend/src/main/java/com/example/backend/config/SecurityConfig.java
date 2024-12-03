@@ -30,7 +30,6 @@ public class SecurityConfig {
                                 "user/reset-password-token"
                         ).permitAll()
                         .requestMatchers(
-                                "/reserve/fixed",
                                 "/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest()
                         .authenticated()

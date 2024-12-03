@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -277,21 +276,24 @@ public class ReserveController {
     }
 
     @GetMapping("/fixed")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<ReserveDTO>> getFixedReserves(@RequestParam Integer roomId,
                                                              @RequestParam Integer dayIndex) {
-        String user = getUserByContextToken();
-        Admin admin = adminService.findById(user).orElse(null);
+        String userEmail = getUserByContextToken();
 
-        if (admin == null) {
+        User user = userService.findById(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Optional<Admin> admin = adminService.findById(userEmail);
+
+        if (admin.isEmpty() && !user.isCanMakeFixedReserve()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        User adminUserData = admin.getUser();
-        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomIdAndAdminEmail(
-                dayIndex, roomId, adminUserData.getEmail()
+
+        List<FixedReserve> fixedReserves = fixedReserveService.findAllByDayIndexAndRoomIdAndUserEmail(
+                dayIndex, roomId, user.getEmail()
         );
 
-        List<ReserveDTO> userFixedReservesDTO = fixedReserveService.getReserveDTOS(fixedReserves, adminUserData);
+        List<ReserveDTO> userFixedReservesDTO = fixedReserveService.getReserveDTOS(fixedReserves, user);
 
         return new ResponseEntity<>(userFixedReservesDTO, HttpStatus.OK);
     }

@@ -42,7 +42,7 @@ public class AdminController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> removeAdmin(@PathVariable String id) {
         Admin admin = adminService.findById(id).orElseThrow();
-        fixedReserveService.deleteAllByAdminEmail(admin.getEmail());
+        fixedReserveService.deleteAllByUserEmail(admin.getEmail());
         adminService.delete(admin);
 
         return new ResponseEntity<>(HttpStatus.OK);
