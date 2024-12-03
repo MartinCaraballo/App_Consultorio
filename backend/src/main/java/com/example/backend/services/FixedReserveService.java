@@ -53,6 +53,7 @@ public class FixedReserveService {
                     fixedReserve.getFixedReserveKey().getStartTime(),
                     fixedReserve.getFixedReserveKey().getStartTime().plusHours(1),
                     null,
+                    fixedReserve.getFixedReserveKey().getDayIndex(),
                     userHaveAccess(userData.getEmail())
             );
             userFixedReservesDTO.add(reserveDTO);

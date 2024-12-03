@@ -59,6 +59,7 @@ public class UserReserveService {
                     reserveStartTime,
                     reserveStartTime.plusHours(1),
                     userReserve.getReserveKey().getReserveDate(),
+                    userReserve.getReserveKey().getReserveDate().getDayOfWeek().getValue() - 1,
                     userHaveAccess(adminUserData.getEmail())
             );
             userFixedReservesDTO.add(reserveDTO);

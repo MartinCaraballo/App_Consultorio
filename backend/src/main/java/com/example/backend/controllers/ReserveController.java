@@ -210,6 +210,7 @@ public class ReserveController {
                     startTime,
                     endTime,
                     null,
+                    fixedReserveKey.getDayIndex(),
                     false
             );
             existingReserves.put(startTime, reserveDTO);
@@ -230,6 +231,7 @@ public class ReserveController {
                     startTime,
                     endTime,
                     reserveDate,
+                    reserveDate.getDayOfWeek().getValue() - 1,
                     canCancel
             );
             existingReserves.put(startTime, reserveDTO);
@@ -248,6 +250,7 @@ public class ReserveController {
                         reserveTime,
                         reserveTime.plusHours(1),
                         date,
+                        date.getDayOfWeek().getValue() - 1,
                         false
                 );
                 dayReserves.add(reserveDTO);
