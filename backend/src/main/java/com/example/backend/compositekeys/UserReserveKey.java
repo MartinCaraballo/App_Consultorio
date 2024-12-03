@@ -15,4 +15,5 @@ import java.time.LocalTime;
 public class UserReserveKey implements Serializable {
     private LocalTime startTime;
     private LocalDate reserveDate;
+    private String email;
 }
