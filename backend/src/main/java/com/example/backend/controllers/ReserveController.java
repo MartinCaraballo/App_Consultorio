@@ -85,8 +85,16 @@ public class ReserveController {
     @PostMapping("/fixed")
     public ResponseEntity<List<String>> postFixedReserve(@RequestBody CreateFixedReserveReq createFixedReserveReq) {
         String userId = getUserByContextToken();
-        LocalTime startTime = LocalTime.of(createFixedReserveReq.getStartTime().getHour(), 0);
-        LocalTime endTime = LocalTime.of(createFixedReserveReq.getStartTime().getHour(), 0);
+
+        int startHour = createFixedReserveReq.getStartTime().getHour();
+        int endHour = createFixedReserveReq.getEndTime().getHour();
+
+        if (startHour < 7) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        LocalTime startTime = LocalTime.of(startHour, 0);
+        LocalTime endTime = LocalTime.of(endHour, 0);
 
         Room room = roomService.findRoomById(createFixedReserveReq.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));

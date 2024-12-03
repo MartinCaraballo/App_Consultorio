@@ -2,11 +2,12 @@
 
 import React, {useEffect, useState} from "react";
 import axiosInstance from "@/utils/axios_instance";
-import LoadingComponent from "../loading/loading";
-import {canInsertSemicolon} from "sucrase/dist/types/parser/traverser/util";
-import {
-    createFlightRouterStateFromLoaderTree
-} from "next/dist/server/app-render/create-flight-router-state-from-loader-tree";
+import {DateInput, TimeInput} from "@nextui-org/date-input";
+import {CalendarDateTime, Time, ZonedDateTime} from "@internationalized/date";
+import {MappedTimeValue, TimeValue} from "@react-types/datepicker";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faClock} from "@fortawesome/free-solid-svg-icons";
+import {DOMAttributeNames} from "next/dist/client/head-manager";
 
 const daysOfWeek = [
     "Lunes",
@@ -29,18 +30,17 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     };
 
     const [dayIndex, setDayIndex] = useState<number>(0);
-    const [startHour, setStartHour] = useState<string>("07:00");
-    const [endHour, setEndHour] = useState<string>("23:00");
+    const [startHour, setStartHour] = useState<TimeValue>(new Time(7, 0));
+    const [endHour, setEndHour] = useState<TimeValue>(new Time(23, 0));
     const [status, setStatus] = useState<string>("");
-    const [statusType, setStatusType] = useState<
-        "success" | "error" | "warning" | ""
-    >("");
+    const [statusType, setStatusType] = useState<"success" | "error" | "warning" | "">("");
     const [reservedSlots, setReservedSlots] = useState<ReserveDTO[]>([]);
     const [reserving, setReserving] = useState<boolean>(false);
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(1);
     const [loading, setLoading] = useState(true);
     const [loadingReserves, setLoadingReserves] = useState(true);
+    const [inputsCorrect, setInputsCorrect] = useState<boolean>(true);
 
     async function fetchReservedSlots(roomId: number, dayIndex: number) {
         setLoadingReserves(true);
@@ -72,21 +72,23 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     };
 
     const handleTimeChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
-        setTime: React.Dispatch<React.SetStateAction<string>>
+        event: MappedTimeValue<TimeValue>,
+        setTime: React.Dispatch<React.SetStateAction<TimeValue>>
     ) => {
-        const [hour] = event.target.value.split(":");
-        setTime(`${hour}:00`);
+        setTime(new Time(event.hour, 0));
     };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setLoading(true);
 
+        const startHourFormatted = `${startHour.hour.toString().padStart(2, "0")}:${startHour.minute.toString().padStart(2, "0")}`;
+        const endHourFormatted = `${endHour.hour.toString().padStart(2, "0")}:${endHour.minute.toString().padStart(2, "0")}`;
+
         const payload = {
             dayIndex: dayIndex,
-            startTime: startHour,
-            endTime: endHour,
+            startTime: startHourFormatted,
+            endTime: endHourFormatted,
             roomId: selectedRoom,
         };
 
@@ -116,6 +118,10 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 fetchReservedSlots(selectedRoom, dayIndex);
                 setReserving(false);
             });
+        setTimeout(() => {
+            setStatus("");
+            setStatusType("")
+        }, 3000);
     };
 
     const handleCancel = async (
@@ -137,10 +143,14 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     setStatusType('error');
                     setStatus(
                         "Error al cancelar la reserva. Por favor, inténtelo de nuevo."
-                    )
+                    );
                 }
             )
             .finally(() => setLoading(false));
+        setTimeout(() => {
+            setStatus("");
+            setStatusType("")
+        }, 3000);
     };
 
     useEffect(() => {
@@ -306,40 +316,56 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     </div>
                     {reserving && (
                         <>
-                            <div>
-                                <label
-                                    htmlFor="startHour"
-                                    className="block text-gray-700"
-                                >
-                                    Hora de inicio
-                                </label>
-                                <input
-                                    type="time"
-                                    id="startHour"
-                                    value={startHour}
-                                    onChange={(e) =>
-                                        handleTimeChange(e, setStartHour)
+                            <TimeInput
+                                label="Hora de inicio"
+                                value={startHour}
+                                onChange={(e) => {
+                                    handleTimeChange(e, setStartHour);
+                                }}
+                                endContent={(
+                                    <FontAwesomeIcon icon={faClock} />
+                                )}
+                                hourCycle={24}
+                                minValue={new Time(7)}
+                                maxValue={new Time(22)}
+                                errorMessage={(validationResult) => {
+                                    if (validationResult.isInvalid) {
+                                        setInputsCorrect(false);
+                                        return startHour.hour > 22
+                                            ? "El valor ingresado debe ser menor/igual a las 22 horas."
+                                            : "El valor ingresado debe ser mayor/igual a las 7 horas."
                                     }
-                                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    htmlFor="endHour"
-                                    className="block text-gray-700"
-                                >
-                                    Hora de fin
-                                </label>
-                                <input
-                                    type="time"
-                                    id="endHour"
-                                    value={endHour}
-                                    onChange={(e) =>
-                                        handleTimeChange(e, setEndHour)
+                                }}
+                                classNames={{
+                                    base: "border rounded-lg border-2",
+                                    errorMessage: "border rounded-lg p-3 text-red-600 border-red-300 bg-red-100"
+                                }}
+                            />
+                            <TimeInput
+                                label="Hora de fin"
+                                value={endHour}
+                                onChange={(e) => {
+                                    handleTimeChange(e, setEndHour);
+                                }}
+                                endContent={(
+                                    <FontAwesomeIcon icon={faClock} />
+                                )}
+                                hourCycle={24}
+                                minValue={new Time(8)}
+                                maxValue={new Time(23)}
+                                errorMessage={(validationResult) => {
+                                    if (validationResult.isInvalid) {
+                                        setInputsCorrect(false);
+                                        return startHour.hour > 23
+                                            ? "El valor ingresado debe ser menor/igual a las 23 horas."
+                                            : "El valor ingresado debe ser mayor/igual a las 8 horas."
                                     }
-                                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                                />
-                            </div>
+                                }}
+                                classNames={{
+                                    base: "border rounded-lg border-2",
+                                    errorMessage: "border rounded-lg p-3 text-red-600 border-red-300 bg-red-100"
+                                }}
+                            />
                             <div className="flex flex-row justify-end space-x-4">
                                 <button
                                     className="flex bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700"
@@ -349,6 +375,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                 </button>
                                 <button
                                     type="submit"
+                                    disabled={!inputsCorrect}
                                     className="flex bg-gray-700 text-white py-2 px-4 rounded-lg hover:bg-gray-800"
                                 >
                                     {loading && (
@@ -377,35 +404,40 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                         </>
                     )}
                 </form>
-                {!reserving && (
-                    <div className="flex items-center justify-center mt-4">
-                        <button
-                            className="border-2 px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setReserving(true)}
+                {
+                    !reserving && (
+                        <div className="flex items-center justify-center mt-4">
+                            <button
+                                className="border-2 px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300"
+                                onClick={() => setReserving(true)}
+                            >
+                                Agregar reserva
+                            </button>
+                        </div>
+                    )
+                }
+                {
+                    status && (
+                        <p
+                            className={`mt-4 border rounded-lg p-3 ${statusType === "success"
+                                ? "text-green-600 border-green-300 bg-green-100"
+                                : ""
+                            } ${statusType === "warning"
+                                ? "text-yellow-600 border-yellow-300 bg-yellow-100"
+                                : ""
+                            } ${statusType === "error"
+                                ? "text-red-600 border-red-300 bg-red-100"
+                                : ""
+                            }`}
                         >
-                            Agregar reserva
-                        </button>
-                    </div>
-                )}
-                {status && (
-                    <p
-                        className={`mt-4 border rounded-lg p-3 ${statusType === "success"
-                            ? "text-green-600 border-green-300 bg-green-100"
-                            : ""
-                        } ${statusType === "warning"
-                            ? "text-yellow-600 border-yellow-300 bg-yellow-100"
-                            : ""
-                        } ${statusType === "error"
-                            ? "text-red-600 border-red-300 bg-red-100"
-                            : ""
-                        }`}
-                    >
-                        {status}
-                    </p>
-                )}
+                            {status}
+                        </p>
+                    )
+                }
             </div>
         </div>
-    );
+    )
+        ;
 };
 
 export default FixedReserveModal;
