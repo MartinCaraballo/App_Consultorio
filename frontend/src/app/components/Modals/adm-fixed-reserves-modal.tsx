@@ -321,7 +321,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                     handleTimeChange(e, setStartHour);
                                 }}
                                 endContent={(
-                                    <FontAwesomeIcon icon={faClock} />
+                                    <FontAwesomeIcon icon={faClock}/>
                                 )}
                                 hourCycle={24}
                                 minValue={new Time(7)}
@@ -333,6 +333,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                             ? "El valor ingresado debe ser menor/igual a las 22 horas."
                                             : "El valor ingresado debe ser mayor/igual a las 7 horas."
                                     }
+                                    setInputsCorrect(true);
                                 }}
                                 classNames={{
                                     base: "border rounded-lg border-2",
@@ -346,7 +347,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                     handleTimeChange(e, setEndHour);
                                 }}
                                 endContent={(
-                                    <FontAwesomeIcon icon={faClock} />
+                                    <FontAwesomeIcon icon={faClock}/>
                                 )}
                                 hourCycle={24}
                                 minValue={new Time(8)}
@@ -358,6 +359,7 @@ const FixedReserveModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                                             ? "El valor ingresado debe ser menor/igual a las 23 horas."
                                             : "El valor ingresado debe ser mayor/igual a las 8 horas."
                                     }
+                                    setInputsCorrect(true);
                                 }}
                                 classNames={{
                                     base: "border rounded-lg border-2",
