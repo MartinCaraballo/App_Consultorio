@@ -199,16 +199,16 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen, onClo
                                     {user.name} {user.lastName} ({user.email})
                                 </span>
                             </Link>
-                            <div>
+                            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                                 <button
                                     onClick={() => changeUserCanMakeFixedReserve(user.email, !user.canMakeFixedReserve)}
-                                    className={`mr-2 p-1 ${user.canMakeFixedReserve ? "bg-red-600" : "bg-green-500"} text-white rounded`}
+                                    className={`p-1 ${user.canMakeFixedReserve ? "bg-red-600" : "bg-green-500"} text-white rounded`}
                                 >
                                     {user.canMakeFixedReserve ? "Deshabilitar reservas fijas" : "Habilitar reservas fijas"}
                                 </button>
                                 <button
                                     onClick={() => makeAdmin(user)}
-                                    className="mr-2 p-1 bg-green-500 text-white rounded"
+                                    className="p-1 bg-green-500 text-white rounded"
                                 >
                                     Hacer Admin
                                 </button>
