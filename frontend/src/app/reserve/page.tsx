@@ -210,7 +210,8 @@ export default function ReservePage() {
                 <div className="flex justify-center p-2 border-gray-300 rounded-lg">
                     <div className="inline-flex overflow-x-auto max-w-full font-bold">
                         {weekDates.map((day, index) => {
-                            const dayDate = new Date(Date.parse(day));
+                            const dayDate = new Date(day[0], day[1], day[2]);
+                            console.log(dayDate);
                             const weekDayIndex = dayDate.getDay();
                             return (
                                 <div
