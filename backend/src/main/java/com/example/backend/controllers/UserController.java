@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -41,7 +41,7 @@ public class UserController {
     private final SendEmailService sendEmailService;
     private final UserService userService;
 
-    @GetMapping("/api/week-cost")
+    @GetMapping("/week-cost")
     public ResponseEntity<WeekCostDTO> getWeekCostAndHours() {
         String user = getUserByContextToken();
 
