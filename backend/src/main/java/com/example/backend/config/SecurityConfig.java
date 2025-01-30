@@ -24,13 +24,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                "auth/register",
-                                "auth/login",
-                                "user/reset-password",
-                                "user/reset-password-token"
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/user/reset-password",
+                                "/api/user/reset-password-token"
                         ).permitAll()
                         .requestMatchers(
-                                "/admin/**").hasAuthority("ROLE_ADMIN")
+                                "/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest()
                         .authenticated()
                 )
