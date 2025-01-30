@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final TokenProvider tokenProvider;

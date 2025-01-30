@@ -41,7 +41,7 @@ public class UserController {
     private final SendEmailService sendEmailService;
     private final UserService userService;
 
-    @GetMapping("/week-cost")
+    @GetMapping("/api/week-cost")
     public ResponseEntity<WeekCostDTO> getWeekCostAndHours() {
         String user = getUserByContextToken();
 

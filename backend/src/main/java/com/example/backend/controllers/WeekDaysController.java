@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/week")
+@RequestMapping("/api/week")
 public class WeekDaysController {
 
     @GetMapping

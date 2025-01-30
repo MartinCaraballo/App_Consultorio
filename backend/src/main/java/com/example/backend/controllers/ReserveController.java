@@ -23,7 +23,7 @@ import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reserve")
+@RequestMapping("/api/reserve")
 public class ReserveController {
 
     private final FixedReserveService fixedReserveService;
