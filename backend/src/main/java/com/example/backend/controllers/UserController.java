@@ -88,7 +88,7 @@ public class UserController {
         return new ResponseEntity<>(user.isCanMakeFixedReserve(), HttpStatus.OK);
     }
 
-    @GetMapping("monthly-cost")
+    @GetMapping("/monthly-cost")
     public ResponseEntity<Integer> getMonthlyCost() {
         String userMail = getUserByContextToken();
 
@@ -132,7 +132,7 @@ public class UserController {
         PasswordResetToken passwordResetToken = new PasswordResetToken(loginData, reqDateTime, expDateTime, token);
         userService.createPasswordResetTokenForUser(passwordResetToken);
 
-        String recoverPasswordFullUrl = recoverPasswordURL + ":3000/forgot-password?token=" + token;
+        String recoverPasswordFullUrl = recoverPasswordURL + "/forgot-password?token=" + token;
 
         sendEmailService.sendRecoverPasswordEmail(resetPasswordReq.email(), passwordResetToken, recoverPasswordFullUrl);
 
