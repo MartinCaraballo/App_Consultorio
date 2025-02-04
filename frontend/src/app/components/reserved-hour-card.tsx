@@ -16,7 +16,7 @@ const ReservedHourCard = (props: propsType) => {
     endTime.setHours(props.endTime[0]);
     endTime.setMinutes(props.endTime[1]);
 
-    const reserveDate = new Date(props.reserveDate.toString());
+    const reserveDate = new Date(props.reserveDate[0], props.reserveDate[1] - 1, props.reserveDate[2]);
 
     // Function to show the hours with 2 digits.
     const formatTime = (date: Date): string => {
