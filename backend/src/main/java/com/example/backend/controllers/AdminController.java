@@ -56,6 +56,7 @@ public class AdminController {
         );
         User user = login.getUser();
         userReserveService.deleteAllByUserEmail(login.getEmail());
+        fixedReserveService.deleteAllByUserEmail(login.getEmail());
         loginService.delete(login);
         userService.delete(user);
 
