@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @RestController
@@ -36,7 +37,7 @@ public class ReserveController {
     @PostMapping
     public ResponseEntity<String> postUserReserve(@RequestBody List<CreateUserReserveReq> listReserveReq) {
         String userEmail = getUserByContextToken();
-        LocalDateTime nowDateTime = LocalDateTime.now();
+        LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("America/Montevideo"));
 
         for (CreateUserReserveReq createReserveReq : listReserveReq) {
 
@@ -152,7 +153,7 @@ public class ReserveController {
                                                 @RequestParam LocalDate date) {
         LocalDate lastDayToCancel = date.minusDays(1);
 
-        if (!LocalDate.now().isBefore(lastDayToCancel)) {
+        if (!LocalDate.now(ZoneId.of("America/Montevideo")).isBefore(lastDayToCancel)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
