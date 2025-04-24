@@ -16,39 +16,39 @@ interface ConfirmReserveModalProps {
 const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
     props: ConfirmReserveModalProps
 ) => {
+    const today = new Date();
+    const month_names = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
+
     const [showResultModal, setShowResultModal] = useState(false);
-    const [resultType, setResultType] = useState<"success" | "error">(
-        "success"
-    );
+    const [resultType, setResultType] = useState<"success" | "error">("success");
     const [resultMessage, setResultMessage] = useState("");
     const [confirmDisabled, setConfirmDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isMonthlyReserve, setIsMonthlyReserve] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState("current");
 
-    // Function to format time
     const formatTime = (timeString: string): string => {
         const [hour, minute] = timeString.split(":").map(Number);
         const plusHour = hour + 1;
-        return `${plusHour.toString().padStart(2, "0")}:${minute
-            .toString()
-            .padStart(2, "0")}`;
+        return `${plusHour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
     };
 
-    // Create JSON payload for reservation
     const createReservePayload = () => {
         return props.hoursToReserve.map((hour) => {
             const [startHour, startMinute] = hour.split(":").map(Number);
-            const startTime = `${startHour
-                .toString()
-                .padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+            const startTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
             return {
                 roomId: props.selectedRoomId,
-                startTime: startTime,
+                startTime,
                 reserveDate: props.selectedDayDate,
+                monthly: isMonthlyReserve,
+                month: isMonthlyReserve ? selectedMonth : undefined,
             };
         });
     };
 
-    // Function to post reserves
     const postReserves = async () => {
         setLoading(true);
         setConfirmDisabled(true);
@@ -61,15 +61,11 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                 props.clearHoursToReserve();
             })
             .catch((err) => {
-                if (err.response.status === 401) {
-                    setResultMessage(
-                        "No se cumplen con las condiciones horarias para efectuar la reserva."
-                    );
+                if (err.response?.status === 401) {
+                    setResultMessage("No se cumplen con las condiciones horarias para efectuar la reserva.");
                     setResultType("error");
                 } else {
-                    setResultMessage(
-                        "Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo."
-                    );
+                    setResultMessage("Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo.");
                     setResultType("error");
                 }
             })
@@ -86,22 +82,55 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 sm:mx-auto overflow-y-auto h-3/5 sm:h-max">
-                <h2 className="text-lg font-bold mb-4 text-gray-800">
-                    Confirmar Reserva
-                </h2>
+                <h2 className="text-lg font-bold mb-4 text-gray-800">Confirmar Reserva</h2>
+
                 {loading && (
                     <div className="fixed inset-0 flex items-center justify-center z-50">
-                        {<LoadingComponent />}
+                        <LoadingComponent />
                     </div>
                 )}
+
                 <>
-                    <ul className="list-disc pl-5 mb-4 text-gray-700 overflow-y-auto">
+                    <ul className="list-disc pl-5 mb-4 text-gray-700 overflow-y-auto max-h-72 lg:max-h-80">
                         {props.hoursToReserve.map((hour, index) => (
                             <li key={index} className="mb-2">
                                 {`${hour} - ${formatTime(hour)}`}
                             </li>
                         ))}
                     </ul>
+
+                    {/* Checkbox para reserva mensual */}
+                    <div className="mb-4 flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="monthly-reserve"
+                            checked={isMonthlyReserve}
+                            onChange={() => setIsMonthlyReserve(!isMonthlyReserve)}
+                            className="w-4 h-4 text-blue-600"
+                        />
+                        <label htmlFor="monthly-reserve" className="text-sm text-gray-700">
+                            Reserva mensual
+                        </label>
+                    </div>
+
+                    {/* Selector de mes si está chequeado */}
+                    {isMonthlyReserve && (
+                        <div className="mb-4">
+                            <label htmlFor="select-month" className="block text-sm font-medium text-gray-700 mb-1">
+                                Seleccione el mes
+                            </label>
+                            <select
+                                id="select-month"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
+                            >
+                                <option value="current">{month_names[today.getMonth()]}</option>
+                                <option value="next">{month_names[(today.getMonth() + 1) % 12]}</option>
+                            </select>
+                        </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row sm:justify-end gap-4">
                         <button
                             onClick={props.onClose}
@@ -117,6 +146,7 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                             Confirmar
                         </button>
                     </div>
+
                     <ResultModal
                         isOpen={showResultModal}
                         onClose={() => {
