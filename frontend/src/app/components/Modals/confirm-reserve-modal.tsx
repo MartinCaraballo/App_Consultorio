@@ -99,37 +99,37 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                         ))}
                     </ul>
 
-                    {/* Checkbox para reserva mensual */}
-                    <div className="mb-4 flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            id="monthly-reserve"
-                            checked={isMonthlyReserve}
-                            onChange={() => setIsMonthlyReserve(!isMonthlyReserve)}
-                            className="w-4 h-4 text-blue-600"
-                        />
-                        <label htmlFor="monthly-reserve" className="text-sm text-gray-700">
-                            Reserva mensual
-                        </label>
-                    </div>
+                    {/*/!* Checkbox para reserva mensual *!/*/}
+                    {/*<div className="mb-4 flex items-center space-x-2">*/}
+                    {/*    <input*/}
+                    {/*        type="checkbox"*/}
+                    {/*        id="monthly-reserve"*/}
+                    {/*        checked={isMonthlyReserve}*/}
+                    {/*        onChange={() => setIsMonthlyReserve(!isMonthlyReserve)}*/}
+                    {/*        className="w-4 h-4 text-blue-600"*/}
+                    {/*    />*/}
+                    {/*    <label htmlFor="monthly-reserve" className="text-sm text-gray-700">*/}
+                    {/*        Reserva mensual*/}
+                    {/*    </label>*/}
+                    {/*</div>*/}
 
-                    {/* Selector de mes si está chequeado */}
-                    {isMonthlyReserve && (
-                        <div className="mb-4">
-                            <label htmlFor="select-month" className="block text-sm font-medium text-gray-700 mb-1">
-                                Seleccione el mes
-                            </label>
-                            <select
-                                id="select-month"
-                                value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
-                            >
-                                <option value="current">{month_names[today.getMonth()]}</option>
-                                <option value="next">{month_names[(today.getMonth() + 1) % 12]}</option>
-                            </select>
-                        </div>
-                    )}
+                    {/*/!* Selector de mes si está chequeado *!/*/}
+                    {/*{isMonthlyReserve && (*/}
+                    {/*    <div className="mb-4">*/}
+                    {/*        <label htmlFor="select-month" className="block text-sm font-medium text-gray-700 mb-1">*/}
+                    {/*            Seleccione el mes*/}
+                    {/*        </label>*/}
+                    {/*        <select*/}
+                    {/*            id="select-month"*/}
+                    {/*            value={selectedMonth}*/}
+                    {/*            onChange={(e) => setSelectedMonth(e.target.value)}*/}
+                    {/*            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"*/}
+                    {/*        >*/}
+                    {/*            <option value="current">{month_names[today.getMonth()]}</option>*/}
+                    {/*            <option value="next">{month_names[(today.getMonth() + 1) % 12]}</option>*/}
+                    {/*        </select>*/}
+                    {/*    </div>*/}
+                    {/*)}*/}
 
                     <div className="flex flex-col sm:flex-row sm:justify-end gap-4">
                         <button
