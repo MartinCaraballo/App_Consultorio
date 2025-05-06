@@ -27,7 +27,7 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
     const [confirmDisabled, setConfirmDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isMonthlyReserve, setIsMonthlyReserve] = useState(false);
-    const [selectedMonth, setSelectedMonth] = useState("current");
+    const [selectedMonth, setSelectedMonth] = useState(month_names[today.getMonth()]);
 
     const formatTime = (timeString: string): string => {
         const [hour, minute] = timeString.split(":").map(Number);
@@ -43,8 +43,6 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                 roomId: props.selectedRoomId,
                 startTime,
                 reserveDate: props.selectedDayDate,
-                monthly: isMonthlyReserve,
-                month: isMonthlyReserve ? selectedMonth : undefined,
             };
         });
     };
@@ -55,6 +53,47 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
         const reservesPayload = createReservePayload();
         axiosInstance
             .post("/reserve", reservesPayload)
+            .then(() => {
+                setResultMessage("¡Tu reserva ha sido realizada con éxito!");
+                setResultType("success");
+                props.clearHoursToReserve();
+            })
+            .catch((err) => {
+                if (err.response?.status === 401) {
+                    setResultMessage("No se cumplen con las condiciones horarias para efectuar la reserva.");
+                    setResultType("error");
+                } else {
+                    setResultMessage("Hubo un error al confirmar la reserva. Revisa la hora y día seleccionada y vuelve a intentarlo.");
+                    setResultType("error");
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+                setConfirmDisabled(false);
+                props.updateReserveCards();
+                setShowResultModal(true);
+            });
+    };
+
+    const createMonthlyReservePayload = () => {
+        return props.hoursToReserve.map((hour) => {
+            const [startHour, startMinute] = hour.split(":").map(Number);
+            const startTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+            return {
+                roomId: props.selectedRoomId,
+                startTime,
+                reserveDate: props.selectedDayDate,
+                monthIndex : month_names.indexOf(selectedMonth) + 1 % 12
+            };
+        });
+    };
+
+    const postMonthlyReserves = async () => {
+        setLoading(true);
+        setConfirmDisabled(true);
+        const reservesPayload = createMonthlyReservePayload();
+        axiosInstance
+            .post("/reserve/monthly", reservesPayload)
             .then(() => {
                 setResultMessage("¡Tu reserva ha sido realizada con éxito!");
                 setResultType("success");
@@ -99,37 +138,37 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                         ))}
                     </ul>
 
-                    {/*/!* Checkbox para reserva mensual *!/*/}
-                    {/*<div className="mb-4 flex items-center space-x-2">*/}
-                    {/*    <input*/}
-                    {/*        type="checkbox"*/}
-                    {/*        id="monthly-reserve"*/}
-                    {/*        checked={isMonthlyReserve}*/}
-                    {/*        onChange={() => setIsMonthlyReserve(!isMonthlyReserve)}*/}
-                    {/*        className="w-4 h-4 text-blue-600"*/}
-                    {/*    />*/}
-                    {/*    <label htmlFor="monthly-reserve" className="text-sm text-gray-700">*/}
-                    {/*        Reserva mensual*/}
-                    {/*    </label>*/}
-                    {/*</div>*/}
+                    {/* Checkbox para reserva mensual */}
+                    <div className="mb-4 flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="monthly-reserve"
+                            checked={isMonthlyReserve}
+                            onChange={() => setIsMonthlyReserve(!isMonthlyReserve)}
+                            className="w-4 h-4 text-blue-600"
+                        />
+                        <label htmlFor="monthly-reserve" className="text-sm text-gray-700">
+                            Reserva mensual
+                        </label>
+                    </div>
 
-                    {/*/!* Selector de mes si está chequeado *!/*/}
-                    {/*{isMonthlyReserve && (*/}
-                    {/*    <div className="mb-4">*/}
-                    {/*        <label htmlFor="select-month" className="block text-sm font-medium text-gray-700 mb-1">*/}
-                    {/*            Seleccione el mes*/}
-                    {/*        </label>*/}
-                    {/*        <select*/}
-                    {/*            id="select-month"*/}
-                    {/*            value={selectedMonth}*/}
-                    {/*            onChange={(e) => setSelectedMonth(e.target.value)}*/}
-                    {/*            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"*/}
-                    {/*        >*/}
-                    {/*            <option value="current">{month_names[today.getMonth()]}</option>*/}
-                    {/*            <option value="next">{month_names[(today.getMonth() + 1) % 12]}</option>*/}
-                    {/*        </select>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
+                    {/* Selector de mes si está chequeado */}
+                    {isMonthlyReserve && (
+                        <div className="mb-4">
+                            <label htmlFor="select-month" className="block text-sm font-medium text-gray-700 mb-1">
+                                Seleccione el mes
+                            </label>
+                            <select
+                                id="select-month"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
+                            >
+                                <option value={selectedMonth}>{selectedMonth}</option>
+                                <option value={month_names[(today.getMonth() + 1) % 12]}>{month_names[(today.getMonth() + 1) % 12]}</option>
+                            </select>
+                        </div>
+                    )}
 
                     <div className="flex flex-col sm:flex-row sm:justify-end gap-4">
                         <button
@@ -139,7 +178,13 @@ const ConfirmReserveModal: React.FC<ConfirmReserveModalProps> = (
                             Cancelar
                         </button>
                         <button
-                            onClick={postReserves}
+                            onClick={() => {
+                                if (isMonthlyReserve) {
+                                    postMonthlyReserves()
+                                } else {
+                                    postReserves()
+                                }
+                            }}
                             disabled={confirmDisabled}
                             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300"
                         >

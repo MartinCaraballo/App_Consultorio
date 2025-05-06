@@ -23,6 +23,10 @@ public class UserReserveService {
         return userReserveRepository.findAllUserReservesAfterGivenDate(date);
     }
 
+    public List<UserReserve> findAllMonthlyUserReservesAfterGivenDate(LocalDate date, String userEmail) {
+        return userReserveRepository.findAllMonthlyUserReservesAfterGivenDate(date, userEmail);
+    }
+
     public List<UserReserve> findAllByDateAndRoomId(LocalDate date, Integer roomId) {
         return userReserveRepository.findAllByDateAndRoomId(date, roomId);
     }
@@ -47,27 +51,31 @@ public class UserReserveService {
         userReserveRepository.deleteAllReservesPastRefDate(refDate);
     }
 
-    public List<ReserveDTO> getReserveDTOS(List<UserReserve> userReserves, User adminUserData) {
+    public List<ReserveDTO> getReserveDTOS(List<UserReserve> userReserves, User userData) {
         List<ReserveDTO> userFixedReservesDTO = new ArrayList<>(userReserves.size());
 
         for (UserReserve userReserve : userReserves) {
             LocalTime reserveStartTime = userReserve.getReserveKey().getStartTime();
             ReserveDTO reserveDTO = new ReserveDTO(
-                    adminUserData.getName(),
-                    adminUserData.getLastName(),
+                    userData.getName(),
+                    userData.getLastName(),
                     userReserve.getRoom().getRoomId(),
                     reserveStartTime,
                     reserveStartTime.plusHours(1),
                     userReserve.getReserveKey().getReserveDate(),
                     userReserve.getReserveKey().getReserveDate().getDayOfWeek().getValue() - 1,
-                    userHaveAccess(adminUserData.getEmail())
+                    userCanCancel(userData.getEmail(), userReserve.getIsMonthly()),
+                    userReserve.getIsMonthly()
             );
             userFixedReservesDTO.add(reserveDTO);
         }
         return userFixedReservesDTO;
     }
 
-    private boolean userHaveAccess(String id) {
+    private boolean userCanCancel(String id, Boolean isMonthly) {
+        if (isMonthly) {
+            return false;
+        }
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return user.equals(id);
     }

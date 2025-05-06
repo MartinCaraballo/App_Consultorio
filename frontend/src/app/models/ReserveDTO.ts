@@ -7,4 +7,5 @@ interface ReserveDTO {
     reserveDate: number[];
     dayIndex: number,
     canCancel: boolean;
+    isMonthly: boolean;
 }

@@ -183,6 +183,9 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                                         <span>
                                         Fecha: {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
                                     </span>
+                                        <span>
+                                        Tipo: {`${reserve.isMonthly ? "Mensual" : "Semanal"}`}
+                                    </span>
                                     </li>
                                 );
                             })}

@@ -17,4 +17,5 @@ public class ReserveDTO {
     private LocalDate reserveDate;
     private Integer dayIndex;
     private Boolean canCancel;
+    private Boolean isMonthly;
 }

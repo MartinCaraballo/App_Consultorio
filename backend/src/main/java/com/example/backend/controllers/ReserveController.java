@@ -6,6 +6,7 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.models.*;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.models.requests.CreateFixedReserveReq;
+import com.example.backend.models.requests.CreateMonthlyReserveReq;
 import com.example.backend.models.requests.CreateUserReserveReq;
 import com.example.backend.services.*;
 import jakarta.transaction.Transactional;
@@ -59,23 +60,41 @@ public class ReserveController {
                     createReserveReq.getStartTime().isAfter(nowDateTime.toLocalTime()))
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
+            boolean result = createReserve(
+                    userEmail, createReserveReq.getReserveDate(), createReserveReq.getStartTime(), createReserveReq.getRoomId(), false
+            );
 
-            Optional<User> user = userService.findById(userEmail);
-            Optional<Room> room = roomService.findRoomById(createReserveReq.getRoomId());
-            if (user.isEmpty() || room.isEmpty()) {
+            if (!result) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Transactional
+    @PostMapping("/monthly")
+    public ResponseEntity<List<String>> postMonthlyUserReserve(@RequestBody List<CreateMonthlyReserveReq> createMonthlyReserveReqs) {
+        String userEmail = getUserByContextToken();
+        LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("America/Montevideo"));
+
+        for (CreateMonthlyReserveReq reserve : createMonthlyReserveReqs) {
+            LocalDate nextDate = reserve.getReserveDate();
+
+            if (reserve.getReserveDate().isBefore(nowDateTime.toLocalDate())) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            UserReserveKey reserveKey = new UserReserveKey();
-            reserveKey.setStartTime(createReserveReq.getStartTime());
-            reserveKey.setReserveDate(createReserveReq.getReserveDate());
+            while (nextDate.getMonthValue() <= reserve.getMonthIndex()) {
 
-            UserReserve userReserve = new UserReserve();
-            userReserve.setReserveKey(reserveKey);
-            userReserve.setRoom(room.get());
-            userReserve.setUser(user.get());
-
-            userReserveService.saveOrUpdate(userReserve);
+                if (nextDate.getMonthValue() == reserve.getMonthIndex()) {
+                    boolean result = createReserve(userEmail, nextDate, reserve.getStartTime(), reserve.getRoomId(), true);
+                    if (!result) {
+                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    }
+                }
+                nextDate = nextDate.plusWeeks(1);
+            }
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -161,6 +180,8 @@ public class ReserveController {
 
         userReserveService.deleteUserReserve(date, startTime, roomId, user);
 
+        //TODO: CHECK IF THE RESERVE IS NOT MONTHLY BEFORE DELETE
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -212,6 +233,7 @@ public class ReserveController {
                     endTime,
                     null,
                     fixedReserveKey.getDayIndex(),
+                    false,
                     false
             );
             existingReserves.put(startTime, reserveDTO);
@@ -224,7 +246,7 @@ public class ReserveController {
             LocalTime startTime = reserveKey.getStartTime();
             LocalTime endTime = reserveKey.getStartTime().plusHours(1);
             LocalDate reserveDate = reserveKey.getReserveDate();
-            boolean canCancel = userHaveAccess(user.getEmail());
+            boolean canCancel = userHaveAccess(user.getEmail(), userReserve.getIsMonthly());
             ReserveDTO reserveDTO = new ReserveDTO(
                     user.getName(),
                     user.getLastName(),
@@ -233,7 +255,8 @@ public class ReserveController {
                     endTime,
                     reserveDate,
                     reserveDate.getDayOfWeek().getValue() - 1,
-                    canCancel
+                    canCancel,
+                    userReserve.getIsMonthly()
             );
             existingReserves.put(startTime, reserveDTO);
         }
@@ -252,6 +275,7 @@ public class ReserveController {
                         reserveTime.plusHours(1),
                         date,
                         date.getDayOfWeek().getValue() - 1,
+                        false,
                         false
                 );
                 dayReserves.add(reserveDTO);
@@ -272,9 +296,23 @@ public class ReserveController {
         LocalDate today = LocalDate.now();
         // setting to monday
         LocalDate startWeekDate = today.minusDays(today.getDayOfWeek().getValue() - 1);
-        LocalDate endWeekDate = today.plusWeeks(1);
+        LocalDate endWeekDate = today.plusWeeks(1).minusDays(1);
         List<UserReserve> userWeekReserves = userReserveService.findAllReserveBetweenDates(startWeekDate, endWeekDate, user);
         List<ReserveDTO> result = userReserveService.getReserveDTOS(userWeekReserves, userData);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<List<ReserveDTO>> getMonthUserReserves() {
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        User userData = userService.findById(user).orElseThrow(
+                () -> new ResourceNotFoundException("User not found")
+        );
+
+        LocalDate today = LocalDate.now();
+        List<UserReserve> userMonthReserves = userReserveService.findAllMonthlyUserReservesAfterGivenDate(today, user);
+        List<ReserveDTO> result = userReserveService.getReserveDTOS(userMonthReserves, userData);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -306,8 +344,32 @@ public class ReserveController {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
-    private boolean userHaveAccess(String id) {
+    private boolean userHaveAccess(String id, Boolean isMonthlyReserve) {
+        if (isMonthlyReserve) {
+            return false;
+        }
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return user.equals(id);
+    }
+
+    private boolean createReserve(String userEmail, LocalDate reserveDate, LocalTime startTime, Integer roomId, Boolean isMonthly) {
+        Optional<User> user = userService.findById(userEmail);
+        Optional<Room> room = roomService.findRoomById(roomId);
+        if (user.isEmpty() || room.isEmpty()) {
+            return false;
+        }
+
+        UserReserveKey reserveKey = new UserReserveKey();
+        reserveKey.setStartTime(startTime);
+        reserveKey.setReserveDate(reserveDate);
+
+        UserReserve userReserve = new UserReserve();
+        userReserve.setReserveKey(reserveKey);
+        userReserve.setRoom(room.get());
+        userReserve.setUser(user.get());
+        userReserve.setIsMonthly(isMonthly);
+
+        userReserveService.saveOrUpdate(userReserve);
+        return true;
     }
 }

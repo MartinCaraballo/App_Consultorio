@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import ReservedHourCard from "@/app/components/reserved-hour-card";
 import FixedReserveModal from "@/app/components/Modals/adm-fixed-reserves-modal";
-import { jwtDecode } from "jwt-decode";
-import { useRouter } from "next/navigation";
+import {jwtDecode} from "jwt-decode";
+import {useRouter} from "next/navigation";
 import axiosInstance from "@/utils/axios_instance";
 import LoadingComponent from "../components/loading/loading";
 
@@ -29,11 +29,22 @@ export default function ReservedHours() {
     const [canMakeFixedReserves, setCanMakeFixedReserves] = useState<boolean>(false);
 
     const [reserveCards, setReserveCards] = useState<ReserveDTO[]>([]);
+    const [monthlyReserves, setMonthlyReserves] = useState<ReserveDTO[]>([]);
+
+    const [activeTab, setActiveTab] = useState<"active" | "monthly">("active");
 
     async function fetchActiveReserves() {
         axiosInstance
             .get<ReserveDTO[]>("/reserve/active")
             .then((res) => setReserveCards(res.data))
+            .finally(() => setLoading(false));
+    }
+
+    async function fetchMonthlyReserves() {
+        axiosInstance
+            .get<ReserveDTO[]>("/reserve/monthly")
+            .then((res) => setMonthlyReserves(res.data))
+            .catch((err) => console.error("Error fetching monthly reserves:", err))
             .finally(() => setLoading(false));
     }
 
@@ -46,6 +57,8 @@ export default function ReservedHours() {
 
     useEffect(() => {
         fetchActiveReserves();
+        fetchMonthlyReserves();
+
         const token = document.cookie.split("=")[1];
         if (token) {
             try {
@@ -72,7 +85,7 @@ export default function ReservedHours() {
             </h1>
             {loading && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
-                    {<LoadingComponent />}
+                    {<LoadingComponent/>}
                 </div>
             )}
             <div className="rounded-lg bg-white h-full text-lg overflow-y-auto">
@@ -86,21 +99,76 @@ export default function ReservedHours() {
                         </button>
                     </div>
                 )}
-                <div className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2 max-h-[80vg]">
-                    {reserveCards.map((reserve, index) => {
-                        return (
-                            <ReservedHourCard
-                                key={index}
-                                startTime={reserve.startTime}
-                                endTime={reserve.endTime}
-                                reserveDate={reserve.reserveDate}
-                                room={reserve.roomId}
-                            />
-                        );
-                    })}
+                <div className="flex justify-center mt-6 space-x-4">
+                    <button
+                        onClick={() => setActiveTab("active")}
+                        className={`py-2 px-4 rounded-t-lg ${
+                            activeTab === "active"
+                                ? "bg-gray-700 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                    >
+                        Activas de la Semana
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("monthly")}
+                        className={`py-2 px-4 rounded-t-lg ${
+                            activeTab === "monthly"
+                                ? "bg-gray-700 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                    >
+                        Historial del Mes
+                    </button>
+                </div>
+                <div className="px-4 pb-4">
+                    {activeTab === "active" && (
+                        <>
+                            <h2 className="text-xl font-semibold mt-4">Reservas Activas de la Semana</h2>
+                            {reserveCards.length === 0 ? (
+                                <p className="text-center text-gray-500 mt-4">No tienes reservas activas esta
+                                    semana.</p>
+                            ) : (
+                                <div
+                                    className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2">
+                                    {reserveCards.map((reserve, index) => (
+                                        <ReservedHourCard
+                                            key={`active-${index}`}
+                                            startTime={reserve.startTime}
+                                            endTime={reserve.endTime}
+                                            reserveDate={reserve.reserveDate}
+                                            room={reserve.roomId}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === "monthly" && (
+                        <>
+                            <h2 className="text-xl font-semibold mt-4">Historial de Reservas del Mes</h2>
+                            {monthlyReserves.length === 0 ? (
+                                <p className="text-center text-gray-500 mt-4">No se encontraron reservas este mes.</p>
+                            ) : (
+                                <div
+                                    className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2">
+                                    {monthlyReserves.map((reserve, index) => (
+                                        <ReservedHourCard
+                                            key={`monthly-${index}`}
+                                            startTime={reserve.startTime}
+                                            endTime={reserve.endTime}
+                                            reserveDate={reserve.reserveDate}
+                                            room={reserve.roomId}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
-            <FixedReserveModal isOpen={isModalOpen} onClose={closeModal} />
+            <FixedReserveModal isOpen={isModalOpen} onClose={closeModal}/>
         </main>
     );
 }

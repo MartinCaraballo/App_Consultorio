@@ -23,4 +23,6 @@ public class UserReserve {
     @ManyToOne
     @JoinColumn(name = "room_id", referencedColumnName = "roomId", nullable = false)
     private Room room;
+
+    private Boolean isMonthly;
 }
