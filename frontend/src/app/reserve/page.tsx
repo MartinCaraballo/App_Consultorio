@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import HourCard from "@/app/components/hour-card";
 import ConfirmReserveModal from "@/app/components/Modals/confirm-reserve-modal";
+import MonthlyReservesModal from "@/app/components/Modals/monthly-reserves-modal";
 import InfoModal from "@/app/components/Modals/info-modal";
 import axiosInstance from "../../utils/axios_instance";
 import LoadingComponent from "../components/loading/loading";
@@ -61,6 +62,10 @@ export default function ReservePage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
+
+    const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
+    const openMonthlyModal = () => setIsMonthlyModalOpen(true);
+    const closeMonthlyModal = () => setIsMonthlyModalOpen(false);
 
     const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
     const [infoModalMessage, setInfoModalMessage] = useState<string>("");
@@ -249,7 +254,7 @@ export default function ReservePage() {
                 <div
                     className={`px-4 flex flex-wrap ${
                         editingReserve ? "justify-evenly" : ""
-                    }`}
+                    } justify-around`}
                 >
                     <div className="py-1 font-bold text-lg">
                         <select
@@ -265,6 +270,16 @@ export default function ReservePage() {
                             ))}
                         </select>
                     </div>
+                    {!editingReserve && (
+                        <div className="mb-4">
+                            <button
+                                onClick={openMonthlyModal}
+                                className="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800 transition"
+                            >
+                                Hacer una Reserva Mensual
+                            </button>
+                        </div>
+                    )}
                     {editingReserve && (
                         <button
                             onClick={openModal}
@@ -319,6 +334,10 @@ export default function ReservePage() {
                 onClose={handleInfoModalClose}
                 message={infoModalMessage}
                 success={infoModalSuccess}
+            />
+            <MonthlyReservesModal
+                isOpen={isMonthlyModalOpen}
+                onClose={closeMonthlyModal}
             />
         </main>
     );

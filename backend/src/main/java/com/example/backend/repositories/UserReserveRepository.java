@@ -9,8 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserReserveRepository extends JpaRepository<UserReserve, UserReserveKey> {
+
+    @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate= :reserveDate AND u.reserveKey.startTime= :startTime AND u.room.roomId= :roomId AND u.user.email= :email")
+    Optional<UserReserve> findUserReserveByReserveKeyAndEmail(LocalDate reserveDate, LocalTime startTime, Integer roomId, String email);
 
     @Query("SELECT u FROM UserReserve u WHERE u.reserveKey.reserveDate >= :date AND NOT u.isMonthly")
     List<UserReserve> findAllUserReservesAfterGivenDate(LocalDate date);

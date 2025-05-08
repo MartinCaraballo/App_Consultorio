@@ -10,5 +10,5 @@ public class CreateMonthlyReserveReq {
     private Integer roomId;
     private LocalTime startTime;
     private Integer monthIndex;
-    private LocalDate reserveDate;
+    private Integer dayIndex;
 }

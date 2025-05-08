@@ -12,12 +12,17 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserReserveService {
 
     private final UserReserveRepository userReserveRepository;
+
+    public Optional<UserReserve> findUserReserveByReserveKeyAndEmail(LocalDate reserveDate, LocalTime startTime, Integer roomId, String email) {
+        return userReserveRepository.findUserReserveByReserveKeyAndEmail(reserveDate, startTime, roomId, email);
+    }
 
     public List<UserReserve> findAllUserReservesAfterGivenDate(LocalDate date) {
         return userReserveRepository.findAllUserReservesAfterGivenDate(date);
@@ -49,6 +54,10 @@ public class UserReserveService {
 
     public void deleteAllReservesPastRefDate(LocalDate refDate) {
         userReserveRepository.deleteAllReservesPastRefDate(refDate);
+    }
+
+    public void deleteUserReserve(UserReserve userReserve) {
+        userReserveRepository.delete(userReserve);
     }
 
     public List<ReserveDTO> getReserveDTOS(List<UserReserve> userReserves, User userData) {

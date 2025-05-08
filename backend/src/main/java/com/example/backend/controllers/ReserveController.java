@@ -77,12 +77,14 @@ public class ReserveController {
     public ResponseEntity<List<String>> postMonthlyUserReserve(@RequestBody List<CreateMonthlyReserveReq> createMonthlyReserveReqs) {
         String userEmail = getUserByContextToken();
         LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("America/Montevideo"));
+        int todayDayIndex = nowDateTime.getDayOfWeek().getValue() - 1;
+        LocalDate weekMonday = nowDateTime.toLocalDate().minusDays(todayDayIndex);
 
         for (CreateMonthlyReserveReq reserve : createMonthlyReserveReqs) {
-            LocalDate nextDate = reserve.getReserveDate();
+            LocalDate nextDate = weekMonday.plusDays(reserve.getDayIndex());
 
-            if (reserve.getReserveDate().isBefore(nowDateTime.toLocalDate())) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if (nextDate.isBefore(nowDateTime.toLocalDate())) {
+                nextDate = nextDate.plusWeeks(1);
             }
 
             while (nextDate.getMonthValue() <= reserve.getMonthIndex()) {
@@ -159,7 +161,8 @@ public class ReserveController {
 
                 fixedReserveService.saveOrUpdate(fixedReserve);
                 startTime = startTime.plusHours(1);
-            } catch (DataIntegrityViolationException ignored) { }
+            } catch (DataIntegrityViolationException ignored) {
+            }
         }
 
         return new ResponseEntity<>(conflictingReserves, HttpStatus.CREATED);
@@ -171,16 +174,22 @@ public class ReserveController {
                                                 @RequestParam LocalTime startTime,
                                                 @RequestParam LocalDate date) {
         LocalDate lastDayToCancel = date.minusDays(1);
-
-        if (!LocalDate.now(ZoneId.of("America/Montevideo")).isBefore(lastDayToCancel)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        LocalDate now = LocalDate.now(ZoneId.of("America/Montevideo"));
 
         String user = getUserByContextToken();
 
-        userReserveService.deleteUserReserve(date, startTime, roomId, user);
+        UserReserve userReserve = userReserveService.findUserReserveByReserveKeyAndEmail(date, startTime, roomId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encuentra una reserva con esos datos"));
 
-        //TODO: CHECK IF THE RESERVE IS NOT MONTHLY BEFORE DELETE
+        if (userReserve.getIsMonthly() && userReserve.getDayReserved().isBefore(now)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (!now.isBefore(lastDayToCancel)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        userReserveService.deleteUserReserve(userReserve);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -25,4 +25,5 @@ public class UserReserve {
     private Room room;
 
     private Boolean isMonthly;
+    private LocalDate dayReserved;
 }
