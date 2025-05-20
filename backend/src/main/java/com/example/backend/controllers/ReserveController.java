@@ -38,9 +38,16 @@ public class ReserveController {
     @PostMapping
     public ResponseEntity<String> postUserReserve(@RequestBody List<CreateUserReserveReq> listReserveReq) {
         String userEmail = getUserByContextToken();
+        User user = userService.findById(userEmail).orElseThrow(
+                () -> new NullPointerException("User not found")
+        );
+
         LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("America/Montevideo"));
 
         for (CreateUserReserveReq createReserveReq : listReserveReq) {
+            Room room = roomService.findRoomById(createReserveReq.getRoomId()).orElseThrow(
+                    () -> new NullPointerException("Room not found")
+            );
 
             // If the reserve date is before than today
             if (createReserveReq.getReserveDate().isBefore(nowDateTime.toLocalDate()))
@@ -60,28 +67,30 @@ public class ReserveController {
                     createReserveReq.getStartTime().isAfter(nowDateTime.toLocalTime()))
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-            boolean result = createReserve(
-                    userEmail, createReserveReq.getReserveDate(), createReserveReq.getStartTime(), createReserveReq.getRoomId(), false
-            );
-
-            if (!result) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+            createReserve(user, createReserveReq.getReserveDate(), createReserveReq.getStartTime(), room, false);
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Transactional
     @PostMapping("/monthly")
     public ResponseEntity<List<String>> postMonthlyUserReserve(@RequestBody List<CreateMonthlyReserveReq> createMonthlyReserveReqs) {
         String userEmail = getUserByContextToken();
+        User user = userService.findById(userEmail).orElseThrow(
+                () -> new ResourceNotFoundException("User not found")
+        );
+
         LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("America/Montevideo"));
         int todayDayIndex = nowDateTime.getDayOfWeek().getValue() - 1;
         LocalDate weekMonday = nowDateTime.toLocalDate().minusDays(todayDayIndex);
 
+        List<String> failedReserves = new ArrayList<>();
+
         for (CreateMonthlyReserveReq reserve : createMonthlyReserveReqs) {
             LocalDate nextDate = weekMonday.plusDays(reserve.getDayIndex());
+            Room room = roomService.findRoomById(reserve.getRoomId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Room not found")
+            );
 
             if (nextDate.isBefore(nowDateTime.toLocalDate())) {
                 nextDate = nextDate.plusWeeks(1);
@@ -90,16 +99,17 @@ public class ReserveController {
             while (nextDate.getMonthValue() <= reserve.getMonthIndex()) {
 
                 if (nextDate.getMonthValue() == reserve.getMonthIndex()) {
-                    boolean result = createReserve(userEmail, nextDate, reserve.getStartTime(), reserve.getRoomId(), true);
-                    if (!result) {
-                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    try {
+                        createReserve(user, nextDate, reserve.getStartTime(), room, true);
+                    } catch (DataIntegrityViolationException ignored) {
+                        failedReserves.add(String.format("%s-%s", nextDate, reserve.getStartTime()));
                     }
                 }
                 nextDate = nextDate.plusWeeks(1);
             }
         }
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(failedReserves, HttpStatus.CREATED);
     }
 
     @Transactional
@@ -174,19 +184,21 @@ public class ReserveController {
                                                 @RequestParam LocalTime startTime,
                                                 @RequestParam LocalDate date) {
         LocalDate lastDayToCancel = date.minusDays(1);
-        LocalDate now = LocalDate.now(ZoneId.of("America/Montevideo"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Montevideo"));
 
         String user = getUserByContextToken();
 
         UserReserve userReserve = userReserveService.findUserReserveByReserveKeyAndEmail(date, startTime, roomId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encuentra una reserva con esos datos"));
 
-        if (userReserve.getIsMonthly() && userReserve.getDayReserved().isBefore(now)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        if (!now.isBefore(lastDayToCancel)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (userReserve.getIsMonthly()) {
+            LocalDateTime startLimitToCancel = now.minusHours(1);
+            if (userReserve.getDateTimeReserved().isBefore(startLimitToCancel) || userReserve.getDateTimeReserved().isAfter(now))
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            if (!now.toLocalDate().isBefore(lastDayToCancel)) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
         }
 
         userReserveService.deleteUserReserve(userReserve);
@@ -316,7 +328,7 @@ public class ReserveController {
     public ResponseEntity<List<ReserveDTO>> getMonthUserReserves() {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         User userData = userService.findById(user).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
+                () -> new NullPointerException("User not found")
         );
 
         LocalDate today = LocalDate.now();
@@ -332,7 +344,7 @@ public class ReserveController {
         String userEmail = getUserByContextToken();
 
         User user = userService.findById(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new NullPointerException("User not found"));
 
         Optional<Admin> admin = adminService.findById(userEmail);
 
@@ -361,24 +373,18 @@ public class ReserveController {
         return user.equals(id);
     }
 
-    private boolean createReserve(String userEmail, LocalDate reserveDate, LocalTime startTime, Integer roomId, Boolean isMonthly) {
-        Optional<User> user = userService.findById(userEmail);
-        Optional<Room> room = roomService.findRoomById(roomId);
-        if (user.isEmpty() || room.isEmpty()) {
-            return false;
-        }
-
+    private void createReserve(User user, LocalDate reserveDate, LocalTime startTime, Room room, Boolean isMonthly) {
         UserReserveKey reserveKey = new UserReserveKey();
         reserveKey.setStartTime(startTime);
         reserveKey.setReserveDate(reserveDate);
 
         UserReserve userReserve = new UserReserve();
         userReserve.setReserveKey(reserveKey);
-        userReserve.setRoom(room.get());
-        userReserve.setUser(user.get());
+        userReserve.setRoom(room);
+        userReserve.setUser(user);
         userReserve.setIsMonthly(isMonthly);
+        userReserve.setDateTimeReserved(LocalDateTime.now(ZoneId.of("America/Montevideo")));
 
         userReserveService.saveOrUpdate(userReserve);
-        return true;
     }
 }

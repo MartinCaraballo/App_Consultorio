@@ -21,7 +21,7 @@ export default function MonthlyReservesModal({isOpen, onClose}: {
 
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(1);
-    const [resultType, setResultType] = useState<"success" | "error">("success");
+    const [resultType, setResultType] = useState<"success" | "error" | "warning">("success");
     const [resultMessage, setResultMessage] = useState("");
 
     const [selectedMonth, setSelectedMonth] = useState(month_names[today.getMonth()]);
@@ -72,11 +72,24 @@ export default function MonthlyReservesModal({isOpen, onClose}: {
         setResultMessage("");
         const reservesPayload = createMonthlyReservePayload();
         axiosInstance
-            .post("/reserve/monthly", reservesPayload)
-            .then(() => {
-                setResultMessage("¡Tu reserva ha sido realizada con éxito!");
-                setResultType("success");
-                setSelectedHours([]);
+            .post<string[]>("/reserve/monthly", reservesPayload)
+            .then((res) => {
+                const data = res.data;
+                if (data.length === 0) {
+                    setResultMessage("¡Tu reserva ha sido realizada con éxito!");
+                    setResultType("success");
+                    setTimeout(() => {
+                        setResultMessage("");
+                    }, 3000);
+                    return;
+                }
+                let message = "No se lograron reservar los siguientes horarios:";
+                data.map((hour) => (message += ` - ${hour}`));
+                setResultMessage(message);
+                setResultType("warning");
+                setTimeout(() => {
+                    setResultMessage("");
+                }, 60000)
             })
             .catch((err) => {
                 if (err.response?.status === 401) {
@@ -89,6 +102,7 @@ export default function MonthlyReservesModal({isOpen, onClose}: {
             })
             .finally(() => {
                 setLoading(false);
+                setSelectedHours([]);
             });
     };
 
@@ -210,7 +224,6 @@ export default function MonthlyReservesModal({isOpen, onClose}: {
                             const nextDate = new Date();
                             nextDate.setHours(hour.getHours() + 1);
                             nextDate.setMinutes(0);
-                            console.log(selectedHours)
                             return (
                                 <button
                                     key={hour.getHours()}
@@ -238,7 +251,24 @@ export default function MonthlyReservesModal({isOpen, onClose}: {
                     </button>
                 </div>
 
-                <p className={`${resultType == 'success' ? "text-green-500" : "text-red-500"} mb-4`}>{resultMessage}</p>
+                {
+                    resultMessage && (
+                        <p
+                            className={`mt-4 border rounded-lg p-3 ${resultType === "success"
+                                ? "text-green-600 border-green-300 bg-green-100"
+                                : ""
+                            } ${resultType === "warning"
+                                ? "text-yellow-600 border-yellow-300 bg-yellow-100"
+                                : ""
+                            } ${resultType === "error"
+                                ? "text-red-600 border-red-300 bg-red-100"
+                                : ""
+                            }`}
+                        >
+                            {resultMessage}
+                        </p>
+                    )
+                }
             </div>
         </Dialog>
     )

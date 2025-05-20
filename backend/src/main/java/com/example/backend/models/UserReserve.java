@@ -4,7 +4,7 @@ import com.example.backend.compositekeys.UserReserveKey;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -16,7 +16,6 @@ public class UserReserve {
     private UserReserveKey reserveKey;
 
     @ManyToOne
-    @MapsId("email")
     @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
     private User user;
 
@@ -25,5 +24,5 @@ public class UserReserve {
     private Room room;
 
     private Boolean isMonthly;
-    private LocalDate dayReserved;
+    private LocalDateTime dateTimeReserved;
 }

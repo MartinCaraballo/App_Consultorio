@@ -7,6 +7,8 @@ import {jwtDecode} from "jwt-decode";
 import {useRouter} from "next/navigation";
 import axiosInstance from "@/utils/axios_instance";
 import LoadingComponent from "../components/loading/loading";
+import MonthlyReservedHourCard from "@/app/components/monthly-reserved-hour-card";
+import InfoModal from "@/app/components/Modals/info-modal";
 
 interface JwtPayload {
     sub: string;
@@ -33,6 +35,14 @@ export default function ReservedHours() {
 
     const [activeTab, setActiveTab] = useState<"active" | "monthly">("active");
 
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
+    const [infoModalMessage, setInfoModalMessage] = useState<string>("");
+    const [infoModalSuccess, setInfoModalSuccess] = useState<boolean>(true);
+
+    const handleInfoModalClose = () => {
+        setIsInfoModalOpen(false);
+    };
+
     async function fetchActiveReserves() {
         axiosInstance
             .get<ReserveDTO[]>("/reserve/active")
@@ -54,6 +64,44 @@ export default function ReservedHours() {
             .then((res) => setCanMakeFixedReserves(res.data))
             .finally(() => setLoading(false));
     }
+
+    const cancelReserve = async (
+        roomId: number,
+        date: string,
+        startTime: string
+    ) => {
+        try {
+            axiosInstance
+                .delete(
+                    `/reserve?roomId=${roomId}&startTime=${startTime}&date=${date}`
+                )
+                .then(() => {
+                    setInfoModalMessage("Reserva cancelada con éxito.");
+                    setInfoModalSuccess(true);
+                    fetchMonthlyReserves();
+                    setIsInfoModalOpen(true);
+                })
+                .catch((error) => {
+                    if (error.response.status === 401) {
+                        setInfoModalMessage(
+                            "No se cumplen las condiciones horarias para cancelar la reserva."
+                        );
+                        setInfoModalSuccess(false);
+                    } else {
+                        setInfoModalMessage(
+                            "Error al cancelar la reserva. Por favor, inténtelo de nuevo."
+                        );
+                        setInfoModalSuccess(false);
+                    }
+                    setIsInfoModalOpen(true);
+                })
+        } catch (error) {
+            setInfoModalMessage(
+                "Error de conexión. Por favor, inténtelo más tarde."
+            );
+            setInfoModalSuccess(false);
+        }
+    };
 
     useEffect(() => {
         fetchActiveReserves();
@@ -118,13 +166,12 @@ export default function ReservedHours() {
                                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                     >
-                        Historial del Mes
+                        Activas del Mes
                     </button>
                 </div>
                 <div className="px-4 pb-4">
                     {activeTab === "active" && (
                         <>
-                            <h2 className="text-xl font-semibold mt-4">Reservas Activas de la Semana</h2>
                             {reserveCards.length === 0 ? (
                                 <p className="text-center text-gray-500 mt-4">No tienes reservas activas esta
                                     semana.</p>
@@ -147,19 +194,20 @@ export default function ReservedHours() {
 
                     {activeTab === "monthly" && (
                         <>
-                            <h2 className="text-xl font-semibold mt-4">Historial de Reservas del Mes</h2>
                             {monthlyReserves.length === 0 ? (
                                 <p className="text-center text-gray-500 mt-4">No se encontraron reservas este mes.</p>
                             ) : (
                                 <div
                                     className="grid place-items-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 py-2">
                                     {monthlyReserves.map((reserve, index) => (
-                                        <ReservedHourCard
+                                        <MonthlyReservedHourCard
                                             key={`monthly-${index}`}
                                             startTime={reserve.startTime}
                                             endTime={reserve.endTime}
                                             reserveDate={reserve.reserveDate}
                                             room={reserve.roomId}
+                                            canCancel={reserve.canCancel}
+                                            cancelReserveFunction={cancelReserve}
                                         />
                                     ))}
                                 </div>
@@ -169,6 +217,12 @@ export default function ReservedHours() {
                 </div>
             </div>
             <FixedReserveModal isOpen={isModalOpen} onClose={closeModal}/>
+            <InfoModal
+                isOpen={isInfoModalOpen}
+                onClose={handleInfoModalClose}
+                message={infoModalMessage}
+                success={infoModalSuccess}
+            />
         </main>
     );
 }

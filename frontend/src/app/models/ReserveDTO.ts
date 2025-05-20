@@ -8,4 +8,5 @@ interface ReserveDTO {
     dayIndex: number,
     canCancel: boolean;
     isMonthly: boolean;
+    dateTimeReserved: number[];
 }

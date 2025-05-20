@@ -5,10 +5,13 @@ import com.example.backend.models.UserReserve;
 import com.example.backend.models.dtos.ReserveDTO;
 import com.example.backend.repositories.UserReserveRepository;
 import lombok.RequiredArgsConstructor;
+import org.bouncycastle.util.test.FixedSecureRandom;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +76,7 @@ public class UserReserveService {
                     reserveStartTime.plusHours(1),
                     userReserve.getReserveKey().getReserveDate(),
                     userReserve.getReserveKey().getReserveDate().getDayOfWeek().getValue() - 1,
-                    userCanCancel(userData.getEmail(), userReserve.getIsMonthly()),
+                    userCanCancel(userData.getEmail(), userReserve),
                     userReserve.getIsMonthly()
             );
             userFixedReservesDTO.add(reserveDTO);
@@ -81,9 +84,12 @@ public class UserReserveService {
         return userFixedReservesDTO;
     }
 
-    private boolean userCanCancel(String id, Boolean isMonthly) {
-        if (isMonthly) {
-            return false;
+    private boolean userCanCancel(String id, UserReserve userReserve) {
+        if (userReserve.getIsMonthly()) {
+            LocalDateTime startLimitToCancel = LocalDateTime.now().minusHours(1);
+            LocalDateTime endLimitToCancel = LocalDateTime.now();
+            return userReserve.getDateTimeReserved().isAfter(startLimitToCancel) &&
+                    userReserve.getDateTimeReserved().isBefore(endLimitToCancel);
         }
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return user.equals(id);
