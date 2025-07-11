@@ -46,7 +46,7 @@ export default function HourPanel() {
                         weekCost.weekDays.map((day, index) => (
                             <HourPanelCard
                                 key={index}
-                                day={new Date(day.date.toString())}
+                                day={new Date(day.date[0], day.date[1] - 1, day.date[2])}
                                 hourCuantity={day.hoursCount}
                             />
                         ))}
