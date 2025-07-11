@@ -2,7 +2,7 @@ import axios, {AxiosError} from "axios";
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    baseURL: `https://${process.env.NEXT_PUBLIC_API_URL}`,
+    baseURL: `http://${process.env.NEXT_PUBLIC_API_URL}`,
 });
 
 axiosInstance.interceptors.response.use(

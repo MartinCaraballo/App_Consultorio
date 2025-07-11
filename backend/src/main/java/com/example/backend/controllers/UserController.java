@@ -104,6 +104,22 @@ public class UserController {
         );
     }
 
+    @GetMapping("/monthly-cost-between-dates")
+    public ResponseEntity<Integer> getUserMonthlyCost(@RequestParam LocalDate startDate,
+                                                      @RequestParam LocalDate endDate) {
+        String id = getUserByContextToken();
+        User user = userService.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("User with email %s not found", id))
+        );
+        List<UserReserve> userReserveList = userReserveService.findAllReserveBetweenDates(
+                startDate, endDate, user.getEmail()
+        );
+
+        int userMonthCost = userService.getReserveCost(userReserveList);
+
+        return new ResponseEntity<>(userMonthCost, HttpStatus.OK);
+    }
+
     @PostMapping("/change-pass")
     public ResponseEntity<String> changeUserPassword(@RequestBody ChangePasswordReq changePasswordReq) {
         String user = getUserByContextToken();

@@ -232,6 +232,21 @@ public class ReserveController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/get-user-reserves")
+    public ResponseEntity<List<ReserveDTO>> getUserReserves(@RequestParam LocalDate startDate,
+                                                            @RequestParam LocalDate endDate) {
+
+        String userEmail = getUserByContextToken();
+        User user = userService.findById(userEmail).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("User with email %s not found", userEmail))
+        );
+        List<UserReserve> userReserveList = userReserveService.findAllReserveBetweenDates(startDate, endDate, userEmail);
+
+        List<ReserveDTO> userReserveDTO = userReserveService.getReserveDTOS(userReserveList, user);
+
+        return new ResponseEntity<>(userReserveDTO, HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<List<ReserveDTO>> getAllUsersReservesOfDay(@RequestParam Integer roomId,
                                                                      @RequestParam Integer dayIndex,

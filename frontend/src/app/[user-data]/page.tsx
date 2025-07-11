@@ -147,69 +147,17 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                         />
                     </div>
                 </div>
-                <div
-                    className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:w-2/3 lg:px-0 space-y-4">
-                    <button onClick={toggleUserReserves}
-                            className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
-                        <span>{showUserReserves ? "Ocultar Reservas" : "Mostrar Reservas"}</span>
-                        <FontAwesomeIcon icon={showUserReserves ? faChevronUp : faChevronDown}/>
-                    </button>
-                    {showUserReserves && (
-                        <ul className="items-center text-lg xl:text-xl space-y-1">
-                            {userReserves.map((reserve, index) => {
-                                const startTime = new Date();
-                                startTime.setHours(reserve.startTime[0]);
-                                startTime.setMinutes(reserve.startTime[1]);
-
-                                const endTime = new Date();
-                                endTime.setHours(reserve.endTime[0]);
-                                endTime.setMinutes(reserve.endTime[1]);
-
-                                const year = reserve.reserveDate[0].toString();
-                                const month = reserve.reserveDate[1].toString();
-                                const day = reserve.reserveDate[2].toString();
-
-                                return (
-                                    <li
-                                        key={index}
-                                        className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-24 sm:h-12"
-                                    >
-                                    <span>
-                                        Consultorio: {reserve.roomId}
-                                    </span>
-                                        <span>
-                                        Hora: {formatTime(startTime)} - {formatTime(endTime)}
-                                    </span>
-                                        <span>
-                                        Fecha: {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
-                                    </span>
-                                        <span>
-                                        Tipo: {`${reserve.isMonthly ? "Mensual" : "Semanal"}`}
-                                    </span>
-                                    </li>
-                                );
-                            })}
-                            <div
-                                className="flex justify-end font-bold rounded-lg text-white items-center">
-                                <div
-                                    className="flex border rounded-lg bg-gray-700 text-white font-bold p-4">
-                                    {`Costo mensual total: $${userMonthCost}`}
-                                </div>
-                            </div>
-                        </ul>
-                    )}
+                <div className="flex flex-row justify-center">
                     <div
-                        className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:px-0 space-y-4">
-                        {userData?.canMakeFixedReserve && (
-                            <button onClick={toggleFixedReserves}
-                                    className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
-                                <span>{showFixedReserves ? "Ocultar Reservas Fijas" : "Mostrar Reservas Fijas"}</span>
-                                <FontAwesomeIcon icon={showFixedReserves ? faChevronUp : faChevronDown}/>
-                            </button>
-                        )}
-                        {showFixedReserves && (
-                            <ul className="items-center text-lg xl:text-xl space-y-1 w-full">
-                                {userFixedReserves.map((reserve, index) => {
+                        className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:w-2/3 lg:px-0 space-y-4">
+                        <button onClick={toggleUserReserves}
+                                className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
+                            <span>{showUserReserves ? "Ocultar Reservas" : "Mostrar Reservas"}</span>
+                            <FontAwesomeIcon icon={showUserReserves ? faChevronUp : faChevronDown}/>
+                        </button>
+                        {showUserReserves && (
+                            <ul className="items-center text-lg xl:text-xl space-y-1">
+                                {userReserves.map((reserve, index) => {
                                     const startTime = new Date();
                                     startTime.setHours(reserve.startTime[0]);
                                     startTime.setMinutes(reserve.startTime[1]);
@@ -218,25 +166,79 @@ const UserDataPage = ({searchParams}: { searchParams: { userEmail: string }; }) 
                                     endTime.setHours(reserve.endTime[0]);
                                     endTime.setMinutes(reserve.endTime[1]);
 
+                                    const year = reserve.reserveDate[0].toString();
+                                    const month = reserve.reserveDate[1].toString();
+                                    const day = reserve.reserveDate[2].toString();
+
                                     return (
                                         <li
                                             key={index}
                                             className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-24 sm:h-12"
                                         >
+                                    <span>
+                                        Consultorio: {reserve.roomId}
+                                    </span>
                                             <span>
-                                                Consultorio: {reserve.roomId}
-                                            </span>
+                                        Hora: {formatTime(startTime)} - {formatTime(endTime)}
+                                    </span>
                                             <span>
-                                                Día: {daysOfWeek[reserve.dayIndex]}
-                                            </span>
+                                        Fecha: {`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`}
+                                    </span>
                                             <span>
-                                                Hora: {formatTime(startTime)} - {formatTime(endTime)}
-                                            </span>
+                                        Tipo: {`${reserve.isMonthly ? "Mensual" : "Semanal"}`}
+                                    </span>
                                         </li>
                                     );
                                 })}
+                                <div
+                                    className="flex justify-end font-bold rounded-lg text-white items-center">
+                                    <div
+                                        className="flex border rounded-lg bg-gray-700 text-white font-bold p-4">
+                                        {`Costo mensual total: $${userMonthCost}`}
+                                    </div>
+                                </div>
                             </ul>
                         )}
+                        <div
+                            className="flex flex-col justify-self-center mt-2 w-full px-8 sm:px-16 lg:px-0 space-y-4">
+                            {userData?.canMakeFixedReserve && (
+                                <button onClick={toggleFixedReserves}
+                                        className="w-full text-left text-lg text-white bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded flex items-center justify-between">
+                                    <span>{showFixedReserves ? "Ocultar Reservas Fijas" : "Mostrar Reservas Fijas"}</span>
+                                    <FontAwesomeIcon icon={showFixedReserves ? faChevronUp : faChevronDown}/>
+                                </button>
+                            )}
+                            {showFixedReserves && (
+                                <ul className="items-center text-lg xl:text-xl space-y-1 w-full">
+                                    {userFixedReserves.map((reserve, index) => {
+                                        const startTime = new Date();
+                                        startTime.setHours(reserve.startTime[0]);
+                                        startTime.setMinutes(reserve.startTime[1]);
+
+                                        const endTime = new Date();
+                                        endTime.setHours(reserve.endTime[0]);
+                                        endTime.setMinutes(reserve.endTime[1]);
+
+                                        return (
+                                            <li
+                                                key={index}
+                                                className="flex items-center justify-around border-b rounded-lg font-bold bg-gray-700 text-center text-white flex-col sm:flex-row h-24 sm:h-12"
+                                            >
+                                            <span>
+                                                Consultorio: {reserve.roomId}
+                                            </span>
+                                                <span>
+                                                Día: {daysOfWeek[reserve.dayIndex]}
+                                            </span>
+                                                <span>
+                                                Hora: {formatTime(startTime)} - {formatTime(endTime)}
+                                            </span>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

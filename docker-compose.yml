@@ -8,7 +8,7 @@ services:
       - MYSQL_USER=app_reservas
       - MYSQL_PASSWORD=app_reservas123@@
       - MYSQL_DATABASE=app_reservas
-    restart: always
+    restart: no
     healthcheck:
       test: ["CMD", "bash", "-c", "mysql --user=$$USER_NAME --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"]
       interval: 5s

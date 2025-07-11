@@ -10,6 +10,7 @@ import PriceModificationModal from "@/app/components/Modals/price-modification-m
 import ChangePasswordModal from "@/app/components/Modals/change-password-modal";
 import ReportErrorModal from "@/app/components/Modals/report-error-modal";
 import LoadingComponent from "../components/loading/loading";
+import HoursReportModal from "@/app/components/Modals/hours-report-modal";
 
 interface JwtPayload {
     sub: string;
@@ -47,6 +48,7 @@ const Profile = () => {
     const [isPriceModalOpen, setPriceModalOpen] = useState(false);
     const [isChangePassModalOpen, setChangePassModalOpen] = useState(false);
     const [isReportErrorModalOpen, setReportErrorModalOpen] = useState(false);
+    const [isHourReportModalOpen, setHourReportModalOpen] = useState(false);
 
     return (
         <main className="flex flex-col min-h-screen bg-gray-600 px-4 pb-16">
@@ -98,6 +100,14 @@ const Profile = () => {
                         <>
                             <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
                                 <button
+                                    onClick={() => setHourReportModalOpen(true)}
+                                    className="text-white hover:underline"
+                                >
+                                    Reporte de Horas
+                                </button>
+                            </li>
+                            <li className="text-center h-12 rounded-xl place-content-center bg-gray-700">
+                                <button
                                     onClick={() => setChangePassModalOpen(true)}
                                     className="text-white hover:underline"
                                 >
@@ -145,6 +155,10 @@ const Profile = () => {
             <ReportErrorModal
                 isOpen={isReportErrorModalOpen}
                 onClose={() => setReportErrorModalOpen(false)}
+            />
+            <HoursReportModal
+                isOpen={isHourReportModalOpen}
+                onClose={() => setHourReportModalOpen(false)}
             />
         </main>
     );
