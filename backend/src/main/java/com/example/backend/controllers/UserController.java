@@ -91,17 +91,30 @@ public class UserController {
     @GetMapping("/monthly-cost")
     public ResponseEntity<Integer> getMonthlyCost() {
         String userMail = getUserByContextToken();
+        int totalCost = 0;
 
         LocalDate today = LocalDate.now();
         LocalDate monthStart = LocalDate.of(today.getYear(), today.getMonth(), 1);
-        LocalDate monthEnd = today.plusMonths(1);
 
-        return new ResponseEntity<>(
-                userService.getReserveCost(
-                        userReserveService.findAllReserveBetweenDates(monthStart, monthEnd, userMail)
-                ),
-                HttpStatus.OK
-        );
+        LocalDate actualWeekToCalc = monthStart;
+        LocalDate nextWeekToCalc = actualWeekToCalc.plusWeeks(1);
+
+        for (int i = 0; i < 3; i++) {
+            totalCost += userService.getReserveCost(
+                    userReserveService.findAllReserveBetweenDates(actualWeekToCalc, nextWeekToCalc, userMail)
+            );
+
+            actualWeekToCalc = nextWeekToCalc;
+            nextWeekToCalc = nextWeekToCalc.plusWeeks(1);
+
+            if (nextWeekToCalc.getMonth().getValue() > monthStart.getMonth().getValue()) {
+                nextWeekToCalc = nextWeekToCalc.minusDays(
+                        nextWeekToCalc.getDayOfMonth()
+                );
+            }
+        }
+
+        return ResponseEntity.ok(totalCost);
     }
 
     @GetMapping("/monthly-cost-between-dates")
